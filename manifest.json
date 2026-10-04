@@ -99,11 +99,13 @@
     {
       "matches": [
         "*://*.google.com/*",
+        "*://*.google.co.ma/*",
         "*://*.google.es/*",
         "*://*.google.fr/*",
         "*://*.google.co.uk/*",
         "*://*.google.de/*",
-        "*://*.google.ca/*"
+        "*://*.google.ca/*",
+        "*://*.google.it/*"
       ],
       "all_frames": true,
       "js": [

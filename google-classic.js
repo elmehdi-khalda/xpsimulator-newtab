@@ -12,6 +12,179 @@
     const style = document.createElement('style');
     style.id = 'xp-google-classic-style';
     style.textContent = `
+      /* ========================================================
+         Google 2009 Classic Homepage & Landing Page Restyling
+         ======================================================== */
+      
+      /* Pure white background & classic font */
+      body, html {
+        background-color: #ffffff !important;
+        font-family: Arial, Helvetica, sans-serif !important;
+      }
+
+      /* Hide modern SVG Google logo and greeting text ("Exprimez-vous!", etc.) */
+      svg.ESTs9d, svg[aria-label="Google"], .uZekje svg, .sI1XGe svg,
+      .HeJfy, .DYz2A, .mL3MVc, .VHYc8b, header.RHL8Vb, .k5vh8d,
+      .X1pLC header, .iZUKEe {
+        display: none !important;
+      }
+
+      /* Homepage classic Catull logo */
+      .xp-classic-logo, #xp-classic-logo {
+        display: block !important;
+        width: 276px !important;
+        height: 110px !important;
+        margin: 22px auto 16px auto !important;
+        image-rendering: auto;
+      }
+
+      /* Logo replacement for fallback <img> elements */
+      img.lnXdpd, #hplogo, img[alt="Google"]:not(.xp-classic-logo) {
+        box-sizing: border-box !important;
+        content: url("https://www.google.com/intl/en_ALL/images/logo.gif") !important;
+        width: 276px !important;
+        height: 110px !important;
+        max-height: 110px !important;
+        object-fit: contain !important;
+        margin: 20px auto 14px auto !important;
+      }
+
+      /* Classic search results header logo */
+      #logo img, header a[aria-label="Google"] svg, .logo img, #logocont img {
+        box-sizing: border-box !important;
+        content: url("https://www.google.com/intl/en_ALL/images/logo.gif") !important;
+        width: 120px !important;
+        height: 44px !important;
+        object-fit: contain !important;
+      }
+
+      /* Classic 2009 Sharp Rectangular Search Box */
+      .RNNXgb, .em4Ftd, div[jsname="RNNXgb"] {
+        border-radius: 0px !important;
+        border: 1px solid #707070 !important;
+        border-top-color: #555555 !important;
+        box-shadow: none !important;
+        background: #ffffff !important;
+        height: 28px !important;
+        min-height: 28px !important;
+        max-width: 565px !important;
+        width: 100% !important;
+        margin: 0 auto !important;
+        padding: 0 4px !important;
+        align-items: center !important;
+      }
+
+      .RNNXgb:hover, .RNNXgb:focus-within {
+        border-color: #707070 !important;
+        box-shadow: none !important;
+      }
+
+      .SDkEP {
+        padding: 0 !important;
+        height: 26px !important;
+      }
+
+      .gLFyf, textarea[name="q"], input[name="q"] {
+        font-family: Arial, Helvetica, sans-serif !important;
+        font-size: 15px !important;
+        line-height: 22px !important;
+        height: 22px !important;
+        color: #000000 !important;
+        background: transparent !important;
+        border: none !important;
+        padding: 1px 2px !important;
+        margin: 0 !important;
+        resize: none !important;
+      }
+
+      /* Hide modern search bar clutter: Lens, Voice, Camera, Search Glass inside input */
+      .XDyW0e, .nDcEnd, .M2vfTd, .dRYYxd, .v7V3Qb, .hOoBg, .bkHsEd,
+      [aria-label*="Lens"], [aria-label*="lens"],
+      [aria-label*="voice"], [aria-label*="Voice"],
+      [aria-label*="vocale"], [aria-label*="Vocale"],
+      [aria-label*="Recherche vocale"], [aria-label*="Recherche par image"],
+      [aria-label*="Search by voice"], [aria-label*="Search by image"] {
+        display: none !important;
+      }
+
+      /* Classic 2009 Gray Action Buttons ("Google Search" / "I'm Feeling Lucky") */
+      .FPdoLc, .tfB0Bf {
+        padding-top: 14px !important;
+        text-align: center !important;
+        margin-top: 0 !important;
+      }
+
+      .FPdoLc input[type="submit"], .tfB0Bf input[type="submit"],
+      input[name="btnK"], input[name="btnI"], .gNO89b, .RNmpXc {
+        font-family: Arial, Helvetica, sans-serif !important;
+        font-size: 12px !important;
+        font-weight: normal !important;
+        color: #000000 !important;
+        background: #ece9d8 !important;
+        background: linear-gradient(to bottom, #ffffff 0%, #ece9d8 100%) !important;
+        border: 1px solid #7f9db9 !important;
+        border-radius: 0px !important;
+        box-shadow: none !important;
+        padding: 3px 12px !important;
+        height: 25px !important;
+        min-height: 25px !important;
+        line-height: 17px !important;
+        margin: 8px 4px !important;
+        cursor: pointer !important;
+        display: inline-block !important;
+        text-shadow: none !important;
+      }
+
+      .FPdoLc input[type="submit"]:hover, .tfB0Bf input[type="submit"]:hover,
+      input[name="btnK"]:hover, input[name="btnI"]:hover,
+      .gNO89b:hover, .RNmpXc:hover {
+        background: #fdfdfd !important;
+        background: linear-gradient(to bottom, #ffffff 0%, #e2eaf5 100%) !important;
+        border-color: #316ac5 !important;
+        box-shadow: none !important;
+      }
+
+      /* Classic 2009 Header & Links */
+      header#gb, .gb_y {
+        font-family: Arial, Helvetica, sans-serif !important;
+        background: transparent !important;
+      }
+
+      .gb_6, .gb_7 a, .gb_A, .gb_z a, .gb_d {
+        font-family: Arial, Helvetica, sans-serif !important;
+        font-size: 12px !important;
+        color: #0000cc !important;
+        text-decoration: underline !important;
+        font-weight: normal !important;
+      }
+
+      /* Hide modern Google Apps launcher grid (waffle) */
+      #gbwa, .gb_L {
+        display: none !important;
+      }
+
+      /* Classic Minimalist Footer */
+      footer, .KxwPGc, .o3j99.c93Gbe {
+        background: #ffffff !important;
+        border-top: none !important;
+        font-family: Arial, Helvetica, sans-serif !important;
+        font-size: 11px !important;
+      }
+
+      footer a, .KxwPGc a, .pHiOh {
+        color: #0000cc !important;
+        font-size: 11px !important;
+        text-decoration: underline !important;
+      }
+
+      .u732Oi, .fbar.p4ecBe {
+        display: none !important;
+      }
+
+      /* ========================================================
+         Search Results & Search Cleaning Styles
+         ======================================================== */
+
       /* Hide ads, sponsored content, sidebars, and privacy popups */
       #rhs_block, #tads, #topstuff table.ts, #bottomads, ._Ak, ._h0h,
       div#modeselector, div.lnsec {
@@ -40,7 +213,7 @@
 
       /* Result Title Links */
       .r a, h3.r a, h3 a {
-        font-family: Arial, sans-serif !important;
+        font-family: Arial, Helvetica, sans-serif !important;
         font-size: 16px !important;
         color: #1a0dab !important;
         text-decoration: underline !important;
@@ -63,7 +236,7 @@
         color: #444;
         font-size: 13px;
         margin-right: 6px;
-        font-family: Arial, sans-serif;
+        font-family: Arial, Helvetica, sans-serif;
       }
 
       /* Result Favicon */
@@ -198,9 +371,70 @@
     } catch (_) {}
   }
 
+  // Apply Classic 2009 Google Homepage Elements
+  function applyClassicHomepage() {
+    try {
+      const isSearchPage = window.location.pathname.includes('/search') || (new URLSearchParams(window.location.search)).has('q');
+
+      if (!isSearchPage) {
+        // --- HOMEPAGE / LANDING PAGE ---
+        // Hide modern greeting text and SVG logos
+        const modernSvgs = document.querySelectorAll('svg.ESTs9d, svg[aria-label="Google"], .uZekje svg, .sI1XGe svg, .HeJfy, .DYz2A, .mL3MVc, .VHYc8b, header.RHL8Vb');
+        modernSvgs.forEach((el) => {
+          el.style.setProperty('display', 'none', 'important');
+        });
+
+        // Ensure Classic 2009 Catull Logo is displayed
+        if (!document.getElementById('xp-classic-logo')) {
+          const classicLogo = document.createElement('img');
+          classicLogo.id = 'xp-classic-logo';
+          classicLogo.className = 'xp-classic-logo';
+          classicLogo.src = 'https://www.google.com/intl/en_ALL/images/logo.gif';
+          classicLogo.alt = 'Google';
+          classicLogo.title = 'Google';
+
+          const logoContainer = document.querySelector('.uZekje, .naW5gc, .sI1XGe, .k1zIA');
+          if (logoContainer) {
+            logoContainer.prepend(classicLogo);
+          } else {
+            const searchForm = document.querySelector('form[action*="/search"]');
+            if (searchForm && searchForm.parentNode) {
+              searchForm.parentNode.insertBefore(classicLogo, searchForm);
+            }
+          }
+        }
+
+        // Clean Search Input (remove placeholder text)
+        const searchInput = document.querySelector('textarea[name="q"], input[name="q"]');
+        if (searchInput && searchInput.placeholder) {
+          searchInput.placeholder = '';
+        }
+      } else {
+        // --- SEARCH RESULTS PAGE ---
+        const navLogos = document.querySelectorAll('header a[aria-label="Google"] img, #logo img, .logo img');
+        navLogos.forEach((img) => {
+          if (!img.src.includes('intl/en_ALL/images/logo.gif')) {
+            img.src = 'https://www.google.com/intl/en_ALL/images/logo.gif';
+            img.removeAttribute('srcset');
+          }
+        });
+      }
+
+      // Update any fallback <img> tags with modern Google logo
+      const fallbackImgs = document.querySelectorAll('img.lnXdpd, #hplogo, img[alt="Google"]:not(#xp-classic-logo)');
+      fallbackImgs.forEach((img) => {
+        if (!img.src.includes('intl/en_ALL/images/logo.gif')) {
+          img.src = 'https://www.google.com/intl/en_ALL/images/logo.gif';
+          img.removeAttribute('srcset');
+        }
+      });
+    } catch (_) {}
+  }
+
   // Initialize Classic Google Enhancer
   function init() {
     injectClassicStyles();
+    applyClassicHomepage();
     cleanTrackingLinks();
     addFaviconsAndNumbers();
     processGoogleImages();
@@ -215,6 +449,7 @@
 
   // Dynamic DOM Observer for SPA search navigations
   const observer = new MutationObserver(() => {
+    applyClassicHomepage();
     cleanTrackingLinks();
     addFaviconsAndNumbers();
     processGoogleImages();
@@ -228,3 +463,4 @@
     });
   }
 })();
+
