@@ -34,7 +34,7 @@
 var defaultSettings = window.defaultSettings || {
 	completedSettingsTutorial: false,
 	gridItems: 6,
-	smallPlayer: true,
+	smallPlayer: false,
 	smallPlayerWidth: 853,
 	autoConfirm: true,
 	disableInfiniteScrolling: false,
@@ -47,6 +47,8 @@ var playerSize = window.playerSize || {
 	height: Math.ceil((reduxSettings.smallPlayerWidth == undefined ? 853 : reduxSettings.smallPlayerWidth) / aspectRatio)
 };
 window.reduxSettings = reduxSettings;
+reduxSettings.smallPlayer = false;
+window.reduxSettings.smallPlayer = false;
 window.aspectRatio = aspectRatio;
 window.playerSize = playerSize;
 
@@ -134,19 +136,24 @@ function alignItems() {
 	let playerElement = document.querySelector('#player-container-outer');
 	let content = document.querySelector('#columns > #primary > #primary-inner');
 	let videoInfoElement = document.querySelector('#columns > #primary > #primary-inner #info ytd-video-primary-info-renderer');
+	if (!playerElement || !content || !videoInfoElement) {
+		return;
+	}
 	let flexPadding = 16;
 	let calcPadding = Math.floor(playerElement.getBoundingClientRect().left - flexPadding);
 
-	if (calcPadding <= 0 || calcPadding >= 1000 || playerElement == null || content == null || videoInfoElement == null) {
-		waitForElement('#columns > #primary > #primary-inner #info ytd-video-primary-info-renderer', 10, alignItems);
+	if (calcPadding <= 0 || calcPadding >= 300) {
 		return;
 	} else if (!isTheater() && !isFullscreen()) {
 		const reduxAlignElement = document.querySelector('#redux-style-align');
-		const videoPlayer = document.querySelector('#player video');
+		const videoPlayer = document.querySelector('#player video') || document.querySelector('video');
+		if (!videoPlayer) return;
+		const vHeight = videoPlayer.getBoundingClientRect() ? videoPlayer.getBoundingClientRect().height : 0;
+		if (vHeight <= 0) return;
 		const calcInner = `
 		#playlist > #container,
 		ytd-playlist-panel-renderer#playlist {
-			max-height: ${videoPlayer.getBoundingClientRect().height}px !important;
+			max-height: ${vHeight}px !important;
 		}
 		#columns.ytd-watch-flexy {
 			margin: 0 ${calcPadding}px !important;
@@ -232,16 +239,16 @@ function recalculateVideoSize() {
 			setTimeout(alignItems, 40);
 		});
 
+		let resizeDebounce = null;
 		window.addEventListener('resize', () => {
-			let repeatInsert = setInterval(() => { //insert in loop for X seconds to prevent YT from overriding
-				let specialWidth = document.querySelector('video').offsetWidth;
-				let specialHeight = document.querySelector('video').offsetHeight;
-				insertRecalcScript(specialWidth, specialHeight);
-			}, 500);
-			setTimeout(() => {
-				clearInterval(repeatInsert);
-			}, 2000);
-			setTimeout(alignItems, 40);
+			if (resizeDebounce) clearTimeout(resizeDebounce);
+			resizeDebounce = setTimeout(() => {
+				let vid = document.querySelector('video');
+				if (vid && vid.offsetWidth > 0 && vid.offsetHeight > 0) {
+					insertRecalcScript(vid.offsetWidth, vid.offsetHeight);
+				}
+				setTimeout(alignItems, 40);
+			}, 250);
 		});
 		flags.recalcListenersAdded = true;
 	}
@@ -257,27 +264,6 @@ function recalculateVideoSize() {
 		script.id = 'redux-recalc';
 		script.src = browser.runtime.getURL('/helpers/resize.js');
 		document.body.append(script);
-
-		if (!isCheckingRecalc) {
-			isCheckingRecalc = true;
-			let checkLoop = setInterval(() => {
-				checkIfProperlyRecalculated(width, height);
-			}, 100);
-    
-			setTimeout(() => {
-				clearInterval(checkLoop);
-				isCheckingRecalc = false;
-			}, 2000);
-
-		}
-
-		function checkIfProperlyRecalculated(width, height) {
-			let videoPlayerElement = document.querySelector('ytd-watch-flexy .html5-video-container');
-			let bottomBarElement = document.querySelector('#movie_player:not(.ytp-delhi-modern) .ytp-chrome-bottom');
-			if (videoPlayerElement != null && bottomBarElement != null && (bottomBarElement.offsetWidth < videoPlayerElement.offsetWidth*0.9)) {
-				insertRecalcScript(width, height);
-			}
-		}
 	}
 
 	function startRecalc() {

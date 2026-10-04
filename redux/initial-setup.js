@@ -49,7 +49,7 @@ const defaultSettings = {
 	"hideAutoplayButton": false, 
 	"hideCastButton": false,
 	"darkPlaylist": true, 
-	"smallPlayer": true, 
+	"smallPlayer": false, 
 	"smallPlayerWidth": 853, 
 	"showRawValues": true, 
 	"classicLikesColors": false, 
@@ -166,6 +166,8 @@ function initiate() {
 			}
 			Object.assign(window.reduxSettings, result.reduxSettings);
 			reduxSettings = window.reduxSettings;
+			reduxSettings.smallPlayer = false;
+			window.reduxSettings.smallPlayer = false;
 			playerSize.width = reduxSettings.smallPlayerWidth == undefined ? 853 : reduxSettings.smallPlayerWidth;
 			playerSize.height = Math.ceil(playerSize.width / aspectRatio);
 			window.playerSize = playerSize;
