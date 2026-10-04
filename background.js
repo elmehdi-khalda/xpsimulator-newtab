@@ -377,6 +377,28 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       return true;
     }
   }
+
+  if (message.action === 'XP_GET_TOP_SITES') {
+    if (chrome.topSites && chrome.topSites.get) {
+      chrome.topSites.get((sites) => {
+        const formatted = (sites || []).map(s => {
+          let domain = '';
+          try { domain = new URL(s.url).hostname; } catch (_) {}
+          return {
+            title: s.title || domain || 'Shortcut',
+            url: s.url,
+            domain: domain,
+            icon: domain ? `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=64` : '/images/xp/icons/InternetExplorer6.png'
+          };
+        });
+        sendResponse({ success: true, shortcuts: formatted });
+      });
+      return true;
+    } else {
+      sendResponse({ success: false, shortcuts: [] });
+      return true;
+    }
+  }
 });
 
 // Helper to recursively extract the full bookmarks hierarchy (folders and links)
