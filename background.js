@@ -89,7 +89,7 @@ async function setupRules() {
         {
           "header": "access-control-allow-origin",
           "operation": "set",
-          "value": "*"
+          "value": "https://www.youtube.com"
         },
         {
           "header": "access-control-allow-credentials",
@@ -132,7 +132,7 @@ async function setupRules() {
         {
           "header": "access-control-allow-origin",
           "operation": "set",
-          "value": "*"
+          "value": "https://www.youtube.com"
         },
         {
           "header": "access-control-allow-credentials",
@@ -175,7 +175,7 @@ async function setupRules() {
         {
           "header": "access-control-allow-origin",
           "operation": "set",
-          "value": "*"
+          "value": "https://www.youtube.com"
         },
         {
           "header": "access-control-allow-credentials",
