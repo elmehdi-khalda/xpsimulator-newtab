@@ -12,12 +12,31 @@ const statusMsg = document.getElementById('status-msg');
 const checkOverlayMaster = document.getElementById('check-overlay-master');
 
 // Load initial settings
+function applyTheme(mode) {
+  let isDark = false;
+  if (mode === 'dark') {
+    isDark = true;
+  } else if (mode === 'system') {
+    isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+  if (document.documentElement) {
+    document.documentElement.classList.toggle('dark-mode', isDark);
+    document.documentElement.setAttribute('data-xp-theme-mode', mode || 'light');
+  }
+  if (document.body) {
+    document.body.classList.toggle('dark-mode', isDark);
+  }
+}
+
+// Load initial settings
 chrome.storage.local.get(['simulatorUrl', 'openInIE', 'themeMode', 'xpOverlaySettings'], (data) => {
   inputUrl.value = data.simulatorUrl || DEFAULT_SIMULATOR_URL;
   switchOpenIe.checked = data.openInIE !== false;
+  const initialTheme = data.themeMode || 'light';
   if (selectThemeMode) {
-    selectThemeMode.value = data.themeMode || 'light';
+    selectThemeMode.value = initialTheme;
   }
+  applyTheme(initialTheme);
 
   const overlaySettings = data.xpOverlaySettings || { masterEnabled: false };
   if (checkOverlayMaster) checkOverlayMaster.checked = overlaySettings.masterEnabled === true;
@@ -72,6 +91,7 @@ switchOpenIe.addEventListener('change', () => {
 if (selectThemeMode) {
   selectThemeMode.addEventListener('change', () => {
     const mode = selectThemeMode.value || 'light';
+    applyTheme(mode);
     chrome.storage.local.set({ themeMode: mode }, () => {
       try {
         chrome.tabs.query({}, (tabs) => {

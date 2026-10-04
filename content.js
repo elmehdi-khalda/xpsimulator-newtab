@@ -89,6 +89,9 @@
       if (msg && msg.action === 'XP_EXTENSION_SETTINGS_CHANGED') {
         const newOpenInIE = msg.openInIE !== false;
         applyBridgeState(newOpenInIE);
+        if (msg.themeMode && document.documentElement) {
+          document.documentElement.setAttribute('data-xp-theme-mode', msg.themeMode);
+        }
       }
       if (msg && msg.action === 'XP_IMPORT_BOOKMARKS') {
         try {
