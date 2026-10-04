@@ -56,10 +56,9 @@
         font-family: Arial, Helvetica, sans-serif !important;
       }
 
-      /* Hide modern SVG Google logo and greeting text ("Exprimez-vous!", etc.) */
+      /* Hide modern SVG Google logo and greeting text */
       svg.ESTs9d, svg[aria-label="Google"], .uZekje svg, .sI1XGe svg,
-      .HeJfy, .DYz2A, .mL3MVc, .VHYc8b, header.RHL8Vb, .k5vh8d,
-      .X1pLC header, .iZUKEe {
+      header.RHL8Vb, .X1pLC header {
         display: none !important;
       }
 
@@ -106,12 +105,13 @@
         border-top-color: #555555 !important;
         box-shadow: none !important;
         background: #ffffff !important;
-        height: 28px !important;
-        min-height: 28px !important;
-        max-width: 565px !important;
+        height: 34px !important;
+        min-height: 34px !important;
+        max-width: 584px !important;
         width: 100% !important;
         margin: 0 auto !important;
-        padding: 0 4px !important;
+        padding: 0 8px !important;
+        display: flex !important;
         align-items: center !important;
       }
 
@@ -122,20 +122,37 @@
 
       .SDkEP {
         padding: 0 !important;
-        height: 26px !important;
+        height: 28px !important;
       }
 
-      .gLFyf, textarea[name="q"], input[name="q"] {
+      .RNNXgb .gLFyf, .RNNXgb textarea[name="q"], .RNNXgb input[name="q"] {
         font-family: Arial, Helvetica, sans-serif !important;
-        font-size: 15px !important;
-        line-height: 22px !important;
-        height: 22px !important;
+        font-size: 16px !important;
+        line-height: 24px !important;
+        height: 24px !important;
         color: #000000 !important;
         background: transparent !important;
         border: none !important;
+        outline: none !important;
         padding: 1px 2px !important;
         margin: 0 !important;
         resize: none !important;
+      }
+
+      /* Fallback inputs outside .RNNXgb */
+      input[name="q"]:not(.RNNXgb input),
+      input.lst,
+      .ds input {
+        border: 1px solid #707070 !important;
+        border-top-color: #555555 !important;
+        border-radius: 0px !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+        height: 30px !important;
+        line-height: 24px !important;
+        padding: 2px 6px !important;
+        font-size: 16px !important;
+        box-sizing: border-box !important;
       }
 
       /* Hide modern search bar clutter: Lens, Voice, Camera, Search Glass inside input */
@@ -412,24 +429,6 @@
     } catch (_) {}
   }
 
-  // Ensure search forms preserve classic flags (gbv=1, sout=1, igu=1)
-  function enforceClassicFormParams() {
-    try {
-      const forms = document.querySelectorAll('form[action*="/search"]');
-      forms.forEach((form) => {
-        ['gbv', 'sout', 'igu'].forEach((paramName) => {
-          if (!form.querySelector(`input[name="${paramName}"]`)) {
-            const hidden = document.createElement('input');
-            hidden.type = 'hidden';
-            hidden.name = paramName;
-            hidden.value = '1';
-            form.appendChild(hidden);
-          }
-        });
-      });
-    } catch (_) {}
-  }
-
   // Apply Classic 2009 Google Homepage Elements
   function applyClassicHomepage() {
     try {
@@ -438,7 +437,7 @@
       if (!isSearchPage) {
         // --- HOMEPAGE / LANDING PAGE ---
         // Hide modern greeting text and SVG logos
-        const modernSvgs = document.querySelectorAll('svg.ESTs9d, svg[aria-label="Google"], .uZekje svg, .sI1XGe svg, .HeJfy, .DYz2A, .mL3MVc, .VHYc8b, header.RHL8Vb');
+        const modernSvgs = document.querySelectorAll('svg.ESTs9d, svg[aria-label="Google"], .uZekje svg, .sI1XGe svg, header.RHL8Vb');
         modernSvgs.forEach((el) => {
           el.style.setProperty('display', 'none', 'important');
         });
@@ -446,7 +445,6 @@
         // Check if a native Google logo img exists on the page
         const nativeLogo = document.querySelector('img.lnXdpd, #hplogo, img[alt="Google"]:not(#xp-classic-logo)');
         if (nativeLogo) {
-          // Native logo exists - ensure its src is classic logo and remove any injected duplicate
           if (!nativeLogo.src.includes('intl/en_ALL/images/logo.gif')) {
             nativeLogo.src = 'https://www.google.com/intl/en_ALL/images/logo.gif';
             nativeLogo.removeAttribute('srcset');
@@ -454,7 +452,6 @@
           const dup = document.getElementById('xp-classic-logo');
           if (dup) dup.remove();
         } else {
-          // No native logo img exists - ensure single Classic 2009 Catull Logo is displayed
           if (!document.getElementById('xp-classic-logo')) {
             const classicLogo = document.createElement('img');
             classicLogo.id = 'xp-classic-logo';
@@ -473,12 +470,6 @@
               }
             }
           }
-        }
-
-        // Clean Search Input (remove placeholder text)
-        const searchInput = document.querySelector('textarea[name="q"], input[name="q"]');
-        if (searchInput && searchInput.placeholder) {
-          searchInput.placeholder = '';
         }
       } else {
         // --- SEARCH RESULTS PAGE ---
@@ -510,7 +501,6 @@
     cleanTrackingLinks();
     addFaviconsAndNumbers();
     processGoogleImages();
-    enforceClassicFormParams();
   }
 
   if (document.readyState === 'loading') {
