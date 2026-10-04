@@ -95,6 +95,21 @@
         "redux/main.js"
       ],
       "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "*://*.google.com/*",
+        "*://*.google.es/*",
+        "*://*.google.fr/*",
+        "*://*.google.co.uk/*",
+        "*://*.google.de/*",
+        "*://*.google.ca/*"
+      ],
+      "all_frames": true,
+      "js": [
+        "google-classic.js"
+      ],
+      "run_at": "document_start"
     }
   ],
   "web_accessible_resources": [
