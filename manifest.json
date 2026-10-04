@@ -31,7 +31,8 @@
     "declarativeNetRequest",
     "scripting",
     "cookies",
-    "bookmarks"
+    "bookmarks",
+    "topSites"
   ],
   "host_permissions": [
     "<all_urls>"

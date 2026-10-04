@@ -9,13 +9,67 @@ const btnSaveUrl = document.getElementById('btn-save-url');
 const btnResetUrl = document.getElementById('btn-reset-url');
 const statusMsg = document.getElementById('status-msg');
 
+const checkOverlayMaster = document.getElementById('check-overlay-master');
+const checkOverlaySearch = document.getElementById('check-overlay-search');
+const checkOverlayShortcuts = document.getElementById('check-overlay-shortcuts');
+const checkOverlayProfile = document.getElementById('check-overlay-profile');
+const overlaySubOptions = document.getElementById('overlay-sub-options');
+
 // Load initial settings
-chrome.storage.local.get(['simulatorUrl', 'openInIE', 'themeMode'], (data) => {
+chrome.storage.local.get(['simulatorUrl', 'openInIE', 'themeMode', 'xpOverlaySettings'], (data) => {
   inputUrl.value = data.simulatorUrl || DEFAULT_SIMULATOR_URL;
   switchOpenIe.checked = data.openInIE !== false;
   if (selectThemeMode) {
     selectThemeMode.value = data.themeMode || 'light';
   }
+
+  const overlaySettings = data.xpOverlaySettings || {
+    masterEnabled: true,
+    showSearch: true,
+    showShortcuts: true,
+    showProfile: true
+  };
+
+  if (checkOverlayMaster) checkOverlayMaster.checked = overlaySettings.masterEnabled !== false;
+  if (checkOverlaySearch) checkOverlaySearch.checked = overlaySettings.showSearch !== false;
+  if (checkOverlayShortcuts) checkOverlayShortcuts.checked = overlaySettings.showShortcuts !== false;
+  if (checkOverlayProfile) checkOverlayProfile.checked = overlaySettings.showProfile !== false;
+
+  if (overlaySubOptions) {
+    overlaySubOptions.classList.toggle('disabled', overlaySettings.masterEnabled === false);
+  }
+});
+
+function broadcastOverlaySettings() {
+  const settings = {
+    masterEnabled: checkOverlayMaster ? checkOverlayMaster.checked : true,
+    showSearch: checkOverlaySearch ? checkOverlaySearch.checked : true,
+    showShortcuts: checkOverlayShortcuts ? checkOverlayShortcuts.checked : true,
+    showProfile: checkOverlayProfile ? checkOverlayProfile.checked : true
+  };
+
+  chrome.storage.local.set({ xpOverlaySettings: settings }, () => {
+    try {
+      chrome.tabs.query({}, (tabs) => {
+        for (const tab of tabs) {
+          if (tab.id) {
+            chrome.tabs.sendMessage(tab.id, {
+              action: 'XP_OVERLAY_SETTINGS_CHANGED',
+              settings: settings
+            }).catch(() => {});
+          }
+        }
+      });
+    } catch (_) {}
+  });
+
+  if (overlaySubOptions) {
+    overlaySubOptions.classList.toggle('disabled', !settings.masterEnabled);
+  }
+}
+
+[checkOverlayMaster, checkOverlaySearch, checkOverlayShortcuts, checkOverlayProfile].forEach((el) => {
+  if (el) el.addEventListener('change', broadcastOverlaySettings);
 });
 
 // Toggle Open in IE Switch
@@ -152,6 +206,63 @@ btnImportBookmarks.addEventListener('click', () => {
     });
   });
 });
+
+// Import Shortcuts to XP Desktop
+const btnImportShortcuts = document.getElementById('btn-import-shortcuts');
+const shortcutStatusMsg = document.getElementById('shortcut-status-msg');
+
+if (btnImportShortcuts) {
+  btnImportShortcuts.addEventListener('click', () => {
+    btnImportShortcuts.disabled = true;
+    if (shortcutStatusMsg) shortcutStatusMsg.textContent = 'Reading top shortcuts...';
+
+    if (!chrome.topSites || !chrome.topSites.get) {
+      if (shortcutStatusMsg) shortcutStatusMsg.textContent = 'TopSites API not available.';
+      btnImportShortcuts.disabled = false;
+      return;
+    }
+
+    chrome.topSites.get((sites) => {
+      const formatted = (sites || []).map(s => {
+        let domain = '';
+        try { domain = new URL(s.url).hostname; } catch (_) {}
+        return {
+          title: s.title || domain || 'Shortcut',
+          url: s.url,
+          domain: domain,
+          icon: domain ? `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=64` : '/images/xp/icons/InternetExplorer6.png'
+        };
+      });
+
+      if (!formatted.length) {
+        if (shortcutStatusMsg) shortcutStatusMsg.textContent = 'No shortcuts found.';
+        btnImportShortcuts.disabled = false;
+        return;
+      }
+
+      chrome.storage.local.set({ xpUserShortcuts: formatted }, () => {
+        chrome.tabs.query({}, (tabs) => {
+          for (const tab of tabs) {
+            if (tab.id) {
+              chrome.tabs.sendMessage(tab.id, {
+                action: 'XP_IMPORT_SHORTCUTS',
+                shortcuts: formatted,
+                playSound: false
+              }).catch(() => {});
+            }
+          }
+          if (shortcutStatusMsg) shortcutStatusMsg.textContent = `Imported shortcuts to Desktop!`;
+          btnImportShortcuts.disabled = false;
+          setTimeout(() => {
+            if (shortcutStatusMsg && shortcutStatusMsg.textContent.includes('Imported')) {
+              shortcutStatusMsg.textContent = '';
+            }
+          }, 3500);
+        });
+      });
+    });
+  });
+}
 
 btnSaveUrl.addEventListener('click', () => {
   let val = (inputUrl.value || '').trim();

@@ -81,6 +81,23 @@
           }, '*');
         } catch (_) {}
       }
+        if (msg && msg.action === 'XP_IMPORT_SHORTCUTS') {
+        try {
+          window.postMessage({
+            type: 'XP_CREATE_SHORTCUTS_FOLDER',
+            shortcuts: msg.shortcuts,
+            playSound: false
+          }, '*');
+        } catch (_) {}
+      }
+      if (msg && msg.action === 'XP_OVERLAY_SETTINGS_CHANGED') {
+        try {
+          window.postMessage({
+            type: 'XP_OVERLAY_SETTINGS_CHANGED',
+            settings: msg.settings
+          }, '*');
+        } catch (_) {}
+      }
     });
 
     function syncBookmarksSilently() {
@@ -97,10 +114,28 @@
       } catch (_) {}
     }
 
+    function syncShortcutsSilently() {
+      try {
+        chrome.runtime.sendMessage({ action: 'XP_GET_TOP_SITES' }, (res) => {
+          if (res && res.success && Array.isArray(res.shortcuts) && res.shortcuts.length > 0) {
+            window.postMessage({
+              type: 'XP_CREATE_SHORTCUTS_FOLDER',
+              shortcuts: res.shortcuts,
+              playSound: false
+            }, '*');
+          }
+        });
+      } catch (_) {}
+    }
+
     // Listen for desktop first-time request or manual request
     window.addEventListener('message', (event) => {
-      if (event.data && (event.data.type === 'XP_GET_INITIAL_BOOKMARKS' || event.data.type === 'XP_GET_SAVED_BOOKMARKS')) {
+      if (!event.data) return;
+      if (event.data.type === 'XP_GET_INITIAL_BOOKMARKS' || event.data.type === 'XP_GET_SAVED_BOOKMARKS') {
         syncBookmarksSilently();
+      }
+      if (event.data.type === 'XP_GET_INITIAL_SHORTCUTS' || event.data.type === 'XP_GET_SAVED_SHORTCUTS') {
+        syncShortcutsSilently();
       }
     });
 

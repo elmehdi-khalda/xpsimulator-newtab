@@ -33,12 +33,44 @@
 
       <div class="xp-divider"></div>
 
+      <!-- Real Browser Overlay (HUD) Controls -->
+      <fieldset class="xp-fieldset">
+        <legend class="xp-legend">Browser Overlay (HUD)</legend>
+        <div class="xp-check-row">
+          <input type="checkbox" id="check-overlay-master" checked />
+          <label for="check-overlay-master" class="xp-bold-label">Enable Overlay HUD</label>
+        </div>
+        <div class="xp-sub-checks" id="overlay-sub-options">
+          <label class="xp-check-label">
+            <input type="checkbox" id="check-overlay-search" checked />
+            <span>Google AI Search Bar</span>
+          </label>
+          <label class="xp-check-label">
+            <input type="checkbox" id="check-overlay-shortcuts" checked />
+            <span>Top Shortcuts Grid</span>
+          </label>
+          <label class="xp-check-label">
+            <input type="checkbox" id="check-overlay-profile" checked />
+            <span>Profile & Apps Bar</span>
+          </label>
+        </div>
+      </fieldset>
+
+      <div class="xp-divider"></div>
+
       <div class="xp-bookmark-row">
         <button id="btn-import-bookmarks" class="xp-btn xp-btn-bookmark" type="button" title="Read your browser bookmarks and create a Bookmarks folder with website logos on the XP Desktop">
-          <span class="xp-btn-star">★</span> Import Bookmarks to Desktop
+          <span class="xp-btn-star">★</span> Import Bookmarks
         </button>
       </div>
       <div id="bookmark-status-msg" class="xp-status-msg"></div>
+
+      <div class="xp-bookmark-row" style="margin-top: 2px;">
+        <button id="btn-import-shortcuts" class="xp-btn xp-btn-bookmark" type="button" title="Read your top visited shortcuts and create a Shortcuts folder on the XP Desktop">
+          <span class="xp-btn-star">🚀</span> Import Shortcuts
+        </button>
+      </div>
+      <div id="shortcut-status-msg" class="xp-status-msg"></div>
 
       <div class="xp-divider"></div>
 
