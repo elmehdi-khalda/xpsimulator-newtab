@@ -16,7 +16,29 @@
     }
     if (document.documentElement) {
       document.documentElement.setAttribute('data-xp-extension', 'true');
+      document.documentElement.style.setProperty('color-scheme', 'light', 'important');
     }
+
+    // Force Light Mode by default so web pages treat user's browser as Light Mode
+    const origMatchMedia = window.matchMedia;
+    window.matchMedia = function(query) {
+      if (typeof query === 'string' && query.includes('prefers-color-scheme')) {
+        const themeMode = document.documentElement.getAttribute('data-xp-theme-mode') || 'light';
+        const wantDark = (themeMode === 'dark');
+        const matches = query.includes('dark') ? wantDark : !wantDark;
+        return {
+          matches: matches,
+          media: query,
+          onchange: null,
+          addListener: () => {},
+          removeListener: () => {},
+          addEventListener: () => {},
+          removeEventListener: () => {},
+          dispatchEvent: () => true
+        };
+      }
+      return origMatchMedia.call(window, query);
+    };
   } catch (_) {}
 
   // If top level (regular YouTube in browser tab), NEVER run!

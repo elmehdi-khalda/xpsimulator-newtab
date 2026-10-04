@@ -1,6 +1,7 @@
 const DEFAULT_SIMULATOR_URL = 'https://xpsimulator.vercel.app';
 
 const switchOpenIe = document.getElementById('switch-open-ie');
+const selectThemeMode = document.getElementById('select-theme-mode');
 const btnImportBookmarks = document.getElementById('btn-import-bookmarks');
 const bookmarkStatusMsg = document.getElementById('bookmark-status-msg');
 const inputUrl = document.getElementById('input-simulator-url');
@@ -9,9 +10,12 @@ const btnResetUrl = document.getElementById('btn-reset-url');
 const statusMsg = document.getElementById('status-msg');
 
 // Load initial settings
-chrome.storage.local.get(['simulatorUrl', 'openInIE'], (data) => {
+chrome.storage.local.get(['simulatorUrl', 'openInIE', 'themeMode'], (data) => {
   inputUrl.value = data.simulatorUrl || DEFAULT_SIMULATOR_URL;
   switchOpenIe.checked = data.openInIE !== false;
+  if (selectThemeMode) {
+    selectThemeMode.value = data.themeMode || 'light';
+  }
 });
 
 // Toggle Open in IE Switch
@@ -33,6 +37,27 @@ switchOpenIe.addEventListener('change', () => {
     } catch (_) {}
   });
 });
+
+// Theme Mode Selector
+if (selectThemeMode) {
+  selectThemeMode.addEventListener('change', () => {
+    const mode = selectThemeMode.value || 'light';
+    chrome.storage.local.set({ themeMode: mode }, () => {
+      try {
+        chrome.tabs.query({}, (tabs) => {
+          for (const tab of tabs) {
+            if (tab.id) {
+              chrome.tabs.sendMessage(tab.id, {
+                action: 'XP_EXTENSION_SETTINGS_CHANGED',
+                themeMode: mode
+              }).catch(() => {});
+            }
+          }
+        });
+      } catch (_) {}
+    });
+  });
+}
 
 // Helper to recursively extract the full bookmarks hierarchy (folders and links)
 function extractBookmarkTree(nodes) {
