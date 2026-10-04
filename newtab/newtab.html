@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Windows XP</title>
+  <link rel="stylesheet" href="newtab.css">
+  <link rel="icon" href="../icons/icon32.png">
+</head>
+<body class="xp-body">
+  <!-- Main Simulator Viewport -->
+  <main class="xp-viewport" id="xp-viewport">
+    <iframe id="simulator-iframe" class="xp-iframe" src="about:blank" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; fullscreen"></iframe>
+    
+    <!-- Offline Fallback Screen -->
+    <div id="offline-screen" class="xp-offline-screen hidden">
+      <div class="xp-dialog-box">
+        <div class="xp-dialog-titlebar">
+          <div class="xp-dialog-titlebar-left">
+            <img src="../icons/icon16.png" class="xp-dialog-title-icon" alt="">
+            <span>Windows XP Simulator - Connection</span>
+          </div>
+          <button id="btn-dialog-close" class="xp-dialog-close-btn" title="Close">✕</button>
+        </div>
+        <div class="xp-dialog-body">
+          <div class="xp-dialog-icon-area">
+            <img src="../icons/icon48.png" alt="Computer" class="xp-dialog-icon">
+          </div>
+          <div class="xp-dialog-content">
+            <h3>Cannot reach the XP Simulator</h3>
+            <p>The simulator server is currently not responding at <strong id="offline-target-url">http://localhost:3000</strong>.</p>
+            <div class="xp-command-hint">
+              <code>cd E:\xpsimulator\portfolio<br>npm run dev</code>
+            </div>
+            <p class="xp-dialog-note">Once the server is running, click Retry below to connect instantly.</p>
+          </div>
+        </div>
+        <div class="xp-dialog-footer">
+          <button id="btn-retry-connect" class="xp-btn-default">Retry</button>
+          <button id="btn-reset-url" class="xp-btn-standard">Reset to Localhost</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="newtab.js"></script>
+</body>
+</html>

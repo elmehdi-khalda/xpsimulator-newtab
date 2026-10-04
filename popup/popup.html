@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Windows XP Simulator Settings</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body class="xp-popup-body">
+  <div class="xp-popup-window">
+    <div class="xp-popup-titlebar">
+      <img src="../icons/icon16.png" class="xp-popup-title-icon" alt="">
+      <span>Windows XP Simulator Settings</span>
+    </div>
+
+    <div class="xp-popup-content">
+      <div class="xp-switch-row">
+        <span class="xp-switch-label">Open links in internet explorer</span>
+        <div class="switch">
+          <input role="switch" type="checkbox" class="switch-input" id="switch-open-ie" checked />
+          <label class="switch-input-label" for="switch-open-ie"></label>
+        </div>
+      </div>
+
+      <div class="xp-divider"></div>
+
+      <div class="xp-bookmark-row">
+        <button id="btn-import-bookmarks" class="xp-btn xp-btn-bookmark" type="button" title="Read your browser bookmarks and create a Bookmarks folder with website logos on the XP Desktop">
+          <span class="xp-btn-star">★</span> Import Bookmarks to Desktop
+        </button>
+      </div>
+      <div id="bookmark-status-msg" class="xp-status-msg"></div>
+
+      <div class="xp-divider"></div>
+
+      <div class="xp-section-label">Redirection URL:</div>
+      <div class="xp-input-group">
+        <input type="text" id="input-simulator-url" class="xp-input" spellcheck="false" placeholder="https://xpsimulator.vercel.app" />
+      </div>
+
+      <div class="xp-btn-row">
+        <button id="btn-save-url" class="xp-btn xp-btn-primary">Apply</button>
+        <button id="btn-reset-url" class="xp-btn">Reset</button>
+      </div>
+      <div id="status-msg" class="xp-status-msg"></div>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
