@@ -1,0 +1,486 @@
+/**
+ * Windows XP Simulator - Background Service Worker
+ * Manages iframe unblocking, YouTube 403 videoplayback Referer/Origin headers, and standalone app window.
+ */
+
+async function setupRules() {
+  try {
+    const dynamicRules = [
+  {
+    "id": 1,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "responseHeaders": [
+        {
+          "header": "x-frame-options",
+          "operation": "remove"
+        },
+        {
+          "header": "X-Frame-Options",
+          "operation": "remove"
+        },
+        {
+          "header": "content-security-policy",
+          "operation": "remove"
+        },
+        {
+          "header": "Content-Security-Policy",
+          "operation": "remove"
+        },
+        {
+          "header": "content-security-policy-report-only",
+          "operation": "remove"
+        },
+        {
+          "header": "Content-Security-Policy-Report-Only",
+          "operation": "remove"
+        },
+        {
+          "header": "frame-options",
+          "operation": "remove"
+        },
+        {
+          "header": "cross-origin-opener-policy",
+          "operation": "remove"
+        },
+        {
+          "header": "cross-origin-embedder-policy",
+          "operation": "remove"
+        },
+        {
+          "header": "cross-origin-resource-policy",
+          "operation": "remove"
+        },
+        {
+          "header": "permissions-policy",
+          "operation": "remove"
+        },
+        {
+          "header": "Permissions-Policy",
+          "operation": "remove"
+        },
+        {
+          "header": "feature-policy",
+          "operation": "remove"
+        },
+        {
+          "header": "Feature-Policy",
+          "operation": "remove"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "*",
+      "resourceTypes": [
+        "main_frame",
+        "sub_frame",
+        "xmlhttprequest",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 2,
+    "priority": 2,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        {
+          "header": "referer",
+          "operation": "set",
+          "value": "https://www.youtube.com/"
+        },
+        {
+          "header": "origin",
+          "operation": "set",
+          "value": "https://www.youtube.com"
+        }
+      ],
+      "responseHeaders": [
+        {
+          "header": "access-control-allow-origin",
+          "operation": "set",
+          "value": "https://www.youtube.com"
+        },
+        {
+          "header": "access-control-allow-credentials",
+          "operation": "set",
+          "value": "true"
+        },
+        {
+          "header": "access-control-allow-methods",
+          "operation": "set",
+          "value": "GET, POST, PUT, DELETE, OPTIONS, HEAD"
+        },
+        {
+          "header": "access-control-allow-headers",
+          "operation": "set",
+          "value": "*"
+        },
+        {
+          "header": "cross-origin-resource-policy",
+          "operation": "set",
+          "value": "cross-origin"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "||googlevideo.com/",
+      "resourceTypes": [
+        "media",
+        "xmlhttprequest",
+        "other",
+        "sub_frame"
+      ]
+    }
+  },
+  {
+    "id": 3,
+    "priority": 2,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        {
+          "header": "referer",
+          "operation": "set",
+          "value": "https://www.youtube.com/"
+        },
+        {
+          "header": "origin",
+          "operation": "set",
+          "value": "https://www.youtube.com"
+        }
+      ],
+      "responseHeaders": [
+        {
+          "header": "access-control-allow-origin",
+          "operation": "set",
+          "value": "https://www.youtube.com"
+        },
+        {
+          "header": "access-control-allow-credentials",
+          "operation": "set",
+          "value": "true"
+        },
+        {
+          "header": "access-control-allow-methods",
+          "operation": "set",
+          "value": "GET, POST, PUT, DELETE, OPTIONS, HEAD"
+        },
+        {
+          "header": "access-control-allow-headers",
+          "operation": "set",
+          "value": "*"
+        },
+        {
+          "header": "cross-origin-resource-policy",
+          "operation": "set",
+          "value": "cross-origin"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "||youtube.com/",
+      "resourceTypes": [
+        "media",
+        "xmlhttprequest",
+        "other",
+        "sub_frame"
+      ]
+    }
+  },
+  {
+    "id": 4,
+    "priority": 2,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        {
+          "header": "referer",
+          "operation": "set",
+          "value": "https://www.youtube.com/"
+        },
+        {
+          "header": "origin",
+          "operation": "set",
+          "value": "https://www.youtube.com"
+        }
+      ],
+      "responseHeaders": [
+        {
+          "header": "access-control-allow-origin",
+          "operation": "set",
+          "value": "https://www.youtube.com"
+        },
+        {
+          "header": "access-control-allow-credentials",
+          "operation": "set",
+          "value": "true"
+        },
+        {
+          "header": "cross-origin-resource-policy",
+          "operation": "set",
+          "value": "cross-origin"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "||ytimg.com/",
+      "resourceTypes": [
+        "media",
+        "xmlhttprequest",
+        "image",
+        "other",
+        "sub_frame"
+      ]
+    }
+  },
+  {
+    "id": 5,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        {
+          "header": "sec-fetch-dest",
+          "operation": "set",
+          "value": "document"
+        },
+        {
+          "header": "sec-fetch-mode",
+          "operation": "set",
+          "value": "navigate"
+        },
+        {
+          "header": "sec-fetch-site",
+          "operation": "set",
+          "value": "none"
+        },
+        {
+          "header": "sec-fetch-user",
+          "operation": "set",
+          "value": "?1"
+        }
+      ],
+      "responseHeaders": [
+        {
+          "header": "access-control-allow-origin",
+          "operation": "set",
+          "value": "*"
+        },
+        {
+          "header": "access-control-allow-credentials",
+          "operation": "set",
+          "value": "true"
+        },
+        {
+          "header": "access-control-allow-methods",
+          "operation": "set",
+          "value": "GET, POST, PUT, DELETE, OPTIONS, HEAD"
+        },
+        {
+          "header": "access-control-allow-headers",
+          "operation": "set",
+          "value": "*"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "*",
+      "resourceTypes": [
+        "sub_frame"
+      ]
+    }
+  }
+];
+
+    const existingRules = await chrome.declarativeNetRequest.getDynamicRules();
+    const existingRuleIds = existingRules.map(r => r.id);
+    const removeIds = Array.from(new Set([...existingRuleIds, 1, 2, 3, 4, 5]));
+
+    await chrome.declarativeNetRequest.updateDynamicRules({
+      removeRuleIds: removeIds,
+      addRules: dynamicRules
+    });
+    console.log('[Windows XP] DeclarativeNetRequest active: Subframes unblocked, CORS headers enabled & YouTube playback authorized.');
+  } catch (err) {
+    console.error('[Windows XP] Error updating declarativeNetRequest:', err);
+  }
+}
+
+function initDefaultSettings() {
+  chrome.storage.local.get(['openInIE'], (res) => {
+    if (res.openInIE === undefined) {
+      chrome.storage.local.set({ openInIE: true });
+    }
+  });
+}
+
+// Register dynamic rules on top-level start, installation, and browser startup
+setupRules();
+preloadSimulator();
+initDefaultSettings();
+
+chrome.runtime.onInstalled.addListener(() => {
+  setupRules();
+  preloadSimulator();
+  initDefaultSettings();
+});
+
+chrome.runtime.onStartup.addListener(() => {
+  setupRules();
+  preloadSimulator();
+  initDefaultSettings();
+});
+
+async function preloadSimulator() {
+  try {
+    const data = await chrome.storage.local.get(['simulatorUrl', 'cachedDesktop']);
+    const targetUrl = data.simulatorUrl || 'https://xpsimulator.vercel.app';
+    const base = new URL(targetUrl);
+
+    // Pre-cache vital shell assets: bliss wallpaper, icons, cursors
+    const coreAssets = [
+      new URL('/images/xp/wallpaper/bliss.jpg', base).toString(),
+      new URL('/images/xp/icons/MyComputer.png', base).toString(),
+      new URL('/images/xp/icons/RecycleBinempty.png', base).toString(),
+      new URL('/images/xp/icons/InternetExplorer6.png', base).toString(),
+      new URL('/images/xp/icons/LiveDemo.png', base).toString(),
+      new URL('/images/xp/icons/WindowsMedia.png', base).toString(),
+      new URL('/images/xp/icons/Application.png', base).toString()
+    ];
+
+    if (data.cachedDesktop?.wallpaper && data.cachedDesktop.wallpaper.startsWith('http')) {
+      coreAssets.push(data.cachedDesktop.wallpaper);
+    }
+
+    Promise.allSettled(coreAssets.map(u => fetch(u, { mode: 'no-cors', cache: 'force-cache' }))).catch(() => {});
+
+    const res = await fetch(targetUrl, { mode: 'cors', cache: 'force-cache' }).catch(() => null);
+    if (!res || !res.ok) return;
+    const html = await res.text();
+    const assetMatches = html.match(/(?:src|href)=["']([^"']+\.(?:js|css|png|jpg|mp3|cur|ani))["']/g) || [];
+    const assetUrls = assetMatches.map(m => {
+      const p = m.replace(/^(?:src|href)=["']|["']$/g, '');
+      return new URL(p, base).toString();
+    });
+    await Promise.allSettled(assetUrls.slice(0, 60).map(u => fetch(u, { mode: 'no-cors', cache: 'force-cache' })));
+    console.log('[Windows XP] Simulator & desktop assets preloaded in background cache.');
+  } catch (err) {
+    console.debug('[Windows XP] Preload skipped:', err);
+  }
+}
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.action === 'openAppWindow') {
+    const url = message.url || 'https://xpsimulator.vercel.app';
+    chrome.windows.create({
+      url: url,
+      type: 'popup',
+      width: Math.min(1280, screen.availWidth || 1280),
+      height: Math.min(800, screen.availHeight || 800),
+      focused: true
+    }, (newWin) => {
+      sendResponse({ success: true, windowId: newWin ? newWin.id : null });
+    });
+    return true;
+  }
+
+  if (message.action === 'XP_DESKTOP_CACHE_SYNC') {
+    if (message.data) {
+      chrome.storage.local.set({ cachedDesktop: message.data });
+      if (message.data.wallpaper && message.data.wallpaper.startsWith('http')) {
+        fetch(message.data.wallpaper, { mode: 'no-cors', cache: 'force-cache' }).catch(() => {});
+      }
+    }
+    sendResponse({ success: true });
+    return true;
+  }
+
+  if (message.action === 'XP_GET_BOOKMARKS_TREE') {
+    if (chrome.bookmarks && chrome.bookmarks.getTree) {
+      chrome.bookmarks.getTree((tree) => {
+        const bookmarks = extractBookmarkTree(tree);
+        sendResponse({ success: true, bookmarks });
+      });
+      return true;
+    } else {
+      sendResponse({ success: false, bookmarks: [] });
+      return true;
+    }
+  }
+});
+
+// Helper to recursively extract the full bookmarks hierarchy (folders and links)
+function extractBookmarkTree(nodes) {
+  const result = [];
+  if (!nodes || !Array.isArray(nodes)) return result;
+
+  for (const node of nodes) {
+    if (node.url && (node.url.startsWith('http://') || node.url.startsWith('https://'))) {
+      let domain = '';
+      try {
+        domain = new URL(node.url).hostname;
+      } catch (_) {}
+      
+      const title = (node.title || domain || 'Bookmark').trim();
+      result.push({
+        type: 'bookmark',
+        title: title,
+        url: node.url,
+        icon: domain ? `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=32` : '/images/xp/icons/InternetExplorer6.png'
+      });
+    } else if (node.children && Array.isArray(node.children)) {
+      const folderTitle = (node.title || '').trim();
+      const children = extractBookmarkTree(node.children);
+      
+      const isRootContainer = node.id === '0' ||
+                              node.id === '1' ||
+                              node.id === 'root________' ||
+                              !folderTitle ||
+                              folderTitle.toLowerCase() === 'bookmarks bar' ||
+                              folderTitle.toLowerCase() === 'bookmarks menu' ||
+                              folderTitle.toLowerCase() === 'favorites bar';
+
+      if (isRootContainer) {
+        result.push(...children);
+      } else if (children.length > 0) {
+        result.push({
+          type: 'folder',
+          title: folderTitle || 'Folder',
+          children: children
+        });
+      }
+    }
+  }
+  return result;
+}
+
+// Push live bookmark updates silently to open simulator tabs when bookmarks change
+function broadcastLiveBookmarks() {
+  if (chrome.bookmarks && chrome.bookmarks.getTree) {
+    chrome.bookmarks.getTree((tree) => {
+      const bookmarks = extractBookmarkTree(tree);
+      chrome.storage.local.set({ xpUserBookmarks: bookmarks });
+      chrome.tabs.query({}, (tabs) => {
+        for (const tab of tabs) {
+          if (tab.id) {
+            chrome.tabs.sendMessage(tab.id, {
+              action: 'XP_IMPORT_BOOKMARKS',
+              bookmarks: bookmarks,
+              playSound: false
+            }).catch(() => {});
+          }
+        }
+      });
+    });
+  }
+}
+
+if (chrome.bookmarks) {
+  chrome.bookmarks.onCreated?.addListener(broadcastLiveBookmarks);
+  chrome.bookmarks.onRemoved?.addListener(broadcastLiveBookmarks);
+  chrome.bookmarks.onChanged?.addListener(broadcastLiveBookmarks);
+  chrome.bookmarks.onMoved?.addListener(broadcastLiveBookmarks);
+}
