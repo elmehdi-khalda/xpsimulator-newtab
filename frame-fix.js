@@ -75,6 +75,14 @@
     });
   } catch (e) {}
 
+  // Spoof document.referrer to YouTube origin so player tokens remain valid
+  try {
+    Object.defineProperty(document, 'referrer', {
+      get: () => 'https://www.youtube.com/',
+      configurable: true
+    });
+  } catch (e) {}
+
   // Fix cross-subdomain postMessage targetOrigin mismatches (e.g. google.com vs ogs.google.com)
   try {
     const originalPostMessage = window.postMessage;
@@ -102,12 +110,12 @@
     }, true);
   } catch (e) {}
 
-  // Disable broken inline video preview on hover (which causes 403 Forbidden & background chunk spam)
-  const injectAntiPreviewStyle = () => {
+  // Inject authoritative sizing and anti-preview CSS for smooth wide-window mounts
+  const injectAuthoritativePlayerStyles = () => {
     try {
-      if (document.getElementById('xp-anti-preview-style')) return;
+      if (document.getElementById('xp-authoritative-player-style')) return;
       const style = document.createElement('style');
-      style.id = 'xp-anti-preview-style';
+      style.id = 'xp-authoritative-player-style';
       style.textContent = `
         #thumbnail > #mouseover-overlay,
         ytd-thumbnail #hover-overlays,
@@ -120,15 +128,59 @@
           pointer-events: none !important;
           visibility: hidden !important;
         }
+        ytd-watch-flexy[flexy][is-two-columns_] #primary.ytd-watch-flexy {
+          max-width: 1280px !important;
+          min-width: 360px !important;
+        }
+        ytd-watch-flexy #player-container-inner,
+        ytd-watch-flexy #player-container-outer {
+          min-height: 240px !important;
+        }
       `;
       (document.head || document.documentElement).appendChild(style);
     } catch (_) {}
   };
 
-  injectAntiPreviewStyle();
+  injectAuthoritativePlayerStyles();
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', injectAntiPreviewStyle);
+    document.addEventListener('DOMContentLoaded', injectAuthoritativePlayerStyles);
   }
+
+  // Playback Watchdog: ensures video playback initiates cleanly when opened in wide window
+  function initPlaybackWatchdog() {
+    let attempted = false;
+    const checkAndPlay = () => {
+      if (attempted) return;
+      const player = document.getElementById('movie_player');
+      const video = document.querySelector('video.html5-main-video');
+      if (video && video.paused && video.readyState >= 2) {
+        attempted = true;
+        video.play().catch(() => {
+          if (player && typeof player.playVideo === 'function') {
+            player.playVideo();
+          }
+        });
+      }
+    };
+    
+    const observer = new MutationObserver(() => {
+      checkAndPlay();
+    });
+    
+    const startObserver = () => {
+      if (document.body) {
+        observer.observe(document.body, { childList: true, subtree: true });
+        checkAndPlay();
+      }
+    };
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', startObserver);
+    } else {
+      startObserver();
+    }
+  }
+  initPlaybackWatchdog();
 
   // Normalize target URL (handling /shorts/ and cleaning parameter noise like themeRefresh)
   function normalizeVideoUrl(rawUrl) {

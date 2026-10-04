@@ -142,7 +142,7 @@ function alignItems() {
 	let flexPadding = 16;
 	let calcPadding = Math.floor(playerElement.getBoundingClientRect().left - flexPadding);
 
-	if (calcPadding <= 0 || calcPadding >= 300) {
+	if (calcPadding <= 0 || calcPadding >= 200) {
 		return;
 	} else if (!isTheater() && !isFullscreen()) {
 		const reduxAlignElement = document.querySelector('#redux-style-align');
@@ -267,45 +267,12 @@ function recalculateVideoSize() {
 	}
 
 	function startRecalc() {
-		let checkingTimeout;
-		let retryTimeout = 2500; 
-		let retryCount = 0;
-		let retryInterval = 10;
-		let checkingVideo = setInterval(() => { //check in loop for X seconds if player size is correct; reset checking if it's not; applied to fix initial page elements load
-			let progressBar = document.querySelector('ytd-watch-flexy #movie_player:not(.ytp-delhi-modern) .ytp-chrome-bottom');
-			let leftEdgeDistancePlayer = document.querySelector('#player-container-outer').getBoundingClientRect().x;
-			let leftEdgeDistanceInfo = document.querySelector('#page-manager.ytd-app #primary-inner #info').getBoundingClientRect().x;
-			let videoElement = document.querySelector('video');
-			let widthCtrlElement = document.querySelector('#columns > #primary > #primary-inner #info');
-
-			if ((widthCtrlElement.offsetWidth) < (playerSize.width-1)) { //condition for starting page in small window
-				let specialWidth = document.querySelector('video').offsetWidth;
-				let specialHeight = document.querySelector('video').offsetHeight;
-				insertRecalcScript(specialWidth, specialHeight);
-			}
-
-			if (progressBar != null && (leftEdgeDistancePlayer > leftEdgeDistanceInfo+10 
-				|| (progressBar.offsetWidth+24) <= videoElement.offsetWidth*0.95 
-				|| (progressBar.offsetWidth+24) >= videoElement.offsetWidth*1.05) && !isTheater() && !isFullscreen()) { //TODO more precise condition
-				insertRecalcScript();
-				retryCount++;
-
-				if ((retryCount*retryInterval) >= retryTimeout) {
-					clearInterval(checkingVideo);
-				}
-
-				if (checkingTimeout != undefined) {
-					clearTimeout(checkingTimeout);
-					checkingTimeout = undefined;
-				}
-			} else {
-				if (checkingTimeout == undefined) {
-					checkingTimeout = setTimeout(() => {
-						clearInterval(checkingVideo);
-					}, retryTimeout);
-				}
-			}
-		}, retryInterval);
+		let vid = document.querySelector('video');
+		if (vid && vid.offsetWidth > 0 && vid.offsetHeight > 0) {
+			insertRecalcScript(vid.offsetWidth, vid.offsetHeight);
+		} else {
+			insertRecalcScript();
+		}
 	}
 	if (!flags.recalcListenersAdded) {
 		waitForElement('.ytp-size-button', 10, addListenersForRecalc);

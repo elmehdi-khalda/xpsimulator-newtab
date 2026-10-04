@@ -195,32 +195,7 @@ function addCustomStyles() {
 		`,
 		hideCastButton: `/*PLAY ON TV BUTTON*/.ytp-remote-button:not([data-tooltip-target-id="ytp-autonav-toggle-button"]) {display:none !important;}`,
 		hideAutoplayButton: `/*AUTOPLAY BUTTON*/[data-tooltip-target-id="ytp-autonav-toggle-button"], #redux-autoplay {display:none !important;}`,
-		smallPlayer: `
-		/*SMALL PLAYER*/
-		#primary.ytd-watch-flexy {
-		max-width: calc((100vh - (var(--ytd-watch-flexy-masthead-height) + var(--ytd-margin-6x) + var(--ytd-watch-flexy-space-below-player))) * (${window.screen.width} / ${window.screen.height})) !important;
-		min-width: calc(var(--ytd-watch-flexy-min-player-height) * (${window.screen.width} / ${window.screen.height})) !important;
-		}
-		#player-container-outer {
-		max-width: ${playerSize.width}px  !important;
-		min-width: 0 !important;
-		position: relative !important;
-		}
-		#player-container-inner {
-		padding-top: calc(${window.screen.height} / ${window.screen.width} * 100%) !important;
-		}
-		.html5-video-container {
-		width:100% !important;
-		height:100% !important;
-		}
-		.html5-video-container video {
-		width:100% !important;
-		height:100% !important;
-		left:0 !important;
-		top: 0 !important;
-		object-fit: contain !important;
-		}
-		`,
+		smallPlayer: ``,
 		darkPlaylist: `
 		/*DARK PLAYLIST*/
 		#playlist.ytd-watch-flexy {
