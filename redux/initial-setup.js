@@ -2,7 +2,9 @@
 (function () {
   function isSimulatorFrame() {
     try {
-      if (window.self === window.top) return false;
+      if (window.self === window.top) {
+        return false;
+      }
       if (window.location.ancestorOrigins && window.location.ancestorOrigins.length > 0) {
         return Array.from(window.location.ancestorOrigins).some(origin => 
           origin.includes('localhost') || 
@@ -24,22 +26,39 @@
     return false;
   }
 
-  // Strictly exit if on regular YouTube outside the simulator!
-  if (!isSimulatorFrame()) {
+  // Strictly exit if on regular YouTube outside the simulator, unless user enabled oldYouTubeRealBrowser option!
+  if (window.self === window.top) {
+    try {
+      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+        chrome.storage.local.get(['oldYouTubeRealBrowser'], (res) => {
+          if (res && res.oldYouTubeRealBrowser === true) {
+            initReduxSetup();
+          }
+        });
+      }
+    } catch (_) {}
     return;
   }
 
-  // Inject redux/styles.css dynamically ONLY inside the simulator iframe
-  try {
-    const cssId = 'xp-youtube-redux-styles';
-    if (!document.getElementById(cssId)) {
-      const link = document.createElement('link');
-      link.id = cssId;
-      link.rel = 'stylesheet';
-      link.href = (chrome || browser).runtime.getURL('redux/styles.css');
-      (document.head || document.documentElement).appendChild(link);
-    }
-  } catch (e) {}
+  function initReduxSetup() {
+    // Inject redux/styles.css dynamically ONLY inside the simulator iframe or when enabled
+    try {
+      const cssId = 'xp-youtube-redux-styles';
+      if (!document.getElementById(cssId)) {
+        const link = document.createElement('link');
+        link.id = cssId;
+        link.rel = 'stylesheet';
+        link.href = (chrome || browser).runtime.getURL('redux/styles.css');
+        (document.head || document.documentElement).appendChild(link);
+      }
+    } catch (e) {}
+  }
+
+  if (isSimulatorFrame()) {
+    initReduxSetup();
+  } else {
+    return;
+  }
 
 /* XP_SIMULATOR_REDUX_GUARD_BODY */
 let browser = (typeof chrome !== 'undefined' && chrome.runtime) ? chrome : (typeof browser !== 'undefined' ? browser : {});
