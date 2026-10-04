@@ -85,23 +85,11 @@ async function setupRules() {
     "priority": 2,
     "action": {
       "type": "modifyHeaders",
-      "requestHeaders": [
-        {
-          "header": "referer",
-          "operation": "set",
-          "value": "https://www.youtube.com/"
-        },
-        {
-          "header": "origin",
-          "operation": "set",
-          "value": "https://www.youtube.com"
-        }
-      ],
       "responseHeaders": [
         {
           "header": "access-control-allow-origin",
           "operation": "set",
-          "value": "https://www.youtube.com"
+          "value": "*"
         },
         {
           "header": "access-control-allow-credentials",
@@ -140,23 +128,11 @@ async function setupRules() {
     "priority": 2,
     "action": {
       "type": "modifyHeaders",
-      "requestHeaders": [
-        {
-          "header": "referer",
-          "operation": "set",
-          "value": "https://www.youtube.com/"
-        },
-        {
-          "header": "origin",
-          "operation": "set",
-          "value": "https://www.youtube.com"
-        }
-      ],
       "responseHeaders": [
         {
           "header": "access-control-allow-origin",
           "operation": "set",
-          "value": "https://www.youtube.com"
+          "value": "*"
         },
         {
           "header": "access-control-allow-credentials",
@@ -195,23 +171,11 @@ async function setupRules() {
     "priority": 2,
     "action": {
       "type": "modifyHeaders",
-      "requestHeaders": [
-        {
-          "header": "referer",
-          "operation": "set",
-          "value": "https://www.youtube.com/"
-        },
-        {
-          "header": "origin",
-          "operation": "set",
-          "value": "https://www.youtube.com"
-        }
-      ],
       "responseHeaders": [
         {
           "header": "access-control-allow-origin",
           "operation": "set",
-          "value": "https://www.youtube.com"
+          "value": "*"
         },
         {
           "header": "access-control-allow-credentials",
@@ -315,6 +279,9 @@ function initDefaultSettings() {
       chrome.storage.local.set({ openInIE: true });
     }
   });
+  if (chrome.storage && chrome.storage.sync) {
+    chrome.storage.sync.remove(['smallPlayer']);
+  }
 }
 
 // Register dynamic rules on top-level start, installation, and browser startup

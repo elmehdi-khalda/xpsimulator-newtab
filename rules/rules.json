@@ -78,23 +78,11 @@
     "priority": 2,
     "action": {
       "type": "modifyHeaders",
-      "requestHeaders": [
-        {
-          "header": "referer",
-          "operation": "set",
-          "value": "https://www.youtube.com/"
-        },
-        {
-          "header": "origin",
-          "operation": "set",
-          "value": "https://www.youtube.com"
-        }
-      ],
       "responseHeaders": [
         {
           "header": "access-control-allow-origin",
           "operation": "set",
-          "value": "https://www.youtube.com"
+          "value": "*"
         },
         {
           "header": "access-control-allow-credentials",
@@ -133,23 +121,11 @@
     "priority": 2,
     "action": {
       "type": "modifyHeaders",
-      "requestHeaders": [
-        {
-          "header": "referer",
-          "operation": "set",
-          "value": "https://www.youtube.com/"
-        },
-        {
-          "header": "origin",
-          "operation": "set",
-          "value": "https://www.youtube.com"
-        }
-      ],
       "responseHeaders": [
         {
           "header": "access-control-allow-origin",
           "operation": "set",
-          "value": "https://www.youtube.com"
+          "value": "*"
         },
         {
           "header": "access-control-allow-credentials",
@@ -188,23 +164,11 @@
     "priority": 2,
     "action": {
       "type": "modifyHeaders",
-      "requestHeaders": [
-        {
-          "header": "referer",
-          "operation": "set",
-          "value": "https://www.youtube.com/"
-        },
-        {
-          "header": "origin",
-          "operation": "set",
-          "value": "https://www.youtube.com"
-        }
-      ],
       "responseHeaders": [
         {
           "header": "access-control-allow-origin",
           "operation": "set",
-          "value": "https://www.youtube.com"
+          "value": "*"
         },
         {
           "header": "access-control-allow-credentials",
