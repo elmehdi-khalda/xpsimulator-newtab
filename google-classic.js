@@ -71,6 +71,13 @@
         margin: 20px auto 14px auto !important;
       }
 
+      /* Prevent duplicate logos if xp-classic-logo is present */
+      body:has(#xp-classic-logo) img.lnXdpd,
+      body:has(#xp-classic-logo) #hplogo,
+      body:has(#xp-classic-logo) img[alt="Google"]:not(#xp-classic-logo) {
+        display: none !important;
+      }
+
       /* Classic search results header logo */
       #logo img, header a[aria-label="Google"] svg, .logo img, #logocont img {
         box-sizing: border-box !important;
@@ -406,22 +413,34 @@
           el.style.setProperty('display', 'none', 'important');
         });
 
-        // Ensure Classic 2009 Catull Logo is displayed
-        if (!document.getElementById('xp-classic-logo')) {
-          const classicLogo = document.createElement('img');
-          classicLogo.id = 'xp-classic-logo';
-          classicLogo.className = 'xp-classic-logo';
-          classicLogo.src = 'https://www.google.com/intl/en_ALL/images/logo.gif';
-          classicLogo.alt = 'Google';
-          classicLogo.title = 'Google';
+        // Check if a native Google logo img exists on the page
+        const nativeLogo = document.querySelector('img.lnXdpd, #hplogo, img[alt="Google"]:not(#xp-classic-logo)');
+        if (nativeLogo) {
+          // Native logo exists - ensure its src is classic logo and remove any injected duplicate
+          if (!nativeLogo.src.includes('intl/en_ALL/images/logo.gif')) {
+            nativeLogo.src = 'https://www.google.com/intl/en_ALL/images/logo.gif';
+            nativeLogo.removeAttribute('srcset');
+          }
+          const dup = document.getElementById('xp-classic-logo');
+          if (dup) dup.remove();
+        } else {
+          // No native logo img exists - ensure single Classic 2009 Catull Logo is displayed
+          if (!document.getElementById('xp-classic-logo')) {
+            const classicLogo = document.createElement('img');
+            classicLogo.id = 'xp-classic-logo';
+            classicLogo.className = 'xp-classic-logo';
+            classicLogo.src = 'https://www.google.com/intl/en_ALL/images/logo.gif';
+            classicLogo.alt = 'Google';
+            classicLogo.title = 'Google';
 
-          const logoContainer = document.querySelector('.uZekje, .naW5gc, .sI1XGe, .k1zIA');
-          if (logoContainer) {
-            logoContainer.prepend(classicLogo);
-          } else {
-            const searchForm = document.querySelector('form[action*="/search"]');
-            if (searchForm && searchForm.parentNode) {
-              searchForm.parentNode.insertBefore(classicLogo, searchForm);
+            const logoContainer = document.querySelector('.uZekje, .naW5gc, .sI1XGe, .k1zIA');
+            if (logoContainer) {
+              logoContainer.prepend(classicLogo);
+            } else {
+              const searchForm = document.querySelector('form[action*="/search"]');
+              if (searchForm && searchForm.parentNode) {
+                searchForm.parentNode.insertBefore(classicLogo, searchForm);
+              }
             }
           }
         }
@@ -442,14 +461,15 @@
         });
       }
 
-      // Update any fallback <img> tags with modern Google logo
-      const fallbackImgs = document.querySelectorAll('img.lnXdpd, #hplogo, img[alt="Google"]:not(#xp-classic-logo)');
-      fallbackImgs.forEach((img) => {
-        if (!img.src.includes('intl/en_ALL/images/logo.gif')) {
-          img.src = 'https://www.google.com/intl/en_ALL/images/logo.gif';
-          img.removeAttribute('srcset');
+      // Universal duplicate guard: If multiple Google logos are found on homepage, hide all except the first one
+      if (!isSearchPage) {
+        const homeLogos = document.querySelectorAll('#xp-classic-logo, img.lnXdpd, #hplogo, img[alt="Google"]');
+        if (homeLogos.length > 1) {
+          for (let i = 1; i < homeLogos.length; i++) {
+            homeLogos[i].style.setProperty('display', 'none', 'important');
+          }
         }
-      });
+      }
     } catch (_) {}
   }
 
