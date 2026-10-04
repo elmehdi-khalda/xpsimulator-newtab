@@ -6,6 +6,28 @@
 (function () {
   'use strict';
 
+  // NEVER run on top-level regular browser tabs (outside the simulator)!
+  if (window.self === window.top) return;
+
+  // Ensure this frame is embedded inside the XP simulator
+  let isSimulator = true;
+  try {
+    if (window.location.ancestorOrigins && window.location.ancestorOrigins.length > 0) {
+      isSimulator = Array.from(window.location.ancestorOrigins).some(origin => 
+        origin.includes('localhost') || 
+        origin.includes('127.0.0.1') || 
+        origin.startsWith('chrome-extension://') ||
+        origin.includes('vercel.app') ||
+        origin.includes('elmehdikhalda') ||
+        origin.includes('192.168.') ||
+        origin.includes('10.') ||
+        origin.includes('::1') ||
+        origin.includes('0.0.0.0')
+      );
+    }
+  } catch (_) {}
+  if (!isSimulator) return;
+
   // Inject Classic Google CSS Styles
   function injectClassicStyles() {
     if (document.getElementById('xp-google-classic-style')) return;
