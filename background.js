@@ -457,31 +457,3 @@ function extractBookmarkTree(nodes) {
   return result;
 }
 
-// Push live bookmark updates silently to open simulator tabs when bookmarks change
-function broadcastLiveBookmarks() {
-  if (chrome.bookmarks && chrome.bookmarks.getTree) {
-    chrome.bookmarks.getTree((tree) => {
-      const bookmarks = extractBookmarkTree(tree);
-      chrome.storage.local.set({ xpUserBookmarks: bookmarks });
-      chrome.tabs.query({}, (tabs) => {
-        for (const tab of tabs) {
-          if (tab.id) {
-            chrome.tabs.sendMessage(tab.id, {
-              action: 'XP_IMPORT_BOOKMARKS',
-              bookmarks: bookmarks,
-              playSound: false
-            }).catch(() => {});
-          }
-        }
-      });
-    });
-  }
-}
-
-if (chrome.bookmarks) {
-  chrome.bookmarks.onCreated?.addListener(broadcastLiveBookmarks);
-  chrome.bookmarks.onRemoved?.addListener(broadcastLiveBookmarks);
-  chrome.bookmarks.onChanged?.addListener(broadcastLiveBookmarks);
-  chrome.bookmarks.onMoved?.addListener(broadcastLiveBookmarks);
-}
-

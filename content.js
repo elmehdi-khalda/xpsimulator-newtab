@@ -97,12 +97,9 @@
       } catch (_) {}
     }
 
-    // Auto-sync bookmarks silently on page load
-    syncBookmarksSilently();
-
-    // Listen for desktop request to sync bookmarks silently
+    // Listen for desktop first-time request or manual request
     window.addEventListener('message', (event) => {
-      if (event.data && event.data.type === 'XP_GET_SAVED_BOOKMARKS') {
+      if (event.data && (event.data.type === 'XP_GET_INITIAL_BOOKMARKS' || event.data.type === 'XP_GET_SAVED_BOOKMARKS')) {
         syncBookmarksSilently();
       }
     });
