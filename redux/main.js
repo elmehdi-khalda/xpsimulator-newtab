@@ -24,7 +24,18 @@
     return false;
   }
 
-  // Strictly exit if on regular YouTube outside the simulator!
+  // Strictly exit if on regular YouTube outside the simulator, unless user enabled oldYouTubeRealBrowser option!
+  if (window.self === window.top) {
+    try {
+      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+        chrome.storage.local.get(['oldYouTubeRealBrowser'], (res) => {
+          if (!res || !res.oldYouTubeRealBrowser) return;
+        });
+      }
+    } catch (_) {}
+    return;
+  }
+
   if (!isSimulatorFrame()) {
     return;
   }

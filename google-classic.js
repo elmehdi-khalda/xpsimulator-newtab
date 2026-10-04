@@ -6,8 +6,20 @@
 (function () {
   'use strict';
 
-  // NEVER run on top-level regular browser tabs (outside the simulator)!
-  if (window.self === window.top) return;
+  // Check if running in top-level regular browser tabs (outside simulation)
+  const isTop = (window.self === window.top);
+  if (isTop) {
+    try {
+      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+        chrome.storage.local.get(['oldGoogleRealBrowser'], (res) => {
+          if (!res || !res.oldGoogleRealBrowser) return;
+          init();
+        });
+        return;
+      }
+    } catch (_) {}
+    return;
+  }
 
   // Ensure this frame is embedded inside the XP simulator
   let isSimulator = true;
@@ -187,23 +199,41 @@
         font-weight: normal !important;
       }
 
-      /* Hide modern Google Apps launcher grid (waffle) */
-      #gbwa, .gb_L {
+      /* Hide modern Google Apps launcher grid (waffle) & modern footer elements */
+      #gbwa, .gb_L, footer, .KxwPGc, .c93Gbe, .o3j99, .u732Oi, .fbar, .p4ecBe, div[role="contentinfo"] {
         display: none !important;
       }
 
-      /* Classic Minimalist Footer */
-      footer, .KxwPGc, .o3j99.c93Gbe {
-        background: #ffffff !important;
-        border-top: none !important;
-        font-family: Arial, Helvetica, sans-serif !important;
-        font-size: 11px !important;
+      /* Dark Mode Support for Classic Google */
+      html[data-xp-theme-mode="dark"],
+      html[data-xp-theme-mode="dark"] body {
+        background-color: #121212 !important;
+        color: #e8eaed !important;
       }
 
-      footer a, .KxwPGc a, .pHiOh {
-        color: #0000cc !important;
-        font-size: 11px !important;
-        text-decoration: underline !important;
+      html[data-xp-theme-mode="dark"] .RNNXgb,
+      html[data-xp-theme-mode="dark"] div[jsname="RNNXgb"] {
+        background: #202124 !important;
+        border-color: #5f6368 !important;
+      }
+
+      html[data-xp-theme-mode="dark"] .gLFyf,
+      html[data-xp-theme-mode="dark"] textarea[name="q"],
+      html[data-xp-theme-mode="dark"] input[name="q"] {
+        color: #ffffff !important;
+      }
+
+      html[data-xp-theme-mode="dark"] input[name="btnK"],
+      html[data-xp-theme-mode="dark"] input[name="btnI"],
+      html[data-xp-theme-mode="dark"] .gNO89b,
+      html[data-xp-theme-mode="dark"] .RNmpXc {
+        background: #303134 !important;
+        color: #e8eaed !important;
+        border-color: #5f6368 !important;
+      }
+
+      html[data-xp-theme-mode="dark"] a {
+        color: #8ab4f8 !important;
       }
 
       .u732Oi, .fbar.p4ecBe {

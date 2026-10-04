@@ -49,8 +49,11 @@
 
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => {
-        chrome.storage.local.get(['openInIE', 'xpOverlaySettings'], (data) => {
+        chrome.storage.local.get(['openInIE', 'xpOverlaySettings', 'themeMode'], (data) => {
           applyBridgeState(data.openInIE !== false);
+          if (document.documentElement) {
+            document.documentElement.setAttribute('data-xp-theme-mode', data.themeMode || 'light');
+          }
           if (data.xpOverlaySettings) {
             window.postMessage({
               type: 'XP_OVERLAY_SETTINGS_CHANGED',
@@ -59,6 +62,12 @@
           }
         });
       }, { once: true });
+    } else {
+      chrome.storage.local.get(['themeMode'], (data) => {
+        if (document.documentElement) {
+          document.documentElement.setAttribute('data-xp-theme-mode', data.themeMode || 'light');
+        }
+      });
     }
 
     // 2. Respond to PING from simulator

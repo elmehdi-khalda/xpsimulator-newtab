@@ -28,8 +28,11 @@ function applyTheme(mode) {
   }
 }
 
+const checkOldGoogleReal = document.getElementById('check-old-google-real');
+const checkOldYouTubeReal = document.getElementById('check-old-youtube-real');
+
 // Load initial settings
-chrome.storage.local.get(['simulatorUrl', 'openInIE', 'themeMode', 'xpOverlaySettings'], (data) => {
+chrome.storage.local.get(['simulatorUrl', 'openInIE', 'themeMode', 'xpOverlaySettings', 'oldGoogleRealBrowser', 'oldYouTubeRealBrowser'], (data) => {
   inputUrl.value = data.simulatorUrl || DEFAULT_SIMULATOR_URL;
   switchOpenIe.checked = data.openInIE !== false;
   const initialTheme = data.themeMode || 'light';
@@ -40,7 +43,22 @@ chrome.storage.local.get(['simulatorUrl', 'openInIE', 'themeMode', 'xpOverlaySet
 
   const overlaySettings = data.xpOverlaySettings || { masterEnabled: false };
   if (checkOverlayMaster) checkOverlayMaster.checked = overlaySettings.masterEnabled === true;
+
+  if (checkOldGoogleReal) checkOldGoogleReal.checked = data.oldGoogleRealBrowser === true;
+  if (checkOldYouTubeReal) checkOldYouTubeReal.checked = data.oldYouTubeRealBrowser === true;
 });
+
+if (checkOldGoogleReal) {
+  checkOldGoogleReal.addEventListener('change', () => {
+    chrome.storage.local.set({ oldGoogleRealBrowser: checkOldGoogleReal.checked });
+  });
+}
+
+if (checkOldYouTubeReal) {
+  checkOldYouTubeReal.addEventListener('change', () => {
+    chrome.storage.local.set({ oldYouTubeRealBrowser: checkOldYouTubeReal.checked });
+  });
+}
 
 function broadcastOverlaySettings() {
   const settings = {
