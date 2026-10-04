@@ -36,15 +36,27 @@
     }
 
     // 1. Initial load from storage
-    chrome.storage.local.get(['openInIE'], (data) => {
+    chrome.storage.local.get(['openInIE', 'xpOverlaySettings'], (data) => {
       const openInIE = data.openInIE !== false;
       applyBridgeState(openInIE);
+      if (data.xpOverlaySettings) {
+        window.postMessage({
+          type: 'XP_OVERLAY_SETTINGS_CHANGED',
+          settings: data.xpOverlaySettings
+        }, '*');
+      }
     });
 
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => {
-        chrome.storage.local.get(['openInIE'], (data) => {
+        chrome.storage.local.get(['openInIE', 'xpOverlaySettings'], (data) => {
           applyBridgeState(data.openInIE !== false);
+          if (data.xpOverlaySettings) {
+            window.postMessage({
+              type: 'XP_OVERLAY_SETTINGS_CHANGED',
+              settings: data.xpOverlaySettings
+            }, '*');
+          }
         });
       }, { once: true });
     }
@@ -53,7 +65,7 @@
     window.addEventListener('message', (event) => {
       if (!event.data || typeof event.data !== 'object') return;
       if (event.data.type === 'XP_EXTENSION_PING' || event.data.type === 'XP_EXTENSION_CHECK') {
-        chrome.storage.local.get(['openInIE'], (res) => {
+        chrome.storage.local.get(['openInIE', 'xpOverlaySettings'], (res) => {
           const currentOpenInIE = res.openInIE !== false;
           applyBridgeState(currentOpenInIE);
           window.postMessage({
@@ -62,6 +74,12 @@
             enabled: true,
             openInIE: currentOpenInIE
           }, '*');
+          if (res.xpOverlaySettings) {
+            window.postMessage({
+              type: 'XP_OVERLAY_SETTINGS_CHANGED',
+              settings: res.xpOverlaySettings
+            }, '*');
+          }
         });
       }
     });
