@@ -10,10 +10,6 @@ const btnResetUrl = document.getElementById('btn-reset-url');
 const statusMsg = document.getElementById('status-msg');
 
 const checkOverlayMaster = document.getElementById('check-overlay-master');
-const checkOverlaySearch = document.getElementById('check-overlay-search');
-const checkOverlayShortcuts = document.getElementById('check-overlay-shortcuts');
-const checkOverlayProfile = document.getElementById('check-overlay-profile');
-const overlaySubOptions = document.getElementById('overlay-sub-options');
 
 // Load initial settings
 chrome.storage.local.get(['simulatorUrl', 'openInIE', 'themeMode', 'xpOverlaySettings'], (data) => {
@@ -23,29 +19,13 @@ chrome.storage.local.get(['simulatorUrl', 'openInIE', 'themeMode', 'xpOverlaySet
     selectThemeMode.value = data.themeMode || 'light';
   }
 
-  const overlaySettings = data.xpOverlaySettings || {
-    masterEnabled: false,
-    showSearch: false,
-    showShortcuts: false,
-    showProfile: false
-  };
-
+  const overlaySettings = data.xpOverlaySettings || { masterEnabled: false };
   if (checkOverlayMaster) checkOverlayMaster.checked = overlaySettings.masterEnabled === true;
-  if (checkOverlaySearch) checkOverlaySearch.checked = overlaySettings.showSearch === true;
-  if (checkOverlayShortcuts) checkOverlayShortcuts.checked = overlaySettings.showShortcuts === true;
-  if (checkOverlayProfile) checkOverlayProfile.checked = overlaySettings.showProfile === true;
-
-  if (overlaySubOptions) {
-    overlaySubOptions.classList.toggle('disabled', overlaySettings.masterEnabled !== true);
-  }
 });
 
 function broadcastOverlaySettings() {
   const settings = {
-    masterEnabled: checkOverlayMaster ? checkOverlayMaster.checked : false,
-    showSearch: checkOverlaySearch ? checkOverlaySearch.checked : false,
-    showShortcuts: checkOverlayShortcuts ? checkOverlayShortcuts.checked : false,
-    showProfile: checkOverlayProfile ? checkOverlayProfile.checked : false
+    masterEnabled: checkOverlayMaster ? checkOverlayMaster.checked : false
   };
 
   chrome.storage.local.set({ xpOverlaySettings: settings }, () => {
@@ -62,35 +42,11 @@ function broadcastOverlaySettings() {
       });
     } catch (_) {}
   });
-
-  if (overlaySubOptions) {
-    overlaySubOptions.classList.toggle('disabled', !settings.masterEnabled);
-  }
 }
 
 if (checkOverlayMaster) {
-  checkOverlayMaster.addEventListener('change', () => {
-    if (checkOverlayMaster.checked) {
-      if (!checkOverlaySearch.checked && !checkOverlayShortcuts.checked && !checkOverlayProfile.checked) {
-        checkOverlaySearch.checked = true;
-        checkOverlayShortcuts.checked = true;
-        checkOverlayProfile.checked = true;
-      }
-    }
-    broadcastOverlaySettings();
-  });
+  checkOverlayMaster.addEventListener('change', broadcastOverlaySettings);
 }
-
-[checkOverlaySearch, checkOverlayShortcuts, checkOverlayProfile].forEach((el) => {
-  if (el) {
-    el.addEventListener('change', () => {
-      if (el.checked && checkOverlayMaster && !checkOverlayMaster.checked) {
-        checkOverlayMaster.checked = true;
-      }
-      broadcastOverlaySettings();
-    });
-  }
-});
 
 // Toggle Open in IE Switch
 switchOpenIe.addEventListener('change', () => {
