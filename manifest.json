@@ -32,7 +32,8 @@
     "scripting",
     "cookies",
     "bookmarks",
-    "topSites"
+    "topSites",
+    "clipboardRead"
   ],
   "host_permissions": [
     "<all_urls>"

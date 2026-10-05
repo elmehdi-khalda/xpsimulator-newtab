@@ -167,6 +167,18 @@
       if (event.data.type === 'XP_GET_INITIAL_SHORTCUTS' || event.data.type === 'XP_GET_SAVED_SHORTCUTS') {
         syncShortcutsSilently();
       }
+      if (event.data.type === 'XP_READ_CLIPBOARD') {
+        const reqId = event.data.requestId;
+        (async () => {
+          let text = '';
+          try {
+            if (navigator.clipboard && navigator.clipboard.readText) {
+              text = await navigator.clipboard.readText();
+            }
+          } catch (_) {}
+          window.postMessage({ type: 'XP_CLIPBOARD_RESULT', requestId: reqId, text: text || '' }, '*');
+        })();
+      }
     });
 
 
