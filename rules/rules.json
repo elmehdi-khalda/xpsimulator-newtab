@@ -296,7 +296,7 @@
       ]
     },
     "condition": {
-      "urlFilter": "||vimm.net/",
+      "urlFilter": "||vimm.net/*",
       "resourceTypes": [
         "main_frame",
         "sub_frame",
