@@ -7,18 +7,24 @@
 (function () {
   // Helper to sync extension state to the simulator window
   function initSimulatorBridge() {
-    function applyBridgeState(openInIE) {
+    function applyBridgeState(openInIE, silentHill = true, residentEvil = true) {
       const openInIeStr = String(openInIE);
+      const silentHillStr = String(silentHill);
+      const residentEvilStr = String(residentEvil);
 
       if (document.documentElement) {
         document.documentElement.setAttribute('data-xp-extension', 'true');
         document.documentElement.setAttribute('data-xp-extension-open-in-ie', openInIeStr);
+        document.documentElement.setAttribute('data-xp-silent-hill', silentHillStr);
+        document.documentElement.setAttribute('data-xp-resident-evil', residentEvilStr);
       }
 
       try {
         localStorage.setItem('xp_extension_installed', 'true');
         localStorage.setItem('xp_extension_enabled', 'true');
         localStorage.setItem('xp_extension_open_in_ie', openInIeStr);
+        localStorage.setItem('xp_extension_silent_hill', silentHillStr);
+        localStorage.setItem('xp_extension_resident_evil', residentEvilStr);
       } catch (_) {}
 
 
@@ -27,18 +33,22 @@
           type: 'XP_EXTENSION_READY',
           installed: true,
           enabled: true,
-          openInIE: openInIE
+          openInIE: openInIE,
+          silentHill: silentHill,
+          residentEvil: residentEvil
         }, '*');
         window.dispatchEvent(new CustomEvent('xp-extension-status', {
-          detail: { installed: true, enabled: true, openInIE: openInIE }
+          detail: { installed: true, enabled: true, openInIE: openInIE, silentHill: silentHill, residentEvil: residentEvil }
         }));
       } catch (_) {}
     }
 
     // 1. Initial load from storage
-    chrome.storage.local.get(['openInIE', 'xpOverlaySettings'], (data) => {
+    chrome.storage.local.get(['openInIE', 'silentHill', 'residentEvil', 'xpOverlaySettings'], (data) => {
       const openInIE = data.openInIE !== false;
-      applyBridgeState(openInIE);
+      const silentHill = data.silentHill !== false;
+      const residentEvil = data.residentEvil !== false;
+      applyBridgeState(openInIE, silentHill, residentEvil);
       if (data.xpOverlaySettings) {
         window.postMessage({
           type: 'XP_OVERLAY_SETTINGS_CHANGED',
@@ -49,8 +59,8 @@
 
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => {
-        chrome.storage.local.get(['openInIE', 'xpOverlaySettings', 'themeMode'], (data) => {
-          applyBridgeState(data.openInIE !== false);
+        chrome.storage.local.get(['openInIE', 'silentHill', 'residentEvil', 'xpOverlaySettings', 'themeMode'], (data) => {
+          applyBridgeState(data.openInIE !== false, data.silentHill !== false, data.residentEvil !== false);
           if (document.documentElement) {
             document.documentElement.setAttribute('data-xp-theme-mode', data.themeMode || 'light');
           }
@@ -74,14 +84,18 @@
     window.addEventListener('message', (event) => {
       if (!event.data || typeof event.data !== 'object') return;
       if (event.data.type === 'XP_EXTENSION_PING' || event.data.type === 'XP_EXTENSION_CHECK') {
-        chrome.storage.local.get(['openInIE', 'xpOverlaySettings'], (res) => {
+        chrome.storage.local.get(['openInIE', 'silentHill', 'residentEvil', 'xpOverlaySettings'], (res) => {
           const currentOpenInIE = res.openInIE !== false;
-          applyBridgeState(currentOpenInIE);
+          const currentSilentHill = res.silentHill !== false;
+          const currentResidentEvil = res.residentEvil !== false;
+          applyBridgeState(currentOpenInIE, currentSilentHill, currentResidentEvil);
           window.postMessage({
             type: 'XP_EXTENSION_STATUS',
             installed: true,
             enabled: true,
-            openInIE: currentOpenInIE
+            openInIE: currentOpenInIE,
+            silentHill: currentSilentHill,
+            residentEvil: currentResidentEvil
           }, '*');
           if (res.xpOverlaySettings) {
             window.postMessage({
@@ -97,7 +111,9 @@
     chrome.runtime.onMessage.addListener((msg) => {
       if (msg && msg.action === 'XP_EXTENSION_SETTINGS_CHANGED') {
         const newOpenInIE = msg.openInIE !== false;
-        applyBridgeState(newOpenInIE);
+        const newSilentHill = msg.silentHill !== false;
+        const newResidentEvil = msg.residentEvil !== false;
+        applyBridgeState(newOpenInIE, newSilentHill, newResidentEvil);
         if (msg.themeMode && document.documentElement) {
           document.documentElement.setAttribute('data-xp-theme-mode', msg.themeMode);
         }
@@ -169,23 +185,41 @@
       }
       if (event.data.type === 'XP_READ_CLIPBOARD') {
         const reqId = event.data.requestId;
-        (async () => {
-          let text = '';
-          try {
-            if (navigator.clipboard && navigator.clipboard.readText) {
-              text = await navigator.clipboard.readText();
-            }
-          } catch (_) {}
-          window.postMessage({ type: 'XP_CLIPBOARD_RESULT', requestId: reqId, text: text || '' }, '*');
-        })();
+        try {
+          chrome.runtime.sendMessage({ action: 'XP_READ_CLIPBOARD' }, (res) => {
+            const text = (res && res.text) ? res.text : '';
+            window.postMessage({ type: 'XP_CLIPBOARD_RESULT', requestId: reqId, text: text }, '*');
+          });
+        } catch (_) {
+          window.postMessage({ type: 'XP_CLIPBOARD_RESULT', requestId: reqId, text: '' }, '*');
+        }
+      }
+    });
+
+    function checkAndPushClipboard() {
+      try {
+        chrome.runtime.sendMessage({ action: 'XP_READ_CLIPBOARD' }, (res) => {
+          if (res && res.text) {
+            window.postMessage({ type: 'XP_CLIPBOARD_RESULT', text: res.text }, '*');
+          }
+        });
+      } catch (_) {}
+    }
+
+    window.addEventListener('focus', checkAndPushClipboard);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        checkAndPushClipboard();
       }
     });
 
 
     // 4. Listen for storage changes
     chrome.storage.onChanged.addListener((changes, area) => {
-      if (area === 'local' && changes.openInIE !== undefined) {
-        applyBridgeState(changes.openInIE.newValue !== false);
+      if (area === 'local' && (changes.openInIE !== undefined || changes.silentHill !== undefined)) {
+        chrome.storage.local.get(['openInIE', 'silentHill'], (res) => {
+          applyBridgeState(res.openInIE !== false, res.silentHill !== false);
+        });
       }
     });
   }

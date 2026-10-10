@@ -39,6 +39,26 @@
       }
       return origMatchMedia.call(window, query);
     };
+
+    // Polyfill/safe-guard WakeLock API in frames to prevent permissions policy rejections from crashing Emscripten/WASM
+    try {
+      if (typeof navigator !== 'undefined') {
+        Object.defineProperty(navigator, 'wakeLock', {
+          value: {
+            request: function() {
+              return Promise.resolve({
+                release: function() { return Promise.resolve(); },
+                addEventListener: function() {},
+                removeEventListener: function() {},
+                dispatchEvent: function() { return true; }
+              });
+            }
+          },
+          configurable: true,
+          writable: true
+        });
+      }
+    } catch (_) {}
   } catch (_) {}
 
   // If top level (regular YouTube in browser tab), NEVER run!

@@ -339,7 +339,45 @@ async function preloadSimulator() {
   }
 }
 
+let creatingOffscreenPromise = null;
+
+async function ensureOffscreenDocument() {
+  const offscreenUrl = chrome.runtime.getURL('offscreen.html');
+  if (chrome.runtime.getContexts) {
+    const existingContexts = await chrome.runtime.getContexts({
+      contextTypes: ['OFFSCREEN_DOCUMENT'],
+      documentUrls: [offscreenUrl]
+    });
+    if (existingContexts.length > 0) return;
+  }
+  if (creatingOffscreenPromise) {
+    await creatingOffscreenPromise;
+    return;
+  }
+  creatingOffscreenPromise = chrome.offscreen.createDocument({
+    url: 'offscreen.html',
+    reasons: ['CLIPBOARD'],
+    justification: 'Read OS clipboard for Windows XP simulator Paste Link feature'
+  });
+  await creatingOffscreenPromise;
+  creatingOffscreenPromise = null;
+}
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.action === 'XP_READ_CLIPBOARD') {
+    (async () => {
+      try {
+        await ensureOffscreenDocument();
+        chrome.runtime.sendMessage({ action: 'XP_READ_CLIPBOARD_OFFSCREEN' }, (res) => {
+          sendResponse({ text: (res && res.text) ? res.text : '' });
+        });
+      } catch (err) {
+        sendResponse({ text: '' });
+      }
+    })();
+    return true;
+  }
+
   if (message.action === 'openAppWindow') {
     const url = message.url || 'https://xpsimulator.vercel.app';
     chrome.windows.create({

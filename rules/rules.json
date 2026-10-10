@@ -47,11 +47,13 @@
         },
         {
           "header": "permissions-policy",
-          "operation": "remove"
+          "operation": "set",
+          "value": "screen-wake-lock=*"
         },
         {
           "header": "Permissions-Policy",
-          "operation": "remove"
+          "operation": "set",
+          "value": "screen-wake-lock=*"
         },
         {
           "header": "feature-policy",
@@ -240,6 +242,16 @@
           "header": "access-control-allow-headers",
           "operation": "set",
           "value": "*"
+        },
+        {
+          "header": "permissions-policy",
+          "operation": "set",
+          "value": "screen-wake-lock=*"
+        },
+        {
+          "header": "Permissions-Policy",
+          "operation": "set",
+          "value": "screen-wake-lock=*"
         }
       ]
     },
