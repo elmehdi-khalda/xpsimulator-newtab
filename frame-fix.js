@@ -59,6 +59,79 @@
         });
       }
     } catch (_) {}
+
+    // Auto-isolate & auto-start Retro Runtime.net app frames inside Windows XP Simulator
+    if (window.location.hostname.includes('Retro Runtime.net')) {
+      const injectVimmStyles = () => {
+        try {
+          if (document.getElementById('xp-Retro Runtime-style')) return;
+          const style = document.createElement('style');
+          style.id = 'xp-Retro Runtime-style';
+          style.textContent = `
+            *, *::before, *::after { box-sizing: border-box; }
+            html, body {
+              margin: 0 !important; padding: 0 !important;
+              width: 100vw !important; height: 100vh !important;
+              overflow: hidden !important; background: #000 !important;
+            }
+            body > *:not(#main):not(script):not(style):not(link):not(noscript) {
+              display: none !important; visibility: hidden !important; pointer-events: none !important;
+            }
+            div.innerMenu, div.sidebarContainer, main.mainContent > h2, main.mainContent > nav,
+            main.mainContent > div.centered > div:not(#app):not(.ejs_parent) {
+              display: none !important;
+            }
+            div#main, div.innerMain, main.mainContent, div.centered {
+              position: fixed !important; inset: 0 !important;
+              width: 100vw !important; height: 100vh !important;
+              margin: 0 !important; padding: 0 !important;
+              display: flex !important; flex-direction: column !important;
+              align-items: center !important; justify-content: center !important;
+              overflow: hidden !important; background: #000 !important;
+              border: none !important; aspect-ratio: unset !important;
+            }
+            #app, .ejs_parent, .ejs_small_screen, .ejs_big_screen {
+              width: 100vw !important; height: 100vh !important;
+              max-width: none !important; max-height: none !important;
+              display: flex !important; align-items: center !important; justify-content: center !important;
+            }
+            .ejs_start_button {
+              position: absolute !important; top: 50% !important; left: 50% !important;
+              transform: translate(-50%, -50%) !important; z-index: 9999999 !important;
+              display: flex !important; align-items: center !important; justify-content: center !important;
+              padding: 18px 36px !important; font-size: 24px !important; font-weight: bold !important;
+              color: #fff !important; background: #1aafff !important; border-radius: 8px !important;
+              box-shadow: 0 0 20px rgba(26, 175, 255, 0.6) !important; cursor: pointer !important;
+              visibility: visible !important; opacity: 1 !important; pointer-events: auto !important;
+            }
+            canvas {
+              image-rendering: pixelated !important; width: 100% !important; height: 100% !important;
+              object-fit: contain !important; outline: none !important;
+            }
+          `;
+          (document.head || document.documentElement).appendChild(style);
+        } catch (_) {}
+      };
+
+      injectVimmStyles();
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', injectVimmStyles);
+      }
+
+      function tryClickVimmStart() {
+        var btn = document.querySelector('.ejs_start_button');
+        if (btn) {
+          setTimeout(function() { try { btn.click(); } catch (_) {} }, 400);
+        } else {
+          setTimeout(tryClickVimmStart, 200);
+        }
+      }
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', tryClickVimmStart);
+      } else {
+        tryClickVimmStart();
+      }
+    }
   } catch (_) {}
 
   // If top level (regular YouTube in browser tab), NEVER run!

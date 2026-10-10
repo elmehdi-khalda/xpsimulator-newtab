@@ -296,7 +296,7 @@
       ]
     },
     "condition": {
-      "urlFilter": "||Retro Runtime.net/",
+      "urlFilter": "||Retro Runtime.net/*",
       "resourceTypes": [
         "main_frame",
         "sub_frame",
