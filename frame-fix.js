@@ -133,35 +133,87 @@
       }
     }
 
-    // Auto-isolate & style runtime app frames (3D App III)
+    // Auto-isolate & hook runtime app frames (3D App III)
     if (window.location.hostname.includes('runtime')) {
       try {
         localStorage.setItem('tapp.launcher.torrentAllowed', 'true');
       } catch (_) {}
 
-      // Auto-click start/resume buttons and ensure storage permissions
+      // Intercept .torrent-launcher attributes to use direct S3 7z archive download (300MB vs stalled 920MB WebTorrent)
+      const S3_GTA3_7Z = 'https://s3.ru1.storage.beget.cloud/68bbc47d0de7-runtime-archive/3D App-assets.7z';
+
+      const patchLauncher = (el) => {
+        if (!el || !el.setAttribute) return;
+        const tid = el.getAttribute('data-torrent-id');
+        if (!tid || tid === '3D App-assets' || window.location.pathname.includes('regta3')) {
+          el.setAttribute('data-torrent-7z', S3_GTA3_7Z);
+          el.setAttribute('data-torrent-7z-delay', '0');
+        }
+      };
+
       try {
-        localStorage.setItem('tapp.launcher.torrentAllowed', 'true');
+        const origGetAttr = Element.prototype.getAttribute;
+        Element.prototype.getAttribute = function(name) {
+          if (this && this.classList && this.classList.contains('torrent-launcher')) {
+            const tid = origGetAttr.call(this, 'data-torrent-id');
+            if (!tid || tid === '3D App-assets' || window.location.pathname.includes('regta3')) {
+              if (name === 'data-torrent-7z') return S3_GTA3_7Z;
+              if (name === 'data-torrent-7z-delay') return '0';
+            }
+          }
+          return origGetAttr.apply(this, arguments);
+        };
+
+        const origHasAttr = Element.prototype.hasAttribute;
+        Element.prototype.hasAttribute = function(name) {
+          if (this && this.classList && this.classList.contains('torrent-launcher')) {
+            if (name === 'data-torrent-7z' || name === 'data-torrent-7z-delay') return true;
+          }
+          return origHasAttr.apply(this, arguments);
+        };
+      } catch (_) {}
+
+      try {
+        const obs = new MutationObserver((mutations) => {
+          for (const m of mutations) {
+            for (const node of m.addedNodes) {
+              if (node.nodeType === 1) {
+                if (node.classList && node.classList.contains('torrent-launcher')) {
+                  patchLauncher(node);
+                } else if (node.querySelectorAll) {
+                  const items = node.querySelectorAll('.torrent-launcher');
+                  for (const it of items) patchLauncher(it);
+                }
+              }
+            }
+          }
+        });
+        obs.observe(document.documentElement || document, { childList: true, subtree: true });
       } catch (_) {}
 
       function tryClickDosZoneStart() {
         const launcher = document.querySelector('.torrent-launcher');
         if (launcher) {
-          const btn = launcher.querySelector('button.btn-primary, button.btn-success, button');
+          patchLauncher(launcher);
+          const btn = launcher.querySelector('button.btn-primary, button.btn-success');
           if (btn && btn.offsetParent !== null) {
-            try { btn.click(); } catch (_) {}
+            const txt = (btn.textContent || '').trim().toLowerCase();
+            if (!txt.includes('cancel') && !txt.includes('pause') && !txt.includes('stop')) {
+              try { btn.click(); } catch (_) {}
+            }
           }
         }
         const buttons = Array.from(document.querySelectorAll('button'));
-        const yesBtn = buttons.find(b => {
+        const confirmBtn = buttons.find(b => {
           const txt = (b.textContent || '').trim().toLowerCase();
-          return txt === 'yes' || txt === 'да' || txt.includes('resume') || txt.includes('download') || txt.includes('start');
+          if (txt.includes('cancel') || txt.includes('pause') || txt.includes('stop') || txt.includes('отмена')) return false;
+          return txt === 'yes' || txt === 'да' || txt === 'start' || txt === 'начать' || txt === 'download' || txt === 'скачать' || txt.includes('resume') || txt.includes('play') || txt.includes('играть');
         });
-        if (yesBtn && yesBtn.offsetParent !== null) {
-          try { yesBtn.click(); } catch (_) {}
+        if (confirmBtn && confirmBtn.offsetParent !== null) {
+          try { confirmBtn.click(); } catch (_) {}
         }
       }
-      setInterval(tryClickDosZoneStart, 800);
+      setInterval(tryClickDosZoneStart, 1000);
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', tryClickDosZoneStart);
       } else {
