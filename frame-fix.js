@@ -251,6 +251,34 @@
       }
     }
 
+    // Auto-launch Half-Life (Xash3D Web) directly without manual clicks
+    if (window.location.hostname.includes('pixelsuft.github.io')) {
+      let started = false;
+      const tryStartHL = () => {
+        if (started) return;
+        const btn = document.querySelector('input[value*="Launch Xash3D"]');
+        if (btn) {
+          started = true;
+          try { btn.click(); } catch (_) {}
+          return;
+        }
+        if (typeof window.startXash === 'function') {
+          const status = document.getElementById('status');
+          const txt = (status && status.innerText) || '';
+          if (txt.includes('downloaded') || txt.includes('Scripts downloaded')) {
+            started = true;
+            try { window.startXash(); } catch (_) {}
+          }
+        }
+      };
+      setInterval(tryStartHL, 300);
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', tryStartHL);
+      } else {
+        tryStartHL();
+      }
+    }
+
     // Auto-isolate & auto-start retrogames.cz game frames (Alone in the Dark)
     if (window.location.hostname.includes('retrogames.cz')) {
       // Stub Google AdSense to prevent "TagError: No slot size for availableWidth=0"
