@@ -7,26 +7,21 @@
 (function () {
   // Helper to sync extension state to the simulator window
   function initSimulatorBridge() {
-    function applyBridgeState(openInIE, silentHill = true, residentEvil = true) {
+    function applyBridgeState(openInIE) {
       const openInIeStr = String(openInIE);
-      const silentHillStr = String(silentHill);
-      const residentEvilStr = String(residentEvil);
 
       if (document.documentElement) {
         document.documentElement.setAttribute('data-xp-extension', 'true');
         document.documentElement.setAttribute('data-xp-extension-open-in-ie', openInIeStr);
-        document.documentElement.setAttribute('data-xp-silent-hill', silentHillStr);
-        document.documentElement.setAttribute('data-xp-resident-evil', residentEvilStr);
+        document.documentElement.setAttribute('data-xp-games', 'true');
       }
 
       try {
         localStorage.setItem('xp_extension_installed', 'true');
         localStorage.setItem('xp_extension_enabled', 'true');
         localStorage.setItem('xp_extension_open_in_ie', openInIeStr);
-        localStorage.setItem('xp_extension_silent_hill', silentHillStr);
-        localStorage.setItem('xp_extension_resident_evil', residentEvilStr);
+        localStorage.setItem('xp_extension_games', 'true');
       } catch (_) {}
-
 
       try {
         window.postMessage({
@@ -34,21 +29,18 @@
           installed: true,
           enabled: true,
           openInIE: openInIE,
-          silentHill: silentHill,
-          residentEvil: residentEvil
+          games: true
         }, '*');
         window.dispatchEvent(new CustomEvent('xp-extension-status', {
-          detail: { installed: true, enabled: true, openInIE: openInIE, silentHill: silentHill, residentEvil: residentEvil }
+          detail: { installed: true, enabled: true, openInIE: openInIE, games: true }
         }));
       } catch (_) {}
     }
 
     // 1. Initial load from storage
-    chrome.storage.local.get(['openInIE', 'silentHill', 'residentEvil', 'xpOverlaySettings'], (data) => {
+    chrome.storage.local.get(['openInIE', 'xpOverlaySettings'], (data) => {
       const openInIE = data.openInIE !== false;
-      const silentHill = data.silentHill !== false;
-      const residentEvil = data.residentEvil !== false;
-      applyBridgeState(openInIE, silentHill, residentEvil);
+      applyBridgeState(openInIE);
       if (data.xpOverlaySettings) {
         window.postMessage({
           type: 'XP_OVERLAY_SETTINGS_CHANGED',
@@ -59,8 +51,8 @@
 
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => {
-        chrome.storage.local.get(['openInIE', 'silentHill', 'residentEvil', 'xpOverlaySettings', 'themeMode'], (data) => {
-          applyBridgeState(data.openInIE !== false, data.silentHill !== false, data.residentEvil !== false);
+        chrome.storage.local.get(['openInIE', 'xpOverlaySettings', 'themeMode'], (data) => {
+          applyBridgeState(data.openInIE !== false);
           if (document.documentElement) {
             document.documentElement.setAttribute('data-xp-theme-mode', data.themeMode || 'light');
           }
@@ -84,18 +76,15 @@
     window.addEventListener('message', (event) => {
       if (!event.data || typeof event.data !== 'object') return;
       if (event.data.type === 'XP_EXTENSION_PING' || event.data.type === 'XP_EXTENSION_CHECK') {
-        chrome.storage.local.get(['openInIE', 'silentHill', 'residentEvil', 'xpOverlaySettings'], (res) => {
+        chrome.storage.local.get(['openInIE', 'xpOverlaySettings'], (res) => {
           const currentOpenInIE = res.openInIE !== false;
-          const currentSilentHill = res.silentHill !== false;
-          const currentResidentEvil = res.residentEvil !== false;
-          applyBridgeState(currentOpenInIE, currentSilentHill, currentResidentEvil);
+          applyBridgeState(currentOpenInIE);
           window.postMessage({
             type: 'XP_EXTENSION_STATUS',
             installed: true,
             enabled: true,
             openInIE: currentOpenInIE,
-            silentHill: currentSilentHill,
-            residentEvil: currentResidentEvil
+            games: true
           }, '*');
           if (res.xpOverlaySettings) {
             window.postMessage({
@@ -111,9 +100,7 @@
     chrome.runtime.onMessage.addListener((msg) => {
       if (msg && msg.action === 'XP_EXTENSION_SETTINGS_CHANGED') {
         const newOpenInIE = msg.openInIE !== false;
-        const newSilentHill = msg.silentHill !== false;
-        const newResidentEvil = msg.residentEvil !== false;
-        applyBridgeState(newOpenInIE, newSilentHill, newResidentEvil);
+        applyBridgeState(newOpenInIE);
         if (msg.themeMode && document.documentElement) {
           document.documentElement.setAttribute('data-xp-theme-mode', msg.themeMode);
         }
@@ -216,9 +203,9 @@
 
     // 4. Listen for storage changes
     chrome.storage.onChanged.addListener((changes, area) => {
-      if (area === 'local' && (changes.openInIE !== undefined || changes.silentHill !== undefined)) {
-        chrome.storage.local.get(['openInIE', 'silentHill'], (res) => {
-          applyBridgeState(res.openInIE !== false, res.silentHill !== false);
+      if (area === 'local' && changes.openInIE !== undefined) {
+        chrome.storage.local.get(['openInIE'], (res) => {
+          applyBridgeState(res.openInIE !== false);
         });
       }
     });

@@ -1,8 +1,6 @@
 const DEFAULT_SIMULATOR_URL = 'https://xpsimulator.vercel.app';
 
 const switchOpenIe = document.getElementById('switch-open-ie');
-const switchSilentHill = document.getElementById('switch-silent-hill');
-const switchResidentEvil = document.getElementById('switch-resident-evil');
 const selectThemeMode = document.getElementById('select-theme-mode');
 const btnImportBookmarks = document.getElementById('btn-import-bookmarks');
 const bookmarkStatusMsg = document.getElementById('bookmark-status-msg');
@@ -34,11 +32,9 @@ const checkOldGoogleReal = document.getElementById('check-old-google-real');
 const checkOldYouTubeReal = document.getElementById('check-old-youtube-real');
 
 // Load initial settings
-chrome.storage.local.get(['simulatorUrl', 'openInIE', 'silentHill', 'residentEvil', 'themeMode', 'xpOverlaySettings', 'oldGoogleRealBrowser', 'oldYouTubeRealBrowser'], (data) => {
+chrome.storage.local.get(['simulatorUrl', 'openInIE', 'themeMode', 'xpOverlaySettings', 'oldGoogleRealBrowser', 'oldYouTubeRealBrowser'], (data) => {
   inputUrl.value = data.simulatorUrl || DEFAULT_SIMULATOR_URL;
   switchOpenIe.checked = data.openInIE !== false;
-  if (switchSilentHill) switchSilentHill.checked = data.silentHill !== false;
-  if (switchResidentEvil) switchResidentEvil.checked = data.residentEvil !== false;
   const initialTheme = data.themeMode || 'light';
   if (selectThemeMode) {
     selectThemeMode.value = initialTheme;
@@ -97,8 +93,7 @@ function notifySettingsChange() {
           chrome.tabs.sendMessage(tab.id, {
             action: 'XP_EXTENSION_SETTINGS_CHANGED',
             openInIE: switchOpenIe.checked,
-            silentHill: switchSilentHill ? switchSilentHill.checked : true,
-            residentEvil: switchResidentEvil ? switchResidentEvil.checked : true
+            games: true
           }).catch(() => {});
         }
       }
@@ -111,22 +106,6 @@ switchOpenIe.addEventListener('change', () => {
   const isEnabled = switchOpenIe.checked;
   chrome.storage.local.set({ openInIE: isEnabled }, notifySettingsChange);
 });
-
-// Toggle Silent Hill Switch
-if (switchSilentHill) {
-  switchSilentHill.addEventListener('change', () => {
-    const isEnabled = switchSilentHill.checked;
-    chrome.storage.local.set({ silentHill: isEnabled }, notifySettingsChange);
-  });
-}
-
-// Toggle Resident Evil Switch
-if (switchResidentEvil) {
-  switchResidentEvil.addEventListener('change', () => {
-    const isEnabled = switchResidentEvil.checked;
-    chrome.storage.local.set({ residentEvil: isEnabled }, notifySettingsChange);
-  });
-}
 
 // Theme Mode Selector
 if (selectThemeMode) {
