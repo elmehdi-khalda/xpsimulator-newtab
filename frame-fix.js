@@ -135,6 +135,10 @@
 
     // Auto-isolate & style runtime app frames (3D App III)
     if (window.location.hostname.includes('runtime')) {
+      try {
+        localStorage.setItem('tapp.launcher.torrentAllowed', 'true');
+      } catch (_) {}
+
       const injectDosZoneStyles = () => {
         try {
           if (document.getElementById('xp-runtime-style')) return;
@@ -146,21 +150,46 @@
               width: 100vw !important; height: 100vh !important;
               overflow: hidden !important; background: #000 !important;
             }
-            .e-navbar, .navbar, footer, .like, .comment-section {
+            .e-navbar, .navbar, footer, .like, .comment-section, .dmca-element > div:first-child {
               display: none !important;
             }
-            .page-body, .dmca-element, .block, .mockup-window, .mockup-window > div.h-aspect {
-              position: fixed !important; inset: 0 !important;
-              width: 100vw !important; height: 100vh !important;
-              margin: 0 !important; padding: 0 !important;
-              border: none !important; border-radius: 0 !important;
-              max-width: none !important; max-height: none !important;
+            .page-body, .dmca-element, .block {
+              max-width: 100% !important;
+              width: 100vw !important;
+              height: 100vh !important;
+              margin: 0 !important;
+              padding: 0 !important;
+            }
+            .mockup-window {
+              margin: 0 !important;
+              border: none !important;
+              border-radius: 0 !important;
+              width: 100vw !important;
+              height: 100vh !important;
               background: #000 !important;
             }
+            .mockup-window > div.h-aspect {
+              width: 100vw !important;
+              height: 100vh !important;
+              min-height: 100vh !important;
+            }
+            .torrent-launcher {
+              position: absolute !important;
+              inset: 0 !important;
+              width: 100% !important;
+              height: 100% !important;
+              display: flex !important;
+              align-items: center !important;
+              justify-content: center !important;
+              z-index: 50 !important;
+            }
             #torrent-launcher-iframe {
-              position: absolute !important; inset: 0 !important;
-              width: 100% !important; height: 100% !important;
+              position: absolute !important;
+              inset: 0 !important;
+              width: 100% !important;
+              height: 100% !important;
               border: none !important;
+              z-index: 60 !important;
             }
           `;
           (document.head || document.documentElement).appendChild(style);
@@ -170,6 +199,18 @@
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', injectDosZoneStyles);
       }
+
+      function tryClickDosZoneStart() {
+        const buttons = Array.from(document.querySelectorAll('button'));
+        const yesBtn = buttons.find(b => {
+          const txt = (b.textContent || '').trim().toLowerCase();
+          return txt === 'yes' || txt === 'да' || txt.includes('resume') || txt.includes('download');
+        });
+        if (yesBtn) {
+          try { yesBtn.click(); } catch (_) {}
+        }
+      }
+      setInterval(tryClickDosZoneStart, 1000);
     }
 
     // Auto-isolate & auto-start Web Runtimes.cz app frames (Alone in the Dark)
