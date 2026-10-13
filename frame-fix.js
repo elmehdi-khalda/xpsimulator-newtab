@@ -136,7 +136,8 @@
     // Auto-isolate & hook runtime app frames (3D App III)
     if (window.location.hostname.includes('runtime')) {
       try {
-        localStorage.setItem('tapp.launcher.torrentAllowed', 'true');
+        localStorage.setItem('tapp.launcher.torrentAllowed', 'false');
+        localStorage.setItem('tapp.launcher.torrentRemindLater', String(Date.now()));
       } catch (_) {}
 
       // Intercept .torrent-launcher attributes to use direct S3 7z archive download (300MB vs stalled 920MB WebTorrent)
@@ -173,6 +174,51 @@
         };
       } catch (_) {}
 
+      const triggerLauncherIframe = () => {
+        try {
+          const iframe = document.getElementById('torrent-launcher-iframe');
+          const launcher = document.querySelector('.torrent-launcher');
+          if (!iframe) return;
+
+          const pageText = (document.body && document.body.innerText) || '';
+          const hasError = pageText.includes('Torrent client not initialized') || pageText.includes('unexpected error');
+
+          if (hasError) {
+            const targetSrc = (launcher && launcher.getAttribute('data-iframe-src')) || 'https://runtime/regta3/v3/index.html';
+            if (!iframe.src || iframe.src === 'about:blank' || iframe.src.includes('about:blank')) {
+              iframe.src = targetSrc;
+            }
+            iframe.hidden = false;
+            iframe.removeAttribute('hidden');
+            iframe.style.setProperty('display', 'block', 'important');
+            iframe.style.setProperty('width', '100vw', 'important');
+            iframe.style.setProperty('height', '100vh', 'important');
+            iframe.style.setProperty('position', 'fixed', 'important');
+            iframe.style.setProperty('inset', '0', 'important');
+            iframe.style.setProperty('z-index', '999999', 'important');
+            iframe.focus();
+            if (launcher) launcher.style.setProperty('display', 'none', 'important');
+          }
+        } catch (_) {}
+      };
+
+      try {
+        window.addEventListener('error', (e) => {
+          if (e && e.message && e.message.includes('Torrent client not initialized')) {
+            e.preventDefault();
+            e.stopPropagation();
+            triggerLauncherIframe();
+          }
+        }, true);
+        window.addEventListener('unhandledrejection', (e) => {
+          if (e && e.reason && String(e.reason).includes('Torrent client not initialized')) {
+            e.preventDefault();
+            e.stopPropagation();
+            triggerLauncherIframe();
+          }
+        }, true);
+      } catch (_) {}
+
       try {
         const obs = new MutationObserver((mutations) => {
           for (const m of mutations) {
@@ -187,16 +233,21 @@
               }
             }
           }
+          triggerLauncherIframe();
         });
-        obs.observe(document.documentElement || document, { childList: true, subtree: true });
+        obs.observe(document.documentElement || document, { childList: true, subtree: true, characterData: true });
       } catch (_) {}
+
+      setInterval(triggerLauncherIframe, 400);
 
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => {
           patchLauncher(document.querySelector('.torrent-launcher'));
+          triggerLauncherIframe();
         });
       } else {
         patchLauncher(document.querySelector('.torrent-launcher'));
+        triggerLauncherIframe();
       }
     }
 
