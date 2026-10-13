@@ -312,5 +312,131 @@
         "other"
       ]
     }
+  },
+  {
+    "id": 7,
+    "priority": 10,
+    "action": {
+      "type": "modifyHeaders",
+      "responseHeaders": [
+        {
+          "header": "Cross-Origin-Opener-Policy",
+          "operation": "set",
+          "value": "same-origin"
+        },
+        {
+          "header": "Cross-Origin-Embedder-Policy",
+          "operation": "set",
+          "value": "credentialless"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "||xpsimulator.vercel.app/",
+      "resourceTypes": [
+        "main_frame"
+      ]
+    }
+  },
+  {
+    "id": 8,
+    "priority": 10,
+    "action": {
+      "type": "modifyHeaders",
+      "responseHeaders": [
+        {
+          "header": "Cross-Origin-Opener-Policy",
+          "operation": "set",
+          "value": "same-origin"
+        },
+        {
+          "header": "Cross-Origin-Embedder-Policy",
+          "operation": "set",
+          "value": "credentialless"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "||localhost/",
+      "resourceTypes": [
+        "main_frame"
+      ]
+    }
+  },
+  {
+    "id": 9,
+    "priority": 10,
+    "action": {
+      "type": "modifyHeaders",
+      "responseHeaders": [
+        {
+          "header": "Cross-Origin-Opener-Policy",
+          "operation": "set",
+          "value": "same-origin"
+        },
+        {
+          "header": "Cross-Origin-Embedder-Policy",
+          "operation": "set",
+          "value": "credentialless"
+        },
+        {
+          "header": "Cross-Origin-Resource-Policy",
+          "operation": "set",
+          "value": "cross-origin"
+        },
+        {
+          "header": "Document-Isolation-Policy",
+          "operation": "set",
+          "value": "isolate-and-credentialless"
+        },
+        {
+          "header": "Access-Control-Allow-Origin",
+          "operation": "set",
+          "value": "*"
+        },
+        {
+          "header": "Permissions-Policy",
+          "operation": "set",
+          "value": "screen-wake-lock=*, cross-origin-isolated=*"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "||vel.gg/",
+      "resourceTypes": [
+        "sub_frame",
+        "script",
+        "xmlhttprequest",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 10,
+    "priority": 10,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||pagead2.googlesyndication.com/",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest"
+      ]
+    }
+  },
+  {
+    "id": 11,
+    "priority": 10,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||static.itch.io/htmlgame.js",
+      "resourceTypes": [
+        "script"
+      ]
+    }
   }
 ]
