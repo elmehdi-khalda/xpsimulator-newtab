@@ -141,37 +141,42 @@
 
       const injectDosZoneStyles = () => {
         try {
-          if (document.getElementById('xp-doszone-style')) return;
-          const style = document.createElement('style');
-          style.id = 'xp-doszone-style';
+          let style = document.getElementById('xp-doszone-style');
+          if (!style) {
+            style = document.createElement('style');
+            style.id = 'xp-doszone-style';
+            (document.head || document.documentElement).appendChild(style);
+          }
           style.textContent = `
             html, body {
               margin: 0 !important; padding: 0 !important;
               width: 100vw !important; height: 100vh !important;
               overflow: hidden !important; background: #000 !important;
             }
-            .e-navbar, .navbar, footer, .like, .comment-section, .dmca-element > div:first-child {
+            .e-navbar, .navbar, footer, .like, .comment-section {
               display: none !important;
             }
-            .page-body, .dmca-element, .block {
-              max-width: 100% !important;
+            .mockup-window {
+              position: fixed !important;
+              inset: 0 !important;
               width: 100vw !important;
               height: 100vh !important;
               margin: 0 !important;
               padding: 0 !important;
-            }
-            .mockup-window {
-              margin: 0 !important;
               border: none !important;
               border-radius: 0 !important;
-              width: 100vw !important;
-              height: 100vh !important;
               background: #000 !important;
+              z-index: 999999 !important;
+            }
+            .mockup-window::before {
+              display: none !important;
             }
             .mockup-window > div.h-aspect {
               width: 100vw !important;
               height: 100vh !important;
               min-height: 100vh !important;
+              margin: 0 !important;
+              padding: 0 !important;
             }
             .torrent-launcher {
               position: absolute !important;
@@ -189,28 +194,36 @@
               width: 100% !important;
               height: 100% !important;
               border: none !important;
-              z-index: 60 !important;
+              z-index: 100 !important;
             }
           `;
-          (document.head || document.documentElement).appendChild(style);
         } catch (_) {}
       };
       injectDosZoneStyles();
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', injectDosZoneStyles);
       }
+      window.addEventListener('load', injectDosZoneStyles);
 
       function tryClickDosZoneStart() {
+        injectDosZoneStyles();
+        const launcher = document.querySelector('.torrent-launcher');
+        if (launcher) {
+          const btn = launcher.querySelector('button.btn-primary, button.btn-success, button');
+          if (btn && btn.offsetParent !== null) {
+            try { btn.click(); } catch (_) {}
+          }
+        }
         const buttons = Array.from(document.querySelectorAll('button'));
         const yesBtn = buttons.find(b => {
           const txt = (b.textContent || '').trim().toLowerCase();
-          return txt === 'yes' || txt === 'да' || txt.includes('resume') || txt.includes('download');
+          return txt === 'yes' || txt === 'да' || txt.includes('resume') || txt.includes('download') || txt.includes('start');
         });
-        if (yesBtn) {
+        if (yesBtn && yesBtn.offsetParent !== null) {
           try { yesBtn.click(); } catch (_) {}
         }
       }
-      setInterval(tryClickDosZoneStart, 1000);
+      setInterval(tryClickDosZoneStart, 800);
     }
 
     // Auto-isolate & auto-start retrogames.cz game frames (Alone in the Dark)
