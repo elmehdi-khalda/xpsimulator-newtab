@@ -61,6 +61,16 @@
     },
     {
       "matches": [
+        "*://*.runtime/*"
+      ],
+      "all_frames": true,
+      "run_at": "document_start",
+      "css": [
+        "web-viewport.css"
+      ]
+    },
+    {
+      "matches": [
         "<all_urls>"
       ],
       "all_frames": true,

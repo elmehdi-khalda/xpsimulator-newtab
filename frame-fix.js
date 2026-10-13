@@ -139,142 +139,33 @@
         localStorage.setItem('tapp.launcher.torrentAllowed', 'true');
       } catch (_) {}
 
-      // A. If on the launcher page (regta3dos): isolate .mockup-window
-      if (window.location.pathname.includes('regta3dos')) {
-        const isolateMockup = () => {
-          try {
-            const mockup = document.querySelector('.mockup-window');
-            if (mockup && mockup.parentElement !== document.body) {
-              document.body.appendChild(mockup);
-            }
+      // Auto-click start/resume buttons and ensure storage permissions
+      try {
+        localStorage.setItem('tapp.launcher.torrentAllowed', 'true');
+      } catch (_) {}
 
-            let style = document.getElementById('xp-runtime-style');
-            if (!style) {
-              style = document.createElement('style');
-              style.id = 'xp-runtime-style';
-              (document.head || document.documentElement).appendChild(style);
-            }
-            style.textContent = `
-              html, body {
-                margin: 0 !important; padding: 0 !important;
-                width: 100vw !important; height: 100vh !important;
-                overflow: hidden !important; background: #000 !important;
-              }
-              body > *:not(.mockup-window):not(script):not(style) {
-                display: none !important;
-                visibility: hidden !important;
-                pointer-events: none !important;
-              }
-              .mockup-window {
-                position: fixed !important;
-                inset: 0 !important;
-                width: 100vw !important;
-                height: 100vh !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                border: none !important;
-                border-radius: 0 !important;
-                background: #000 !important;
-                display: flex !important;
-                flex-direction: column !important;
-                z-index: 999999 !important;
-              }
-              .mockup-window::before {
-                display: none !important;
-              }
-              .mockup-window > div.h-aspect {
-                width: 100% !important;
-                height: 100% !important;
-                min-height: 100% !important;
-                flex: 1 !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                position: relative !important;
-              }
-              .torrent-launcher {
-                position: absolute !important;
-                inset: 0 !important;
-                width: 100% !important;
-                height: 100% !important;
-                display: flex !important;
-                align-items: center !important;
-                justify-content: center !important;
-                z-index: 50 !important;
-              }
-              #torrent-launcher-iframe {
-                position: absolute !important;
-                inset: 0 !important;
-                width: 100% !important;
-                height: 100% !important;
-                border: none !important;
-                z-index: 100 !important;
-              }
-            `;
-          } catch (_) {}
-        };
-
-        isolateMockup();
-        if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', isolateMockup);
-        }
-        window.addEventListener('load', isolateMockup);
-
-        try {
-          const obs = new MutationObserver(isolateMockup);
-          if (document.body) {
-            obs.observe(document.body, { childList: true, subtree: true });
-          } else {
-            document.addEventListener('DOMContentLoaded', () => {
-              if (document.body) obs.observe(document.body, { childList: true, subtree: true });
-            });
-          }
-        } catch (_) {}
-
-        function tryClickDosZoneStart() {
-          isolateMockup();
-          const launcher = document.querySelector('.torrent-launcher');
-          if (launcher) {
-            const btn = launcher.querySelector('button.btn-primary, button.btn-success, button');
-            if (btn && btn.offsetParent !== null) {
-              try { btn.click(); } catch (_) {}
-            }
-          }
-          const buttons = Array.from(document.querySelectorAll('button'));
-          const yesBtn = buttons.find(b => {
-            const txt = (b.textContent || '').trim().toLowerCase();
-            return txt === 'yes' || txt === 'да' || txt.includes('resume') || txt.includes('download') || txt.includes('start');
-          });
-          if (yesBtn && yesBtn.offsetParent !== null) {
-            try { yesBtn.click(); } catch (_) {}
+      function tryClickDosZoneStart() {
+        const launcher = document.querySelector('.torrent-launcher');
+        if (launcher) {
+          const btn = launcher.querySelector('button.btn-primary, button.btn-success, button');
+          if (btn && btn.offsetParent !== null) {
+            try { btn.click(); } catch (_) {}
           }
         }
-        setInterval(tryClickDosZoneStart, 800);
+        const buttons = Array.from(document.querySelectorAll('button'));
+        const yesBtn = buttons.find(b => {
+          const txt = (b.textContent || '').trim().toLowerCase();
+          return txt === 'yes' || txt === 'да' || txt.includes('resume') || txt.includes('download') || txt.includes('start');
+        });
+        if (yesBtn && yesBtn.offsetParent !== null) {
+          try { yesBtn.click(); } catch (_) {}
+        }
+      }
+      setInterval(tryClickDosZoneStart, 800);
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', tryClickDosZoneStart);
       } else {
-        // B. If inside the app canvas iframe (regta3/v3/index.html):
-        const injectGameStyles = () => {
-          try {
-            if (document.getElementById('xp-regta3-app-style')) return;
-            const style = document.createElement('style');
-            style.id = 'xp-regta3-app-style';
-            style.textContent = `
-              html, body {
-                margin: 0 !important; padding: 0 !important;
-                width: 100vw !important; height: 100vh !important;
-                overflow: hidden !important; background: #000 !important;
-              }
-              #wrap, canvas {
-                width: 100vw !important; height: 100vh !important;
-                display: block !important; outline: none !important;
-              }
-            `;
-            (document.head || document.documentElement).appendChild(style);
-          } catch (_) {}
-        };
-        injectGameStyles();
-        if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', injectGameStyles);
-        }
-        window.addEventListener('load', injectGameStyles);
+        tryClickDosZoneStart();
       }
     }
 
