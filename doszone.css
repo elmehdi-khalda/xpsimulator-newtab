@@ -1,0 +1,90 @@
+/* Windows XP Simulator - GTA 3 / dos.zone Frame Isolation */
+html, body {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  overflow: hidden !important;
+  background: #000 !important;
+}
+
+/* Hide all website chrome, navbars, sidebars, headers, footers, forum links */
+.e-navbar,
+.navbar,
+footer,
+.like,
+.comment-section,
+.breadcrumbs,
+.genre-switch,
+.dropdown,
+#theme-select,
+#search,
+.discuss-link,
+.divider,
+.container {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Make .mockup-window fill the entire viewport */
+.mockup-window {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  background: #000 !important;
+  z-index: 999999 !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.mockup-window::before {
+  display: none !important;
+}
+
+.mockup-window > div.h-aspect {
+  width: 100vw !important;
+  height: 100vh !important;
+  min-height: 100vh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  flex: 1 !important;
+  position: relative !important;
+}
+
+.torrent-launcher {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 50 !important;
+}
+
+#torrent-launcher-iframe {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  border: none !important;
+  z-index: 100 !important;
+}
+
+/* Inner game iframe styling */
+#wrap, canvas {
+  width: 100vw !important;
+  height: 100vh !important;
+  display: block !important;
+  outline: none !important;
+}
