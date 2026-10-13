@@ -191,33 +191,12 @@
         obs.observe(document.documentElement || document, { childList: true, subtree: true });
       } catch (_) {}
 
-      function tryClickDosZoneStart() {
-        const launcher = document.querySelector('.torrent-launcher');
-        if (launcher) {
-          patchLauncher(launcher);
-          const btn = launcher.querySelector('button.btn-primary, button.btn-success');
-          if (btn && btn.offsetParent !== null) {
-            const txt = (btn.textContent || '').trim().toLowerCase();
-            if (!txt.includes('cancel') && !txt.includes('pause') && !txt.includes('stop')) {
-              try { btn.click(); } catch (_) {}
-            }
-          }
-        }
-        const buttons = Array.from(document.querySelectorAll('button'));
-        const confirmBtn = buttons.find(b => {
-          const txt = (b.textContent || '').trim().toLowerCase();
-          if (txt.includes('cancel') || txt.includes('pause') || txt.includes('stop') || txt.includes('отмена')) return false;
-          return txt === 'yes' || txt === 'да' || txt === 'start' || txt === 'начать' || txt === 'download' || txt === 'скачать' || txt.includes('resume') || txt.includes('play') || txt.includes('играть');
-        });
-        if (confirmBtn && confirmBtn.offsetParent !== null) {
-          try { confirmBtn.click(); } catch (_) {}
-        }
-      }
-      setInterval(tryClickDosZoneStart, 1000);
       if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', tryClickDosZoneStart);
+        document.addEventListener('DOMContentLoaded', () => {
+          patchLauncher(document.querySelector('.torrent-launcher'));
+        });
       } else {
-        tryClickDosZoneStart();
+        patchLauncher(document.querySelector('.torrent-launcher'));
       }
     }
 
