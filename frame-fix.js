@@ -132,6 +132,129 @@
         tryClickVimmStart();
       }
     }
+
+    // Auto-isolate & style runtime app frames (3D App III)
+    if (window.location.hostname.includes('runtime')) {
+      const injectDosZoneStyles = () => {
+        try {
+          if (document.getElementById('xp-runtime-style')) return;
+          const style = document.createElement('style');
+          style.id = 'xp-runtime-style';
+          style.textContent = `
+            html, body {
+              margin: 0 !important; padding: 0 !important;
+              width: 100vw !important; height: 100vh !important;
+              overflow: hidden !important; background: #000 !important;
+            }
+            .e-navbar, .navbar, footer, .like, .comment-section {
+              display: none !important;
+            }
+            .page-body, .dmca-element, .block, .mockup-window, .mockup-window > div.h-aspect {
+              position: fixed !important; inset: 0 !important;
+              width: 100vw !important; height: 100vh !important;
+              margin: 0 !important; padding: 0 !important;
+              border: none !important; border-radius: 0 !important;
+              max-width: none !important; max-height: none !important;
+              background: #000 !important;
+            }
+            #torrent-launcher-iframe {
+              position: absolute !important; inset: 0 !important;
+              width: 100% !important; height: 100% !important;
+              border: none !important;
+            }
+          `;
+          (document.head || document.documentElement).appendChild(style);
+        } catch (_) {}
+      };
+      injectDosZoneStyles();
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', injectDosZoneStyles);
+      }
+    }
+
+    // Auto-isolate & auto-start Web Runtimes.cz app frames (Alone in the Dark)
+    if (window.location.hostname.includes('Web Runtimes.cz')) {
+      // Stub Google AdSense to prevent "TagError: No slot size for availableWidth=0"
+      try {
+        window.adsbygoogle = {
+          push: function() { return 0; },
+          loaded: true
+        };
+      } catch (_) {}
+
+      const injectRetrogamesStyles = () => {
+        try {
+          if (document.getElementById('xp-Web Runtimes-style')) return;
+          const style = document.createElement('style');
+          style.id = 'xp-Web Runtimes-style';
+          style.textContent = `
+            html, body {
+              margin: 0 !important; padding: 0 !important;
+              width: 100vw !important; height: 100vh !important;
+              overflow: hidden !important; background: #000 !important;
+            }
+            #dosbox, .dosbox-container, .dosbox-canvas, canvas {
+              position: fixed !important; inset: 0 !important;
+              width: 100vw !important; height: 100vh !important;
+              max-width: none !important; max-height: none !important;
+              object-fit: contain !important; background: #000 !important;
+              z-index: 99999 !important;
+            }
+            .dosbox-overlay {
+              position: fixed !important; inset: 0 !important;
+              z-index: 100000 !important;
+            }
+            .dosbox-start {
+              position: absolute !important; top: 50% !important; left: 50% !important;
+              transform: translate(-50%, -50%) !important;
+              padding: 14px 28px !important; font-size: 20px !important; font-weight: bold !important;
+              color: #fff !important; background: #1aafff !important; border-radius: 8px !important;
+              cursor: pointer !important;
+            }
+          `;
+          (document.head || document.documentElement).appendChild(style);
+        } catch (_) {}
+      };
+      injectRetrogamesStyles();
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', injectRetrogamesStyles);
+      }
+
+      function tryClickDosboxStart() {
+        var btn = document.querySelector('.dosbox-start');
+        if (btn) {
+          setTimeout(function() { try { btn.click(); } catch (_) {} }, 400);
+        } else {
+          setTimeout(tryClickDosboxStart, 200);
+        }
+      }
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', tryClickDosboxStart);
+      } else {
+        tryClickDosboxStart();
+      }
+    }
+
+    // Intercept itch.io embed-hotlink redirect
+    try {
+      const origAssign = window.location.assign;
+      const origReplace = window.location.replace;
+      const blockHotlink = (url) => {
+        return typeof url === 'string' && url.includes('embed-hotlink');
+      };
+      if (origAssign) {
+        window.location.assign = function(url) {
+          if (blockHotlink(url)) return;
+          return origAssign.call(window.location, url);
+        };
+      }
+      if (origReplace) {
+        window.location.replace = function(url) {
+          if (blockHotlink(url)) return;
+          return origReplace.call(window.location, url);
+        };
+      }
+    } catch (_) {}
   } catch (_) {}
 
   // If top level (regular YouTube in browser tab), NEVER run!
