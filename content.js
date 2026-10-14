@@ -131,6 +131,14 @@
           }, '*');
         } catch (_) {}
       }
+      if (msg && msg.action === 'XP_EXTENSION_SHARE_SYNC') {
+        try {
+          window.postMessage({
+            type: 'XP_EXTENSION_SHARE_SYNC',
+            share: msg.share
+          }, '*');
+        } catch (_) {}
+      }
     });
 
     function syncBookmarksSilently() {
@@ -180,6 +188,25 @@
         } catch (_) {
           window.postMessage({ type: 'XP_CLIPBOARD_RESULT', requestId: reqId, text: '' }, '*');
         }
+      }
+      if (event.data.type === 'XP_SHARE_UPDATE' && event.data.share) {
+        try {
+          chrome.runtime.sendMessage({ action: 'XP_SHARE_UPDATE', share: event.data.share });
+        } catch (_) {}
+      }
+      if (event.data.type === 'XP_SHARE_REMOVE' && event.data.id) {
+        try {
+          chrome.runtime.sendMessage({ action: 'XP_SHARE_REMOVE', id: event.data.id });
+        } catch (_) {}
+      }
+      if (event.data.type === 'XP_GET_SHARES') {
+        try {
+          chrome.runtime.sendMessage({ action: 'XP_GET_SHARES' }, (res) => {
+            if (res && Array.isArray(res.shares)) {
+              window.postMessage({ type: 'XP_SHARES_RESULT', shares: res.shares }, '*');
+            }
+          });
+        } catch (_) {}
       }
     });
 
