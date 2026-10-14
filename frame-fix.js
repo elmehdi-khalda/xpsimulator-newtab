@@ -62,6 +62,25 @@
 
     // Auto-isolate & auto-start Vimm.net game frames inside Windows XP Simulator
     if (window.location.hostname.includes('vimm.net')) {
+      try {
+        let _threads = false;
+        Object.defineProperty(window, 'EJS_threads', {
+          get: () => _threads,
+          set: (val) => {
+            _threads = (typeof SharedArrayBuffer === 'function') ? Boolean(val) : false;
+          },
+          configurable: true
+        });
+        const origGetItem = Storage.prototype.getItem;
+        Storage.prototype.getItem = function(key) {
+          if (key === 'ejs_threads' && typeof SharedArrayBuffer !== 'function') {
+            return 'disabled';
+          }
+          return origGetItem.apply(this, arguments);
+        };
+        localStorage.removeItem('ejs_threads');
+      } catch (_) {}
+
       const injectVimmStyles = () => {
         try {
           if (document.getElementById('xp-vimm-style')) return;
@@ -130,6 +149,179 @@
         document.addEventListener('DOMContentLoaded', tryClickVimmStart);
       } else {
         tryClickVimmStart();
+      }
+    }
+
+    // Auto-isolate & auto-start RetroGames.cz game frames inside Windows XP Simulator
+    if (window.location.hostname.includes('retrogames.cz')) {
+      try {
+        window.EJS_startOnLoaded = true;
+      } catch (_) {}
+
+      // Keep document visibility active so EmulatorJS does not pause canvas rendering frames
+      try {
+        Object.defineProperty(document, 'hidden', { get: () => false, configurable: true });
+        Object.defineProperty(document, 'visibilityState', { get: () => 'visible', configurable: true });
+      } catch (_) {}
+
+      window.addEventListener('visibilitychange', (e) => {
+        try { e.stopImmediatePropagation(); } catch (_) {}
+      }, true);
+
+      const injectRetroStyles = () => {
+        try {
+          if (document.getElementById('xp-retro-style')) return;
+          const style = document.createElement('style');
+          style.id = 'xp-retro-style';
+          style.textContent = `
+            *, *::before, *::after { box-sizing: border-box; }
+            html, body {
+              margin: 0 !important; padding: 0 !important;
+              width: 100vw !important; height: 100vh !important;
+              overflow: hidden !important; background: #000 !important;
+            }
+            .adsbygoogle, #adblock-content, #preview_div, #fb-root, [id*="sharethis"], [class*="ad-"], div[style*="position: fixed"]:not(#game):not(#dosbox) {
+              display: none !important; pointer-events: none !important; visibility: hidden !important;
+            }
+            #game, #dosbox, #my-div, #my-iframe, #start-screen {
+              position: fixed !important; top: 0 !important; left: 0 !important;
+              width: 100vw !important; height: 100vh !important;
+              max-width: none !important; max-height: none !important;
+              margin: 0 !important; padding: 0 !important;
+              display: flex !important; align-items: center !important; justify-content: center !important;
+              z-index: 999999 !important; background: #000 !important; visibility: visible !important;
+            }
+            #game > *, #dosbox > *, #my-div > *, .ejs_parent, .ejs_small_screen, .ejs_big_screen, .dosbox-container {
+              width: 100% !important; height: 100% !important;
+              max-width: 100% !important; max-height: 100% !important;
+              display: flex !important; align-items: center !important; justify-content: center !important;
+              background: #000 !important; visibility: visible !important;
+            }
+            #game canvas, #dosbox canvas, .dosbox-canvas, canvas {
+              width: 100% !important; height: 100% !important;
+              max-width: 100% !important; max-height: 100% !important;
+              object-fit: contain !important; image-rendering: pixelated !important;
+              display: block !important; visibility: visible !important;
+            }
+            .ejs_start_button, .ejs_play_button, .dosbox-start, .dosbox-start a {
+              position: absolute !important; top: 50% !important; left: 50% !important;
+              transform: translate(-50%, -50%) !important; z-index: 9999999 !important;
+              display: flex !important; align-items: center !important; justify-content: center !important;
+              padding: 18px 36px !important; font-size: 24px !important; font-weight: bold !important;
+              color: #fff !important; background: #1aafff !important; border-radius: 8px !important;
+              box-shadow: 0 0 20px rgba(26, 175, 255, 0.6) !important; cursor: pointer !important;
+              visibility: visible !important; opacity: 1 !important; pointer-events: auto !important;
+            }
+          `;
+          (document.head || document.documentElement).appendChild(style);
+        } catch (_) {}
+      };
+
+      injectRetroStyles();
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', injectRetroStyles);
+      }
+
+      function tryClickRetroStart() {
+        var btn = document.querySelector('.ejs_start_button, .ejs_play_button, .dosbox-start a, .dosbox-start, #dosbox canvas, #game canvas');
+        if (btn) {
+          setTimeout(function() {
+            try { btn.click(); } catch (_) {}
+            setTimeout(function() {
+              try { window.dispatchEvent(new Event('resize')); } catch (_) {}
+            }, 300);
+          }, 400);
+        } else {
+          setTimeout(tryClickRetroStart, 200);
+        }
+      }
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', tryClickRetroStart);
+      } else {
+        tryClickRetroStart();
+      }
+
+      setTimeout(() => { try { window.dispatchEvent(new Event('resize')); } catch (_) {} }, 1000);
+      setTimeout(() => { try { window.dispatchEvent(new Event('resize')); } catch (_) {} }, 2500);
+    }
+
+    // Auto-unmute & fix audio on Super Mario Bros inside Windows XP Simulator
+    if (window.location.hostname.includes('supermario-game.com')) {
+      try {
+        let _mute = false;
+        Object.defineProperty(window, 'customMute', {
+          get: () => false,
+          set: () => { _mute = false; },
+          configurable: true
+        });
+        window.smgVolume = 0.8;
+        localStorage.setItem('muted', 'false');
+      } catch (_) {}
+
+      const unmuteMario = () => {
+        try {
+          window.customMute = false;
+          window.smgVolume = 0.8;
+          const paused = document.getElementById('paused');
+          if (paused && paused.style.display !== 'none') {
+            try { paused.click(); } catch (_) {}
+          }
+        } catch (_) {}
+      };
+
+      window.addEventListener('click', unmuteMario, { passive: true });
+      window.addEventListener('keydown', unmuteMario, { passive: true });
+      window.addEventListener('mousedown', unmuteMario, { passive: true });
+      setInterval(unmuteMario, 1000);
+    }
+
+    // Auto-isolate & start FreePacman inside Windows XP Simulator
+    if (window.location.hostname.includes('freepacman.org')) {
+      const injectPacmanStyles = () => {
+        try {
+          if (document.getElementById('xp-pacman-style')) return;
+          const style = document.createElement('style');
+          style.id = 'xp-pacman-style';
+          style.textContent = `
+            html, body {
+              margin: 0 !important; padding: 0 !important;
+              width: 100vw !important; height: 100vh !important;
+              overflow: hidden !important; background: #000 !important;
+            }
+            #left-column, #menu1, #menu2, #menu-bottom, header, footer, [id*="inmobi"], [class*="ad"] {
+              display: none !important; pointer-events: none !important;
+            }
+            main, #game-container {
+              position: fixed !important; inset: 0 !important;
+              width: 100vw !important; height: 100vh !important;
+              display: flex !important; align-items: center !important; justify-content: center !important;
+              background: #000 !important; z-index: 999999 !important;
+            }
+            #game-ui, canvas {
+              max-width: 100vw !important; max-height: 100vh !important;
+            }
+          `;
+          (document.head || document.documentElement).appendChild(style);
+        } catch (_) {}
+      };
+
+      injectPacmanStyles();
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', injectPacmanStyles);
+      }
+
+      function tryStartPacman() {
+        var startBtn = document.getElementById('game-start');
+        if (startBtn) {
+          setTimeout(function() { try { startBtn.click(); } catch (_) {} }, 300);
+        } else {
+          setTimeout(tryStartPacman, 200);
+        }
+      }
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', tryStartPacman);
+      } else {
+        tryStartPacman();
       }
     }
 
