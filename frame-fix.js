@@ -279,6 +279,141 @@
       }
     }
 
+    // Auto-isolate & auto-start PES 6 (optijuegos.net)
+    if (window.location.hostname.includes('optijuegos.net')) {
+      const injectPes6Styles = () => {
+        try {
+          if (document.getElementById('xp-pes6-style')) return;
+          const style = document.createElement('style');
+          style.id = 'xp-pes6-style';
+          style.textContent = `
+            html, body {
+              margin: 0 !important; padding: 0 !important;
+              width: 100vw !important; height: 100vh !important;
+              overflow: hidden !important; background: #000 !important;
+            }
+            header, footer, aside, .settings-col, .btn-group, .compat-notice, section.player-col > :not(#stage) {
+              display: none !important;
+            }
+            main.layout, section.player-col {
+              margin: 0 !important; padding: 0 !important;
+              width: 100vw !important; height: 100vh !important;
+              max-width: none !important; display: flex !important;
+              align-items: center !important; justify-content: center !important;
+              background: #000 !important;
+            }
+            #stage.player {
+              position: fixed !important; inset: 0 !important;
+              width: 100vw !important; height: 100vh !important;
+              max-width: none !important; max-height: none !important;
+              display: flex !important; align-items: center !important; justify-content: center !important;
+              background: #000 !important; z-index: 99999 !important;
+            }
+            #stage canvas#canvas {
+              width: 100% !important; height: 100% !important;
+              max-width: 100% !important; max-height: 100% !important;
+              object-fit: contain !important;
+            }
+            #stage #overlay {
+              position: absolute !important; inset: 0 !important;
+              z-index: 100000 !important;
+            }
+          `;
+          (document.head || document.documentElement).appendChild(style);
+        } catch (_) {}
+      };
+      injectPes6Styles();
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', injectPes6Styles);
+      }
+
+      let pes6Started = false;
+      const tryStartPes6 = () => {
+        if (pes6Started) return;
+        const choice = document.getElementById('startChoice');
+        const overlay = document.getElementById('overlay');
+        const btn = document.getElementById('startWithCommentary') ||
+                    document.querySelector('#startChoice button[data-commentary]') ||
+                    document.getElementById('startWithoutCommentary');
+        if (btn && (choice && !choice.hidden || (overlay && overlay.classList.contains('ready')) || document.querySelector('.start-choice:not([hidden])'))) {
+          pes6Started = true;
+          try { btn.click(); } catch (_) {}
+        }
+      };
+      setInterval(tryStartPes6, 250);
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', tryStartPes6);
+      } else {
+        tryStartPes6();
+      }
+    }
+
+    // Auto-scale & isolate Flash / Ruffle games on ooooooooo.ooo (Tropix)
+    if (window.location.hostname.includes('ooooooooo.ooo')) {
+      const injectOoooStyles = () => {
+        try {
+          if (document.getElementById('xp-oooo-style')) return;
+          const style = document.createElement('style');
+          style.id = 'xp-oooo-style';
+          style.textContent = `
+            html, body {
+              margin: 0 !important; padding: 0 !important;
+              width: 100vw !important; height: 100vh !important;
+              overflow: hidden !important; background: #000 !important;
+            }
+            body > header, body > footer, .content > :not(.player-container), .info-container, .links-container, .message {
+              display: none !important;
+            }
+            .content {
+              margin: 0 !important; padding: 0 !important;
+              width: 100vw !important; height: 100vh !important;
+              max-width: none !important; display: flex !important;
+              align-items: center !important; justify-content: center !important;
+              background: #000 !important;
+            }
+            .player-container {
+              width: 100vw !important; height: 100vh !important;
+              max-width: 100vw !important; max-height: 100vh !important;
+              position: fixed !important; inset: 0 !important;
+              margin: 0 !important; padding: 0 !important;
+              display: flex !important; align-items: center !important; justify-content: center !important;
+              background: #000 !important; z-index: 99999 !important;
+            }
+            ruffle-player, .player, canvas {
+              width: 100% !important; height: 100% !important;
+              max-width: 100% !important; max-height: 100% !important;
+              position: absolute !important; inset: 0 !important;
+            }
+          `;
+          (document.head || document.documentElement).appendChild(style);
+        } catch (_) {}
+      };
+      injectOoooStyles();
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', injectOoooStyles);
+      }
+
+      const enforcePlayerSize = () => {
+        try {
+          const container = document.querySelector('.player-container');
+          if (container) {
+            container.style.maxWidth = '100vw';
+            container.style.maxHeight = '100vh';
+            container.style.width = '100vw';
+            container.style.height = '100vh';
+          }
+          const player = document.querySelector('ruffle-player') || document.querySelector('.player');
+          if (player) {
+            player.style.maxWidth = '100vw';
+            player.style.maxHeight = '100vh';
+            player.style.width = '100vw';
+            player.style.height = '100vh';
+          }
+        } catch (_) {}
+      };
+      setInterval(enforcePlayerSize, 300);
+    }
+
     // Auto-isolate & auto-start retrogames.cz game frames (Alone in the Dark)
     if (window.location.hostname.includes('retrogames.cz')) {
       // Stub Google AdSense to prevent "TagError: No slot size for availableWidth=0"
