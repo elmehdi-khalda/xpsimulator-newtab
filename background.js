@@ -437,6 +437,43 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       return true;
     }
   }
+
+  if (message.action === 'XP_SHARE_UPDATE' && message.share) {
+    chrome.storage.local.get(['xp_network_shares'], (data) => {
+      let shares = Array.isArray(data.xp_network_shares) ? data.xp_network_shares : [];
+      shares = shares.filter(s => s.id !== message.share.id);
+      shares.push(message.share);
+      chrome.storage.local.set({ xp_network_shares: shares }, () => {
+        chrome.tabs.query({}, (tabs) => {
+          for (const tab of tabs) {
+            chrome.tabs.sendMessage(tab.id, {
+              action: 'XP_EXTENSION_SHARE_SYNC',
+              share: message.share
+            }).catch(() => {});
+          }
+        });
+      });
+    });
+    sendResponse({ success: true });
+    return true;
+  }
+
+  if (message.action === 'XP_SHARE_REMOVE' && message.id) {
+    chrome.storage.local.get(['xp_network_shares'], (data) => {
+      let shares = Array.isArray(data.xp_network_shares) ? data.xp_network_shares : [];
+      shares = shares.filter(s => s.id !== message.id);
+      chrome.storage.local.set({ xp_network_shares: shares });
+    });
+    sendResponse({ success: true });
+    return true;
+  }
+
+  if (message.action === 'XP_GET_SHARES') {
+    chrome.storage.local.get(['xp_network_shares'], (data) => {
+      sendResponse({ success: true, shares: Array.isArray(data.xp_network_shares) ? data.xp_network_shares : [] });
+    });
+    return true;
+  }
 });
 
 // Helper to recursively extract the full bookmarks hierarchy (folders and links)
