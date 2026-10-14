@@ -60,6 +60,17 @@
       }
     } catch (_) {}
 
+    // Forward ESC key press to parent XP Simulator window to exit fullscreen
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' || e.keyCode === 27) {
+        try {
+          if (window.parent && window.parent !== window) {
+            window.parent.postMessage({ type: 'xp-exit-fullscreen' }, '*');
+          }
+        } catch (_) {}
+      }
+    }, { capture: true, passive: false });
+
     // Auto-isolate & auto-start Vimm.net game frames inside Windows XP Simulator
     if (window.location.hostname.includes('vimm.net')) {
       try {
