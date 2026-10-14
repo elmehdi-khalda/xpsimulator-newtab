@@ -27,6 +27,7 @@
   },
   "permissions": [
     "storage",
+    "unlimitedStorage",
     "tabs",
     "declarativeNetRequest",
     "scripting",
