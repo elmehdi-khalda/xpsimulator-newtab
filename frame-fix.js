@@ -71,6 +71,353 @@
       }
     }, { capture: true, passive: false });
 
+    // Fix TypeError: child.setAttribute is not a function when third-party SVG icon injecters iterate childNodes
+    try {
+      if (typeof Node !== 'undefined' && !Node.prototype.setAttribute) {
+        Node.prototype.setAttribute = function(name, value) {
+          if (this instanceof Element) {
+            Element.prototype.setAttribute.call(this, name, value);
+          }
+        };
+      }
+    } catch (_) {}
+
+    // Polyfill / safe-guard showOpenFilePicker for cross-origin subframes
+    try {
+      if (typeof window.showOpenFilePicker === 'function') {
+        const origShowOpenFilePicker = window.showOpenFilePicker;
+        window.showOpenFilePicker = async function(options) {
+          try {
+            return await origShowOpenFilePicker.call(window, options);
+          } catch (err) {
+            if (err && (err.name === 'SecurityError' || String(err).includes('sub frames') || String(err).includes('Cross origin'))) {
+              return new Promise((resolve, reject) => {
+                const input = document.createElement('input');
+                input.type = 'file';
+                if (options && options.multiple) input.multiple = true;
+                if (options && options.types && Array.isArray(options.types)) {
+                  const exts = [];
+                  for (const t of options.types) {
+                    if (t.accept) {
+                      for (const [mime, extList] of Object.entries(t.accept)) {
+                        exts.push(mime);
+                        if (Array.isArray(extList)) exts.push(...extList);
+                      }
+                    }
+                  }
+                  if (exts.length) input.accept = exts.join(',');
+                }
+                input.style.position = 'fixed';
+                input.style.top = '-9999px';
+                input.style.opacity = '0';
+                (document.body || document.documentElement).appendChild(input);
+                input.onchange = () => {
+                  const files = Array.from(input.files || []);
+                  input.remove();
+                  if (files.length === 0) {
+                    reject(new DOMException('The user aborted a request.', 'AbortError'));
+                    return;
+                  }
+                  const handles = files.map(file => ({
+                    kind: 'file',
+                    name: file.name,
+                    getFile: async () => file,
+                    createWritable: async () => { throw new Error('File writing not supported in fallback'); }
+                  }));
+                  resolve(options && options.multiple ? handles : handles);
+                };
+                input.oncancel = () => {
+                  input.remove();
+                  reject(new DOMException('The user aborted a request.', 'AbortError'));
+                };
+                input.click();
+              });
+            }
+            throw err;
+          }
+        };
+      }
+    } catch (_) {}
+
+    // ZIZIYI / Univer Office in-browser editor enhancements & banner removal
+    try {
+      const isZiziyi = window.location.hostname.includes('ziziyi.com');
+      if (isZiziyi) {
+        // Universal URL rewriter for ONLYOFFICE / Ziziyi to office-editor.ziziyi.com
+        const fixZiziyiUrl = (url) => {
+          if (!url || typeof url !== 'string') return url;
+          // NEVER rewrite blob:, data:, or javascript: URLs!
+          if (url.startsWith('blob:') || url.startsWith('data:') || url.startsWith('javascript:')) {
+            return url;
+          }
+          if (url.includes('office.ziziyi.com')) {
+            return url.replace('https://office.ziziyi.com', 'https://office-editor.ziziyi.com')
+                      .replace('http://office.ziziyi.com', 'https://office-editor.ziziyi.com')
+                      .replace('//office.ziziyi.com', '//office-editor.ziziyi.com')
+                      .replace('wss://office.ziziyi.com', 'wss://office-editor.ziziyi.com')
+                      .replace('ws://office.ziziyi.com', 'wss://office-editor.ziziyi.com');
+          }
+          if (window.location.hostname.includes('ziziyi.com')) {
+            if (/^\/(v[0-9]|sdkjs|web-apps|fonts|dictionaries|sdkjs-plugins|coauthoring)/.test(url)) {
+              return 'https://office-editor.ziziyi.com' + url;
+            }
+          }
+          return url;
+        };
+
+        // Hook HTMLScriptElement.src
+        try {
+          const scriptSrcDesc = Object.getOwnPropertyDescriptor(HTMLScriptElement.prototype, 'src');
+          if (scriptSrcDesc && scriptSrcDesc.set) {
+            const origScriptSrcSet = scriptSrcDesc.set;
+            Object.defineProperty(HTMLScriptElement.prototype, 'src', {
+              get: scriptSrcDesc.get,
+              set: function(val) {
+                return origScriptSrcSet.call(this, fixZiziyiUrl(val));
+              },
+              configurable: true,
+              enumerable: true
+            });
+          }
+        } catch (_) {}
+
+        // Hook HTMLLinkElement.href
+        try {
+          const linkHrefDesc = Object.getOwnPropertyDescriptor(HTMLLinkElement.prototype, 'href');
+          if (linkHrefDesc && linkHrefDesc.set) {
+            const origLinkHrefSet = linkHrefDesc.set;
+            Object.defineProperty(HTMLLinkElement.prototype, 'href', {
+              get: linkHrefDesc.get,
+              set: function(val) {
+                return origLinkHrefSet.call(this, fixZiziyiUrl(val));
+              },
+              configurable: true,
+              enumerable: true
+            });
+          }
+        } catch (_) {}
+
+        // Hook Element.prototype.setAttribute safely for Ziziyi ONLY
+        try {
+          const origSetAttribute = Element.prototype.setAttribute;
+          Element.prototype.setAttribute = function(name, val) {
+            try {
+              if (typeof name === 'string' && (name.toLowerCase() === 'src' || name.toLowerCase() === 'href') && typeof val === 'string') {
+                val = fixZiziyiUrl(val);
+              }
+              return origSetAttribute.call(this, name, val);
+            } catch (err) {
+              return origSetAttribute.apply(this, arguments);
+            }
+          };
+        } catch (_) {}
+
+        // Hook window.fetch
+        try {
+          if (typeof window.fetch === 'function') {
+            const origFetch = window.fetch;
+            window.fetch = async function(input, init) {
+              let rawUrl = (typeof input === 'string') ? input : (input && input.url ? input.url : '');
+              if (typeof input === 'string') {
+                input = fixZiziyiUrl(input);
+              } else if (input && typeof input.url === 'string') {
+                try {
+                  input = new Request(fixZiziyiUrl(input.url), input);
+                } catch (_) {}
+              }
+              try {
+                const resp = await origFetch.call(this, input, init);
+                // Gracefully fallback on missing SVG theme icons (e.g. formats@2.5x.svg) to prevent ERR_ABORTED 404
+                if (!resp.ok && resp.status === 404 && typeof rawUrl === 'string' && rawUrl.includes('/resources/img/') && rawUrl.endsWith('.svg')) {
+                  return new Response('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"></svg>', {
+                    status: 200,
+                    statusText: 'OK',
+                    headers: { 'Content-Type': 'image/svg+xml' }
+                  });
+                }
+                return resp;
+              } catch (err) {
+                if (typeof rawUrl === 'string' && rawUrl.includes('/resources/img/') && rawUrl.endsWith('.svg')) {
+                  return new Response('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"></svg>', {
+                    status: 200,
+                    statusText: 'OK',
+                    headers: { 'Content-Type': 'image/svg+xml' }
+                  });
+                }
+                throw err;
+              }
+            };
+          }
+        } catch (_) {}
+
+        // Hook XMLHttpRequest.prototype.open
+        try {
+          const origXhrOpen = XMLHttpRequest.prototype.open;
+          XMLHttpRequest.prototype.open = function(method, url, ...rest) {
+            if (typeof url === 'string') {
+              url = fixZiziyiUrl(url);
+            }
+            return origXhrOpen.call(this, method, url, ...rest);
+          };
+        } catch (_) {}
+
+        // Hook Worker constructor safely for blob/cross-origin workers
+        try {
+          if (typeof window.Worker === 'function') {
+            const OrigWorker = window.Worker;
+            window.Worker = function(scriptURL, options) {
+              if (typeof scriptURL === 'string') {
+                if (!scriptURL.startsWith('blob:') && !scriptURL.startsWith('data:')) {
+                  const rewritten = fixZiziyiUrl(scriptURL);
+                  if (rewritten.startsWith('http') && !rewritten.startsWith(window.location.origin)) {
+                    try {
+                      const blob = new Blob([`importScripts(${JSON.stringify(rewritten)});`], { type: 'application/javascript' });
+                      scriptURL = URL.createObjectURL(blob);
+                    } catch (_) {
+                      scriptURL = rewritten;
+                    }
+                  } else {
+                    scriptURL = rewritten;
+                  }
+                }
+              }
+              return new OrigWorker(scriptURL, options);
+            };
+            window.Worker.prototype = OrigWorker.prototype;
+          }
+        } catch (_) {}
+
+        // Hook WebSocket constructor
+        try {
+          if (typeof window.WebSocket === 'function') {
+            const OrigWebSocket = window.WebSocket;
+            window.WebSocket = function(url, protocols) {
+              if (typeof url === 'string') {
+                url = fixZiziyiUrl(url);
+              }
+              return protocols !== undefined ? new OrigWebSocket(url, protocols) : new OrigWebSocket(url);
+            };
+            window.WebSocket.prototype = OrigWebSocket.prototype;
+          }
+        } catch (_) {}
+
+        // 1. Inject meta tag so Ziziyi detects the official extension
+        const injectZiziyiMeta = () => {
+          if (!document.querySelector('meta[name="office-ext-id"]')) {
+            const meta = document.createElement('meta');
+            meta.name = 'office-ext-id';
+            meta.content = 'kjigcolnmdghbjgkcijcdahaobhkpngo';
+            (document.head || document.documentElement).appendChild(meta);
+          }
+        };
+        injectZiziyiMeta();
+        document.addEventListener('DOMContentLoaded', injectZiziyiMeta);
+
+        // 2. Hide and remove the promo banner: "Make your browser an Office app"
+        const hideBannerStyle = document.createElement('style');
+        hideBannerStyle.id = 'xp-hide-ziziyi-banner';
+        hideBannerStyle.textContent = `
+          div.p-4:has(a[href*="kjigcolnmdghbjgkcijcdahaobhkpngo"]),
+          div:has(> div > div > div > p:first-child),
+          a[href*="kjigcolnmdghbjgkcijcdahaobhkpngo"] {
+            display: none !important;
+          }
+        `;
+        (document.head || document.documentElement).appendChild(hideBannerStyle);
+
+        const purgePromoBanner = () => {
+          try {
+            const banners = document.querySelectorAll('div.p-4, a[href*="kjigcolnmdghbjgkcijcdahaobhkpngo"]');
+            for (const b of banners) {
+              if (b.tagName === 'A' || (b.textContent && (b.textContent.includes('Make your browser an Office app') || b.textContent.includes('kjigcolnmdghbjgkcijcdahaobhkpngo')))) {
+                const container = b.closest('div.p-4') || b;
+                container.remove();
+              }
+            }
+          } catch (_) {}
+        };
+        purgePromoBanner();
+        const bannerObserver = new MutationObserver(purgePromoBanner);
+        if (document.documentElement) {
+          bannerObserver.observe(document.documentElement, { childList: true, subtree: true });
+        }
+        document.addEventListener('DOMContentLoaded', purgePromoBanner);
+
+        // 3. Emulate the chrome-extension proxy.html iframe
+        const origCreateElement = document.createElement;
+        document.createElement = function(tagName, options) {
+          const el = origCreateElement.call(this, tagName, options);
+          if (tagName && typeof tagName === 'string' && tagName.toLowerCase() === 'iframe') {
+            let isProxy = false;
+            const origSetAttr = el.setAttribute;
+            el.setAttribute = function(name, value) {
+              if (name === 'src' && typeof value === 'string' && value.includes('proxy.html')) {
+                isProxy = true;
+                value = 'about:blank';
+              }
+              return origSetAttr.call(this, name, value);
+            };
+            Object.defineProperty(el, 'src', {
+              get: () => el.getAttribute('src') || '',
+              set: (val) => {
+                if (typeof val === 'string' && val.includes('proxy.html')) {
+                  isProxy = true;
+                  val = 'about:blank';
+                }
+                el.setAttribute('src', val);
+              },
+              configurable: true
+            });
+
+            setTimeout(() => {
+              if (!isProxy) return;
+              try {
+                window.dispatchEvent(new MessageEvent('message', {
+                  source: el.contentWindow,
+                  data: { type: 'ready' }
+                }));
+              } catch (_) {}
+
+              window.addEventListener('message', async (ev) => {
+                if (ev.data && ev.data.type === 'fetch' && ev.data.url) {
+                  const { id, url } = ev.data;
+                  try {
+                    const resp = await fetch(url);
+                    const buf = await resp.arrayBuffer();
+                    const headersObj = {};
+                    try {
+                      resp.headers.forEach((v, k) => { headersObj[k] = v; });
+                    } catch (_) {}
+                    window.dispatchEvent(new MessageEvent('message', {
+                      source: el.contentWindow,
+                      data: {
+                        type: 'response',
+                        id: id,
+                        buffer: buf,
+                        status: resp.status,
+                        statusText: resp.statusText,
+                        headers: headersObj
+                      }
+                    }));
+                  } catch (err) {
+                    window.dispatchEvent(new MessageEvent('message', {
+                      source: el.contentWindow,
+                      data: {
+                        type: 'error',
+                        id: id,
+                        error: err.message || 'Fetch failed'
+                      }
+                    }));
+                  }
+                }
+              });
+            }, 30);
+          }
+          return el;
+        };
+      }
+    } catch (_) {}
+
     // Auto-isolate & auto-start Retro Runtime.net app frames inside Windows XP Simulator
     if (window.location.hostname.includes('Retro Runtime.net')) {
       try {
@@ -758,13 +1105,15 @@
     });
   } catch (e) {}
 
-  // Spoof document.referrer to YouTube origin so player tokens remain valid
-  try {
-    Object.defineProperty(document, 'referrer', {
-      get: () => 'https://www.youtube.com/',
-      configurable: true
-    });
-  } catch (e) {}
+  // Spoof document.referrer to YouTube origin ONLY on YouTube frames so player tokens remain valid
+  if (window.location.hostname.includes('youtube.com') || window.location.hostname.includes('googlevideo.com')) {
+    try {
+      Object.defineProperty(document, 'referrer', {
+        get: () => 'https://www.youtube.com/',
+        configurable: true
+      });
+    } catch (e) {}
+  }
 
   // Fix cross-subdomain postMessage targetOrigin mismatches (e.g. google.com vs ogs.google.com)
   try {

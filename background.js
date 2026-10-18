@@ -8,7 +8,7 @@ async function setupRules() {
     const dynamicRules = [
   {
     "id": 1,
-    "priority": 1,
+    "priority": 10,
     "action": {
       "type": "modifyHeaders",
       "responseHeaders": [
@@ -34,6 +34,22 @@ async function setupRules() {
         },
         {
           "header": "Content-Security-Policy-Report-Only",
+          "operation": "remove"
+        },
+        {
+          "header": "x-content-security-policy",
+          "operation": "remove"
+        },
+        {
+          "header": "X-Content-Security-Policy",
+          "operation": "remove"
+        },
+        {
+          "header": "x-webkit-csp",
+          "operation": "remove"
+        },
+        {
+          "header": "X-WebKit-CSP",
           "operation": "remove"
         },
         {
@@ -256,12 +272,34 @@ async function setupRules() {
         "sub_frame"
       ]
     }
+  },
+  {
+    "id": 12,
+    "priority": 15,
+    "action": {
+      "type": "redirect",
+      "redirect": {
+        "regexSubstitution": "https://office-editor.ziziyi.com/\\1"
+      }
+    },
+    "condition": {
+      "regexFilter": "^https?://office\\.ziziyi\\.com/(v[0-9].*|sdkjs/.*|web-apps/.*)",
+      "resourceTypes": [
+        "script",
+        "stylesheet",
+        "image",
+        "font",
+        "xmlhttprequest",
+        "sub_frame",
+        "other"
+      ]
+    }
   }
 ];
 
     const existingRules = await chrome.declarativeNetRequest.getDynamicRules();
     const existingRuleIds = existingRules.map(r => r.id);
-    const removeIds = Array.from(new Set([...existingRuleIds, 1, 2, 3, 4, 5]));
+    const removeIds = Array.from(new Set([...existingRuleIds, 1, 2, 3, 4, 5, 6]));
 
     await chrome.declarativeNetRequest.updateDynamicRules({
       removeRuleIds: removeIds,
