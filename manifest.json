@@ -35,6 +35,7 @@
     "bookmarks",
     "topSites",
     "clipboardRead",
+    "downloads",
     "offscreen"
   ],
   "host_permissions": [
