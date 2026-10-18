@@ -223,6 +223,93 @@
       }
     } catch (_) {}
 
+    // Polyfill / safe-guard showSaveFilePicker for cross-origin subframes
+    try {
+      const origShowSaveFilePicker = window.showSaveFilePicker;
+      window.showSaveFilePicker = async function(options) {
+        if (window.self === window.top && typeof origShowSaveFilePicker === 'function') {
+          try {
+            return await origShowSaveFilePicker.call(window, options);
+          } catch (err) {
+            if (!err || (err.name !== 'SecurityError' && !String(err).includes('sub frames') && !String(err).includes('Cross origin'))) {
+              throw err;
+            }
+          }
+        }
+
+        const fileName = (options && options.suggestedName) ? options.suggestedName : 'Document1.docx';
+        const chunks = [];
+        let savedFile = null;
+
+        const mockWritableStream = {
+          async write(data) {
+            if (data && typeof data === 'object' && data.type === 'write' && data.data !== undefined) {
+              chunks.push(data.data);
+            } else if (data !== undefined) {
+              chunks.push(data);
+            }
+          },
+          async seek() {},
+          async truncate() {},
+          async close() {
+            let mimeType = 'application/octet-stream';
+            if (fileName.endsWith('.docx')) {
+              mimeType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+            } else if (fileName.endsWith('.pdf')) {
+              mimeType = 'application/pdf';
+            } else if (fileName.endsWith('.xlsx')) {
+              mimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+            } else if (fileName.endsWith('.pptx')) {
+              mimeType = 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+            }
+            const blob = new Blob(chunks, { type: mimeType });
+            savedFile = new File([blob], fileName, { type: mimeType });
+
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            a.style.display = 'none';
+            (document.body || document.documentElement).appendChild(a);
+            try {
+              a.click();
+            } finally {
+              setTimeout(() => {
+                try { a.remove(); URL.revokeObjectURL(url); } catch (_) {}
+              }, 5000);
+            }
+          },
+          getWriter() {
+            return {
+              write: (chunk) => mockWritableStream.write(chunk),
+              close: () => mockWritableStream.close(),
+              abort: () => Promise.resolve(),
+              releaseLock: () => {}
+            };
+          }
+        };
+
+        const mockHandle = {
+          kind: 'file',
+          name: fileName,
+          async getFile() {
+            if (savedFile) return savedFile;
+            const blob = new Blob(chunks);
+            return new File([blob], fileName);
+          },
+          async createWritable() {
+            chunks.length = 0;
+            return mockWritableStream;
+          },
+          async isSameEntry(other) {
+            return other && other.name === fileName;
+          }
+        };
+
+        return mockHandle;
+      };
+    } catch (_) {}
+
     // ZIZIYI / Univer Office enhancements & banner removal
     try {
       const isZiziyi = window.location.hostname.includes('ziziyi.com');
