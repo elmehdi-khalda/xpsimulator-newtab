@@ -454,28 +454,5 @@
         "script"
       ]
     }
-  },
-  {
-    "id": 12,
-    "priority": 15,
-    "action": {
-      "type": "redirect",
-      "redirect": {
-        "regexSubstitution": "https://office-editor.ziziyi.com/\\1"
-      }
-    },
-    "condition": {
-      "regexFilter": "^https?://office\\.ziziyi\\.com/(v[0-9].*|sdkjs/.*|web-apps/.*)",
-      "resourceTypes": [
-        "script",
-        "stylesheet",
-        "image",
-        "font",
-        "xmlhttprequest",
-        "websocket",
-        "sub_frame",
-        "other"
-      ]
-    }
   }
 ]
