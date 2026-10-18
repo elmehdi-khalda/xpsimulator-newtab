@@ -71,6 +71,41 @@
       }
     }, { capture: true, passive: false });
 
+    // Hook Window.prototype.postMessage to prevent dropped messages due to cross-subdomain targetOrigin mismatches
+    try {
+      const origWindowPostMessage = Window.prototype.postMessage;
+      Window.prototype.postMessage = function(message, targetOrigin, transfer) {
+        if (typeof targetOrigin === 'string' && (targetOrigin.includes('ziziyi.com') || targetOrigin.includes('office-editor'))) {
+          targetOrigin = '*';
+        }
+        try {
+          return origWindowPostMessage.apply(this, arguments);
+        } catch (e) {
+          try {
+            return origWindowPostMessage.call(this, message, '*', transfer);
+          } catch (_) {}
+        }
+      };
+    } catch (_) {}
+
+    // Allow MessageEvent.origin to be accepted across ziziyi subdomains (office-editor.ziziyi.com -> office.ziziyi.com)
+    try {
+      const origEventOriginDesc = Object.getOwnPropertyDescriptor(MessageEvent.prototype, 'origin');
+      if (origEventOriginDesc && origEventOriginDesc.get) {
+        const origOriginGet = origEventOriginDesc.get;
+        Object.defineProperty(MessageEvent.prototype, 'origin', {
+          get: function() {
+            const orig = origOriginGet.call(this);
+            if (orig && orig.includes('office-editor.ziziyi.com') && window.location.hostname.includes('office.ziziyi.com')) {
+              return window.location.origin;
+            }
+            return orig;
+          },
+          configurable: true
+        });
+      }
+    } catch (_) {}
+
     // Fix TypeError: child.setAttribute is not a function when third-party SVG icon injecters iterate childNodes
     try {
       if (typeof Node !== 'undefined' && !Node.prototype.setAttribute) {
@@ -1080,30 +1115,33 @@
                           window.location.pathname.includes('/html/');
   if (isInternalFrame) return;
 
-  // Spoof top, parent, and frameElement so YouTube acts as a standalone browser window
-  try {
-    Object.defineProperty(window, 'top', {
-      get: () => window,
-      set: () => {},
-      configurable: true
-    });
-  } catch (e) {}
+  // Spoof top, parent, and frameElement so YouTube acts as a standalone browser window ONLY on YouTube!
+  const isYouTube = window.location.hostname.includes('youtube.com') || window.location.hostname.includes('googlevideo.com');
+  if (isYouTube) {
+    try {
+      Object.defineProperty(window, 'top', {
+        get: () => window,
+        set: () => {},
+        configurable: true
+      });
+    } catch (e) {}
 
-  try {
-    Object.defineProperty(window, 'parent', {
-      get: () => window,
-      set: () => {},
-      configurable: true
-    });
-  } catch (e) {}
+    try {
+      Object.defineProperty(window, 'parent', {
+        get: () => window,
+        set: () => {},
+        configurable: true
+      });
+    } catch (e) {}
 
-  try {
-    Object.defineProperty(window, 'frameElement', {
-      get: () => null,
-      set: () => {},
-      configurable: true
-    });
-  } catch (e) {}
+    try {
+      Object.defineProperty(window, 'frameElement', {
+        get: () => null,
+        set: () => {},
+        configurable: true
+      });
+    } catch (e) {}
+  }
 
   // Spoof document.referrer to YouTube origin ONLY on YouTube frames so player tokens remain valid
   if (window.location.hostname.includes('youtube.com') || window.location.hostname.includes('googlevideo.com')) {
