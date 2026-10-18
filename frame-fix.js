@@ -408,19 +408,27 @@
             main.mainContent > div.centered > div:not(#app):not(.ejs_parent) {
               display: none !important;
             }
-            div#main, div.innerMain, main.mainContent, div.centered {
+            div#main, div.innerMain, div.innerMain > div, main.mainContent, div.centered, .centered {
               position: fixed !important; inset: 0 !important;
               width: 100vw !important; height: 100vh !important;
-              margin: 0 !important; padding: 0 !important;
+              max-width: none !important; max-height: none !important;
+              margin: 0 auto !important; padding: 0 !important;
               display: flex !important; flex-direction: column !important;
               align-items: center !important; justify-content: center !important;
               overflow: hidden !important; background: #000 !important;
               border: none !important; aspect-ratio: unset !important;
             }
-            #app, .ejs_parent, .ejs_small_screen, .ejs_big_screen {
+            #app, .ejs_parent, .ejs_game, .ejs_canvas_parent, .ejs_game_background, .ejs_small_screen, .ejs_big_screen {
               width: 100vw !important; height: 100vh !important;
               max-width: none !important; max-height: none !important;
+              margin: 0 auto !important; padding: 0 !important;
               display: flex !important; align-items: center !important; justify-content: center !important;
+              position: relative !important;
+            }
+            .ejs_game_background {
+              background-position: center center !important;
+              background-size: contain !important;
+              background-repeat: no-repeat !important;
             }
             .ejs_start_button {
               position: absolute !important; top: 50% !important; left: 50% !important;
@@ -431,25 +439,66 @@
               box-shadow: 0 0 20px rgba(26, 175, 255, 0.6) !important; cursor: pointer !important;
               visibility: visible !important; opacity: 1 !important; pointer-events: auto !important;
             }
-            canvas {
-              image-rendering: pixelated !important; width: 100% !important; height: 100% !important;
+            canvas, .ejs_canvas {
+              image-rendering: pixelated !important;
+              width: 100% !important; height: 100% !important;
+              max-width: 100vw !important; max-height: 100vh !important;
               object-fit: contain !important; outline: none !important;
+              margin: auto !important; display: block !important;
             }
           `;
           (document.head || document.documentElement).appendChild(style);
         } catch (_) {}
       };
 
+      const fixVimmDOM = () => {
+        try {
+          const elements = document.querySelectorAll('#main, .innerMain, .innerMain > div, .mainContent, .centered, #app, .ejs_parent, .ejs_game, .ejs_canvas_parent');
+          elements.forEach(el => {
+            el.style.setProperty('max-width', 'none', 'important');
+            el.style.setProperty('max-height', 'none', 'important');
+            el.style.setProperty('aspect-ratio', 'unset', 'important');
+            el.style.setProperty('width', '100vw', 'important');
+            el.style.setProperty('height', '100vh', 'important');
+            el.style.setProperty('margin', '0 auto', 'important');
+            el.style.setProperty('border', 'none', 'important');
+          });
+        } catch (_) {}
+      };
+
       injectVimmStyles();
+      fixVimmDOM();
       if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', injectVimmStyles);
+        document.addEventListener('DOMContentLoaded', () => {
+          injectVimmStyles();
+          fixVimmDOM();
+        });
       }
 
+      // Observer to ensure dynamic elements inserted by loader.js / emulator.js are unconstrained
+      try {
+        const obs = new MutationObserver(() => {
+          fixVimmDOM();
+        });
+        obs.observe(document.documentElement, { childList: true, subtree: true });
+        setTimeout(() => obs.disconnect(), 15000);
+      } catch (_) {}
+
+      var vimmStartAttempts = 0;
       function tryClickVimmStart() {
+        fixVimmDOM();
         var btn = document.querySelector('.ejs_start_button');
         if (btn) {
-          setTimeout(function() { try { btn.click(); } catch (_) {} }, 400);
-        } else {
+          setTimeout(function() {
+            try {
+              btn.click();
+              setTimeout(() => {
+                fixVimmDOM();
+                window.dispatchEvent(new Event('resize'));
+              }, 400);
+            } catch (_) {}
+          }, 400);
+        } else if (vimmStartAttempts++ < 50) {
           setTimeout(tryClickVimmStart, 200);
         }
       }
