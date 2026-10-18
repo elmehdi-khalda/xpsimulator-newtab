@@ -1,7 +1,7 @@
 [
   {
     "id": 1,
-    "priority": 1,
+    "priority": 10,
     "action": {
       "type": "modifyHeaders",
       "responseHeaders": [
@@ -27,6 +27,22 @@
         },
         {
           "header": "Content-Security-Policy-Report-Only",
+          "operation": "remove"
+        },
+        {
+          "header": "x-content-security-policy",
+          "operation": "remove"
+        },
+        {
+          "header": "X-Content-Security-Policy",
+          "operation": "remove"
+        },
+        {
+          "header": "x-webkit-csp",
+          "operation": "remove"
+        },
+        {
+          "header": "X-WebKit-CSP",
           "operation": "remove"
         },
         {
@@ -436,6 +452,28 @@
       "urlFilter": "||static.itch.io/htmlgame.js",
       "resourceTypes": [
         "script"
+      ]
+    }
+  },
+  {
+    "id": 12,
+    "priority": 15,
+    "action": {
+      "type": "redirect",
+      "redirect": {
+        "regexSubstitution": "https://office-editor.ziziyi.com/\\1"
+      }
+    },
+    "condition": {
+      "regexFilter": "^https?://office\\.ziziyi\\.com/(v[0-9].*|sdkjs/.*|web-apps/.*)",
+      "resourceTypes": [
+        "script",
+        "stylesheet",
+        "image",
+        "font",
+        "xmlhttprequest",
+        "sub_frame",
+        "other"
       ]
     }
   }
