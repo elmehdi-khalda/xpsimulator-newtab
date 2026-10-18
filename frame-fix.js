@@ -106,6 +106,26 @@
       }
     } catch (_) {}
 
+    // Ensure WebAssembly streaming compilation falls back gracefully without console errors
+    try {
+      if (typeof WebAssembly !== 'undefined' && WebAssembly.instantiateStreaming) {
+        const origInstantiateStreaming = WebAssembly.instantiateStreaming;
+        WebAssembly.instantiateStreaming = async function(source, importObject) {
+          try {
+            return await origInstantiateStreaming.call(this, source, importObject);
+          } catch (e) {
+            try {
+              const resp = await source;
+              const buf = await resp.arrayBuffer();
+              return await WebAssembly.instantiate(buf, importObject);
+            } catch (err2) {
+              throw e;
+            }
+          }
+        };
+      }
+    } catch (_) {}
+
     // Fix TypeError: child.setAttribute is not a function when third-party SVG icon injecters iterate childNodes
     try {
       if (typeof Node !== 'undefined' && !Node.prototype.setAttribute) {
@@ -251,8 +271,18 @@
         try {
           if (typeof window.fetch === 'function') {
             const origFetch = window.fetch;
-            window.fetch = async function(input, init) {
+            window.fetch = function(input, init) {
               let rawUrl = (typeof input === 'string') ? input : (input && input.url ? input.url : '');
+              // Prevent network 404 for non-existent fractional/scaled theme icons before network request is made
+              if (typeof rawUrl === 'string' && rawUrl.includes('/resources/img/') && (rawUrl.includes('@') || rawUrl.endsWith('.svg'))) {
+                if (rawUrl.includes('formats@') || rawUrl.includes('@2.5x') || rawUrl.includes('@1.25x') || rawUrl.includes('@1.75x') || rawUrl.includes('@1.5x')) {
+                  return Promise.resolve(new Response('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"></svg>', {
+                    status: 200,
+                    statusText: 'OK',
+                    headers: { 'Content-Type': 'image/svg+xml' }
+                  }));
+                }
+              }
               if (typeof input === 'string') {
                 input = fixZiziyiUrl(input);
               } else if (input && typeof input.url === 'string') {
@@ -260,27 +290,7 @@
                   input = new Request(fixZiziyiUrl(input.url), input);
                 } catch (_) {}
               }
-              try {
-                const resp = await origFetch.call(this, input, init);
-                // Gracefully fallback on missing SVG theme icons (e.g. formats@2.5x.svg) to prevent ERR_ABORTED 404
-                if (!resp.ok && resp.status === 404 && typeof rawUrl === 'string' && rawUrl.includes('/resources/img/') && rawUrl.endsWith('.svg')) {
-                  return new Response('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"></svg>', {
-                    status: 200,
-                    statusText: 'OK',
-                    headers: { 'Content-Type': 'image/svg+xml' }
-                  });
-                }
-                return resp;
-              } catch (err) {
-                if (typeof rawUrl === 'string' && rawUrl.includes('/resources/img/') && rawUrl.endsWith('.svg')) {
-                  return new Response('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"></svg>', {
-                    status: 200,
-                    statusText: 'OK',
-                    headers: { 'Content-Type': 'image/svg+xml' }
-                  });
-                }
-                throw err;
-              }
+              return origFetch.call(this, input, init);
             };
           }
         } catch (_) {}
