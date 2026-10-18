@@ -290,6 +290,7 @@ async function setupRules() {
         "image",
         "font",
         "xmlhttprequest",
+        "websocket",
         "sub_frame",
         "other"
       ]
@@ -402,6 +403,14 @@ async function ensureOffscreenDocument() {
 }
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.action === 'XP_GET_REDUX_CSS') {
+    fetch(chrome.runtime.getURL('redux/styles.css'))
+      .then(res => res.text())
+      .then(css => sendResponse({ css }))
+      .catch(() => sendResponse({ css: '' }));
+    return true;
+  }
+
   if (message.action === 'XP_READ_CLIPBOARD') {
     (async () => {
       try {

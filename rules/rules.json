@@ -472,6 +472,7 @@
         "image",
         "font",
         "xmlhttprequest",
+        "websocket",
         "sub_frame",
         "other"
       ]

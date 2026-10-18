@@ -45,19 +45,18 @@
     try {
       const cssId = 'xp-youtube-redux-styles';
       if (!document.getElementById(cssId)) {
-        const runtime = (typeof chrome !== 'undefined' && chrome.runtime) ? chrome.runtime : (typeof browser !== 'undefined' ? browser.runtime : null);
-        if (runtime && runtime.getURL) {
-          fetch(runtime.getURL('redux/styles.css'))
-            .then(res => res.text())
-            .then(css => {
-              if (!document.getElementById(cssId)) {
+        if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+          try {
+            chrome.runtime.sendMessage({ action: 'XP_GET_REDUX_CSS' }, (res) => {
+              if (chrome.runtime.lastError) return;
+              if (res && res.css && !document.getElementById(cssId)) {
                 const style = document.createElement('style');
                 style.id = cssId;
-                style.textContent = css;
+                style.textContent = res.css;
                 (document.head || document.documentElement).appendChild(style);
               }
-            })
-            .catch(() => {});
+            });
+          } catch (_) {}
         }
       }
     } catch (e) {}
