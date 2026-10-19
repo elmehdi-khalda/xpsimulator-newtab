@@ -106,16 +106,24 @@
       }
     } catch (_) {}
 
-    // Filter egui / eframe unhandled viewport command warnings and sync document.title
+    // Filter harmless warnings in console
     try {
       const origConsoleWarn = console.warn;
       console.warn = function(...args) {
-        if (typeof args[0] === 'string' && args[0].includes('Unhandled egui viewport command: Title')) {
-          const match = args[0].match(/Title\("([^"]+)"\)/);
-          if (match && match[1]) {
-            try { document.title = match[1]; } catch (_) {}
+        if (typeof args[0] === 'string') {
+          if (args[0].includes('Unhandled egui viewport command: Title')) {
+            const match = args[0].match(/Title\("([^"]+)"\)/);
+            if (match && match[1]) {
+              try { document.title = match[1]; } catch (_) {}
+            }
+            return; // Suppress continuous console spam in animation loop
           }
-          return; // Suppress continuous console spam in animation loop
+          if (args[0].includes('cdn.tailwindcss.com should not be used in production')) {
+            return;
+          }
+          if (args[0].includes("Couldn't load Ruffle into IFRAME") && args[0].includes('data:text/html')) {
+            return;
+          }
         }
         return origConsoleWarn.apply(console, args);
       };
