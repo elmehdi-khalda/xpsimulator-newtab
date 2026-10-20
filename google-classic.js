@@ -6,40 +6,47 @@
 (function () {
   'use strict';
 
-  // Check if running in top-level regular browser tabs (outside simulation)
-  const isTop = (window.self === window.top);
-  if (isTop) {
+  function isInternetExplorer() {
+    try {
+      if (window.self === window.top) return false;
+      if (window.name === 'xp-ie-iframe' || (typeof window.name === 'string' && window.name.includes('xp-ie'))) {
+        return true;
+      }
+      try {
+        if (window.parent && window.parent !== window && typeof window.parent.name === 'string' && window.parent.name.includes('xp-ie')) {
+          return true;
+        }
+      } catch (_) {}
+      if (window.location.search && (window.location.search.includes('igu=1') || window.location.search.includes('sout=1'))) {
+        if (window.location.ancestorOrigins && window.location.ancestorOrigins.length > 0) {
+          return Array.from(window.location.ancestorOrigins).some(origin => 
+            origin.includes('localhost') || 
+            origin.includes('127.0.0.1') || 
+            origin.startsWith('chrome-extension://') ||
+            origin.includes('vercel.app') ||
+            origin.includes('elmehdikhalda')
+          );
+        }
+      }
+    } catch (_) {}
+    return false;
+  }
+
+  if (isInternetExplorer()) {
+    runClassic();
+  } else {
     try {
       if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
         chrome.storage.local.get(['oldGoogleRealBrowser'], (res) => {
-          if (!res || !res.oldGoogleRealBrowser) return;
-          init();
+          if (res && res.oldGoogleRealBrowser === true) {
+            runClassic();
+          }
         });
-        return;
       }
     } catch (_) {}
-    return;
   }
 
-  // Ensure this frame is embedded inside the XP simulator
-  let isSimulator = true;
-  try {
-    if (window.location.ancestorOrigins && window.location.ancestorOrigins.length > 0) {
-      isSimulator = Array.from(window.location.ancestorOrigins).some(origin => 
-        origin.includes('localhost') || 
-        origin.includes('127.0.0.1') || 
-        origin.startsWith('chrome-extension://') ||
-        origin.includes('vercel.app') ||
-        origin.includes('elmehdikhalda') ||
-        origin.includes('192.168.') ||
-        origin.includes('10.') ||
-        origin.includes('::1') ||
-        origin.includes('0.0.0.0')
-      );
-    }
-  } catch (_) {}
-  if (!isSimulator) return;
-
+  function runClassic() {
   // Inject Classic Google CSS Styles
   function injectClassicStyles() {
     if (document.getElementById('xp-google-classic-style')) return;
@@ -523,5 +530,6 @@
     document.addEventListener('DOMContentLoaded', () => {
       if (document.body) observer.observe(document.body, { childList: true, subtree: true });
     });
+  }
   }
 })();

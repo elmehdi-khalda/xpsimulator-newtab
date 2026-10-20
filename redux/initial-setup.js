@@ -1,43 +1,18 @@
 /* XP_SIMULATOR_REDUX_GUARD_START */
 (function () {
-  function isSimulatorFrame() {
+  function isInternetExplorer() {
     try {
-      if (window.self === window.top) {
-        return false;
+      if (window.self === window.top) return false;
+      if (window.name === 'xp-ie-iframe' || (typeof window.name === 'string' && window.name.includes('xp-ie'))) {
+        return true;
       }
-      if (window.location.ancestorOrigins && window.location.ancestorOrigins.length > 0) {
-        return Array.from(window.location.ancestorOrigins).some(origin => 
-          origin.includes('localhost') || 
-          origin.includes('127.0.0.1') || 
-          origin.startsWith('chrome-extension://') ||
-          origin.includes('vercel.app') ||
-          origin.includes('elmehdikhalda')
-        );
-      }
-      if (document.referrer) {
-        const ref = document.referrer;
-        return ref.includes('localhost') || 
-               ref.includes('127.0.0.1') || 
-               ref.startsWith('chrome-extension://') ||
-               ref.includes('vercel.app') ||
-               ref.includes('elmehdikhalda');
-      }
-    } catch (e) {}
-    return false;
-  }
-
-  // Strictly exit if on regular YouTube outside the simulator, unless user enabled oldYouTubeRealBrowser option!
-  if (window.self === window.top) {
-    try {
-      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-        chrome.storage.local.get(['oldYouTubeRealBrowser'], (res) => {
-          if (res && res.oldYouTubeRealBrowser === true) {
-            initReduxSetup();
-          }
-        });
-      }
+      try {
+        if (window.parent && window.parent !== window && typeof window.parent.name === 'string' && window.parent.name.includes('xp-ie')) {
+          return true;
+        }
+      } catch (_) {}
     } catch (_) {}
-    return;
+    return false;
   }
 
   function initReduxSetup() {
@@ -62,12 +37,23 @@
     } catch (e) {}
   }
 
-  if (isSimulatorFrame()) {
+  if (isInternetExplorer()) {
     initReduxSetup();
+    startReduxInitialSetup();
   } else {
-    return;
+    try {
+      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+        chrome.storage.local.get(['oldYouTubeRealBrowser'], (res) => {
+          if (res && res.oldYouTubeRealBrowser === true) {
+            initReduxSetup();
+            startReduxInitialSetup();
+          }
+        });
+      }
+    } catch (_) {}
   }
 
+  function startReduxInitialSetup() {
 /* XP_SIMULATOR_REDUX_GUARD_BODY */
 let browser = (typeof chrome !== 'undefined' && chrome.runtime) ? chrome : (typeof browser !== 'undefined' ? browser : {});
 const defaultSettings = {
@@ -2921,6 +2907,7 @@ function addCustomStyles() {
 		document.querySelector('link[rel="shortcut icon"]').href = iconUrl;
 		document.querySelectorAll('link[rel="icon"]').forEach(element => element.href = iconUrl);
 	}
+}
 }
 /* XP_SIMULATOR_REDUX_GUARD_END */
 })();

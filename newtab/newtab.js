@@ -128,6 +128,9 @@ function setupFullscreenListener() {
       }
       chrome.runtime.sendMessage({ action: 'XP_DESKTOP_CACHE_SYNC', data: e.data.data }).catch(() => {});
     }
+    if (e.data && e.data.type === 'XP_NAVIGATE_TAB' && e.data.url) {
+      window.location.href = e.data.url;
+    }
     if (e.data && e.data.type === 'TOGGLE_FULLSCREEN') {
       toggleFullscreen();
     }
