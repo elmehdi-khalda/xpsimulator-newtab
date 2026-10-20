@@ -1,45 +1,35 @@
 /* XP_SIMULATOR_REDUX_GUARD_START */
 (function () {
-  function isSimulatorFrame() {
+  function isInternetExplorer() {
     try {
       if (window.self === window.top) return false;
-      if (window.location.ancestorOrigins && window.location.ancestorOrigins.length > 0) {
-        return Array.from(window.location.ancestorOrigins).some(origin => 
-          origin.includes('localhost') || 
-          origin.includes('127.0.0.1') || 
-          origin.startsWith('chrome-extension://') ||
-          origin.includes('vercel.app') ||
-          origin.includes('elmehdikhalda')
-        );
+      if (window.name === 'xp-ie-iframe' || (typeof window.name === 'string' && window.name.includes('xp-ie'))) {
+        return true;
       }
-      if (document.referrer) {
-        const ref = document.referrer;
-        return ref.includes('localhost') || 
-               ref.includes('127.0.0.1') || 
-               ref.startsWith('chrome-extension://') ||
-               ref.includes('vercel.app') ||
-               ref.includes('elmehdikhalda');
-      }
-    } catch (e) {}
+      try {
+        if (window.parent && window.parent !== window && typeof window.parent.name === 'string' && window.parent.name.includes('xp-ie')) {
+          return true;
+        }
+      } catch (_) {}
+    } catch (_) {}
     return false;
   }
 
-  // Strictly exit if on regular YouTube outside the simulator, unless user enabled oldYouTubeRealBrowser option!
-  if (window.self === window.top) {
+  if (isInternetExplorer()) {
+    startReduxMain();
+  } else {
     try {
       if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
         chrome.storage.local.get(['oldYouTubeRealBrowser'], (res) => {
-          if (!res || !res.oldYouTubeRealBrowser) return;
+          if (res && res.oldYouTubeRealBrowser === true) {
+            startReduxMain();
+          }
         });
       }
     } catch (_) {}
-    return;
   }
 
-  if (!isSimulatorFrame()) {
-    return;
-  }
-
+  function startReduxMain() {
 /* XP_SIMULATOR_REDUX_GUARD_BODY */
 'use strict';
 var defaultSettings = window.defaultSettings || {
@@ -1035,6 +1025,7 @@ function main() {
 		}
 	}, 100);
 })();
+}
 
 /* XP_SIMULATOR_REDUX_GUARD_END */
 })();
