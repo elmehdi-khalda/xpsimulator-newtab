@@ -269,6 +269,14 @@
               mimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
             } else if (fileName.endsWith('.pptx')) {
               mimeType = 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+            } else if (fileName.endsWith('.psd')) {
+              mimeType = 'image/vnd.adobe.photoshop';
+            } else if (fileName.endsWith('.png')) {
+              mimeType = 'image/png';
+            } else if (fileName.endsWith('.jpg') || fileName.endsWith('.jpeg')) {
+              mimeType = 'image/jpeg';
+            } else if (fileName.endsWith('.webp')) {
+              mimeType = 'image/webp';
             }
             const blob = new Blob(chunks, { type: mimeType });
             savedFile = new File([blob], fileName, { type: mimeType });
