@@ -326,12 +326,15 @@ async function preloadSimulator() {
     // Pre-cache vital shell assets: bliss wallpaper, icons, cursors
     const coreAssets = [
       new URL('/images/xp/wallpaper/bliss.jpg', base).toString(),
+      new URL('/images/wallpaper_layers/Bliss - remastred.png', base).toString(),
       new URL('/images/xp/icons/MyComputer.png', base).toString(),
       new URL('/images/xp/icons/RecycleBinempty.png', base).toString(),
+      new URL('/images/xp/icons/RecycleBinfull.png', base).toString(),
       new URL('/images/xp/icons/InternetExplorer6.png', base).toString(),
       new URL('/images/xp/icons/LiveDemo.png', base).toString(),
       new URL('/images/xp/icons/WindowsMedia.png', base).toString(),
-      new URL('/images/xp/icons/Application.png', base).toString()
+      new URL('/images/xp/icons/Application.png', base).toString(),
+      new URL('/images/xp/icons/FolderClosed.png', base).toString()
     ];
 
     if (data.cachedDesktop?.wallpaper && data.cachedDesktop.wallpaper.startsWith('http')) {
