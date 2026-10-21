@@ -330,56 +330,6 @@
     }
   },
   {
-    "id": 7,
-    "priority": 10,
-    "action": {
-      "type": "modifyHeaders",
-      "responseHeaders": [
-        {
-          "header": "Cross-Origin-Opener-Policy",
-          "operation": "set",
-          "value": "same-origin"
-        },
-        {
-          "header": "Cross-Origin-Embedder-Policy",
-          "operation": "set",
-          "value": "credentialless"
-        }
-      ]
-    },
-    "condition": {
-      "urlFilter": "||xpsimulator.vercel.app/",
-      "resourceTypes": [
-        "main_frame"
-      ]
-    }
-  },
-  {
-    "id": 8,
-    "priority": 10,
-    "action": {
-      "type": "modifyHeaders",
-      "responseHeaders": [
-        {
-          "header": "Cross-Origin-Opener-Policy",
-          "operation": "set",
-          "value": "same-origin"
-        },
-        {
-          "header": "Cross-Origin-Embedder-Policy",
-          "operation": "set",
-          "value": "credentialless"
-        }
-      ]
-    },
-    "condition": {
-      "urlFilter": "||localhost/",
-      "resourceTypes": [
-        "main_frame"
-      ]
-    }
-  },
-  {
     "id": 9,
     "priority": 10,
     "action": {

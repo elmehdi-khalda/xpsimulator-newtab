@@ -277,7 +277,7 @@ async function setupRules() {
 
     const existingRules = await chrome.declarativeNetRequest.getDynamicRules();
     const existingRuleIds = existingRules.map(r => r.id);
-    const removeIds = Array.from(new Set([...existingRuleIds, 1, 2, 3, 4, 5, 6, 12]));
+    const removeIds = Array.from(new Set([...existingRuleIds, 1, 2, 3, 4, 5, 6, 7, 8, 12]));
 
     await chrome.declarativeNetRequest.updateDynamicRules({
       removeRuleIds: removeIds,
