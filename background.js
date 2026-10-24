@@ -379,6 +379,19 @@ async function ensureOffscreenDocument() {
   creatingOffscreenPromise = null;
 }
 
+function sanitizeShareForExtension(share) {
+  if (!share) return null;
+  const copy = { ...share };
+  if (copy.files && Array.isArray(copy.files)) {
+    copy.files = copy.files.map(f => {
+      if (!f) return null;
+      const { content_data, ...rest } = f;
+      return rest;
+    }).filter(Boolean);
+  }
+  return copy;
+}
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === 'XP_GET_REDUX_CSS') {
     fetch(chrome.runtime.getURL('redux/styles.css'))
@@ -462,18 +475,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }
   }
 
-  /* [TEST: DISABLED NETWORK SHARING]
   if (message.action === 'XP_SHARE_UPDATE' && message.share) {
+    const cleanShare = sanitizeShareForExtension(message.share);
     chrome.storage.local.get(['xp_network_shares'], (data) => {
-      let shares = Array.isArray(data.xp_network_shares) ? data.xp_network_shares : [];
-      shares = shares.filter(s => s.id !== message.share.id);
-      shares.push(message.share);
+      let shares = Array.isArray(data.xp_network_shares) ? data.xp_network_shares.map(sanitizeShareForExtension).filter(Boolean) : [];
+      shares = shares.filter(s => s && s.id !== cleanShare.id);
+      shares.push(cleanShare);
       chrome.storage.local.set({ xp_network_shares: shares }, () => {
         chrome.tabs.query({}, (tabs) => {
           for (const tab of tabs) {
             chrome.tabs.sendMessage(tab.id, {
               action: 'XP_EXTENSION_SHARE_SYNC',
-              share: message.share
+              share: cleanShare
             }).catch(() => {});
           }
         });
@@ -486,7 +499,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === 'XP_SHARE_REMOVE' && message.id) {
     chrome.storage.local.get(['xp_network_shares'], (data) => {
       let shares = Array.isArray(data.xp_network_shares) ? data.xp_network_shares : [];
-      shares = shares.filter(s => s.id !== message.id);
+      shares = shares.filter(s => s && s.id !== message.id);
       chrome.storage.local.set({ xp_network_shares: shares });
     });
     sendResponse({ success: true });
@@ -495,11 +508,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   if (message.action === 'XP_GET_SHARES') {
     chrome.storage.local.get(['xp_network_shares'], (data) => {
-      sendResponse({ success: true, shares: Array.isArray(data.xp_network_shares) ? data.xp_network_shares : [] });
+      const shares = Array.isArray(data.xp_network_shares) ? data.xp_network_shares.map(sanitizeShareForExtension).filter(Boolean) : [];
+      sendResponse({ success: true, shares });
     });
     return true;
   }
-  */
 });
 
 // Helper to recursively extract the full bookmarks hierarchy (folders and links)
