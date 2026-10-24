@@ -129,6 +129,7 @@
           }, '*');
         } catch (_) {}
       }
+      /* [TEST: DISABLED NETWORK SHARING]
       if (msg && msg.action === 'XP_EXTENSION_SHARE_SYNC') {
         try {
           window.postMessage({
@@ -137,6 +138,7 @@
           }, '*');
         } catch (_) {}
       }
+      */
     });
 
     function syncBookmarksSilently() {
@@ -187,6 +189,7 @@
           window.postMessage({ type: 'XP_CLIPBOARD_RESULT', requestId: reqId, text: '' }, '*');
         }
       }
+      /* [TEST: DISABLED NETWORK SHARING]
       if (event.data.type === 'XP_SHARE_UPDATE' && event.data.share) {
         try {
           chrome.runtime.sendMessage({ action: 'XP_SHARE_UPDATE', share: event.data.share });
@@ -206,6 +209,7 @@
           });
         } catch (_) {}
       }
+      */
     });
 
     function checkAndPushClipboard() {

@@ -462,6 +462,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }
   }
 
+  /* [TEST: DISABLED NETWORK SHARING]
   if (message.action === 'XP_SHARE_UPDATE' && message.share) {
     chrome.storage.local.get(['xp_network_shares'], (data) => {
       let shares = Array.isArray(data.xp_network_shares) ? data.xp_network_shares : [];
@@ -498,6 +499,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     });
     return true;
   }
+  */
 });
 
 // Helper to recursively extract the full bookmarks hierarchy (folders and links)
