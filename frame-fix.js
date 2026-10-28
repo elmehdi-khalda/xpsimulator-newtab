@@ -60,12 +60,19 @@
       }
     } catch (_) {}
 
-    // Forward ESC key press to parent XP Simulator window to exit fullscreen
+    // Forward ESC and F11 key press to parent XP Simulator window for fullscreen handling
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' || e.keyCode === 27) {
         try {
           if (window.parent && window.parent !== window) {
             window.parent.postMessage({ type: 'xp-exit-fullscreen' }, '*');
+          }
+        } catch (_) {}
+      } else if (e.key === 'F11' || e.keyCode === 122) {
+        e.preventDefault();
+        try {
+          if (window.parent && window.parent !== window) {
+            window.parent.postMessage({ type: 'xp-toggle-fullscreen' }, '*');
           }
         } catch (_) {}
       }
@@ -1006,6 +1013,209 @@
         document.addEventListener('DOMContentLoaded', tryClickDosboxStart);
       } else {
         tryClickDosboxStart();
+      }
+    }
+
+    // Auto-isolate & screen-fit copy.sh v86 virtual machine frames (Remote Access Services)
+    if (window.location.hostname.includes('copy.sh')) {
+      const injectV86Styles = () => {
+        try {
+          if (document.getElementById('xp-v86-style')) return;
+          const style = document.createElement('style');
+          style.id = 'xp-v86-style';
+          style.textContent = `
+            html, body {
+              background: #000000 !important;
+              color: #ffffff !important;
+              margin: 0 !important;
+              padding: 0 !important;
+              width: 100vw !important;
+              height: 100vh !important;
+              overflow: hidden !important;
+            }
+            #boot_options,
+            #runtime_options,
+            #runtime_infos,
+            #description,
+            #links,
+            h1, h2, h3, h4, hr, footer, header {
+              display: none !important;
+              visibility: hidden !important;
+              pointer-events: none !important;
+              height: 0 !important;
+              margin: 0 !important;
+              padding: 0 !important;
+              overflow: hidden !important;
+            }
+            #screen_container {
+              display: flex !important;
+              align-items: center !important;
+              justify-content: center !important;
+              position: fixed !important;
+              inset: 0 !important;
+              width: 100vw !important;
+              height: 100vh !important;
+              margin: 0 !important;
+              padding: 0 !important;
+              background: #000000 !important;
+              z-index: 999999 !important;
+              overflow: hidden !important;
+            }
+            #vga {
+              display: block !important;
+              max-width: 100vw !important;
+              max-height: 100vh !important;
+              width: 100% !important;
+              height: 100% !important;
+              object-fit: contain !important;
+              image-rendering: pixelated !important;
+              image-rendering: crisp-edges !important;
+              margin: auto !important;
+            }
+            #screen {
+              max-width: 100vw !important;
+              max-height: 100vh !important;
+              margin: auto !important;
+              font-family: monospace !important;
+            }
+            #loading {
+              position: fixed !important;
+              top: 50% !important;
+              left: 50% !important;
+              transform: translate(-50%, -50%) !important;
+              color: #ffffff !important;
+              background: rgba(0, 0, 0, 0.85) !important;
+              padding: 12px 24px !important;
+              border-radius: 6px !important;
+              font-family: monospace !important;
+              font-size: 14px !important;
+              z-index: 1000000 !important;
+            }
+          `;
+          (document.head || document.documentElement).appendChild(style);
+        } catch (_) {}
+      };
+      injectV86Styles();
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', injectV86Styles);
+      }
+    }
+
+    // Auto-isolate & screen-fit pcjs.org historic machines (Remote Access Services)
+    if (window.location.hostname.includes('pcjs.org')) {
+      const injectPcjsStyles = () => {
+        try {
+          if (document.getElementById('xp-pcjs-style')) return;
+          const style = document.createElement('style');
+          style.id = 'xp-pcjs-style';
+          style.textContent = `
+            html, body {
+              background: #000000 !important;
+              color: #ffffff !important;
+              margin: 0 !important;
+              padding: 0 !important;
+              width: 100vw !important;
+              height: 100vh !important;
+              overflow: hidden !important;
+            }
+            header, footer, .menu, #pcjs-machines, #pcjs-heading,
+            .pcjs-name, .pcjs-title, .pcjs-copyright, .pcjs-reference,
+            .pcjs-controls, .pcjs-control, .pcjs-button, .pcjs-status,
+            .pcjs-description, .pcjs-registers, .pcjs-panel, .pcjs-fieldset,
+            .machine-warning, .language-plaintext, .highlight,
+            h1, h2, h3, h4, hr, p, .wrapper > *:not(.machine-placeholder):not(.pcjs-machine) {
+              display: none !important;
+              visibility: hidden !important;
+              pointer-events: none !important;
+              height: 0 !important;
+              margin: 0 !important;
+              padding: 0 !important;
+              overflow: hidden !important;
+            }
+            .wrapper, .machine-placeholder, .pcjs-machine {
+              position: fixed !important;
+              inset: 0 !important;
+              width: 100vw !important;
+              height: 100vh !important;
+              margin: 0 !important;
+              padding: 0 !important;
+              border: none !important;
+              background: #000000 !important;
+              overflow: hidden !important;
+              display: flex !important;
+              align-items: center !important;
+              justify-content: center !important;
+            }
+            .pcjs-screen, .pcjs-video, .pcjs-surface, .pcjs-monitor {
+              position: fixed !important;
+              inset: 0 !important;
+              width: 100vw !important;
+              height: 100vh !important;
+              margin: 0 !important;
+              padding: 0 !important;
+              background: #000000 !important;
+              z-index: 999999 !important;
+              display: flex !important;
+              align-items: center !important;
+              justify-content: center !important;
+              overflow: hidden !important;
+            }
+            canvas.pcjs-canvas {
+              display: block !important;
+              max-width: 100vw !important;
+              max-height: 100vh !important;
+              width: 100% !important;
+              height: 100% !important;
+              object-fit: contain !important;
+              image-rendering: pixelated !important;
+              image-rendering: crisp-edges !important;
+              margin: auto !important;
+            }
+            textarea.pcjs-overlay {
+              max-width: 100vw !important;
+              max-height: 100vh !important;
+              margin: auto !important;
+            }
+          `;
+          (document.head || document.documentElement).appendChild(style);
+        } catch (_) {}
+      };
+      injectPcjsStyles();
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', injectPcjsStyles);
+      }
+    }
+
+    // Auto-fit distrosea.com live linux distros (Remote Access Services)
+    if (window.location.hostname.includes('distrosea.com')) {
+      const injectDistroSeaStyles = () => {
+        try {
+          if (document.getElementById('xp-distrosea-style')) return;
+          const style = document.createElement('style');
+          style.id = 'xp-distrosea-style';
+          style.textContent = `
+            html, body {
+              background: #0f172a !important;
+              margin: 0 !important;
+              padding: 0 !important;
+              width: 100vw !important;
+              height: 100vh !important;
+              overflow: auto !important;
+            }
+            header, footer, nav, #info, .supporter-avatar, [data-v-c05018cf], #ad-container, .adsbygoogle {
+              display: none !important;
+            }
+            iframe, #vnc, #display, canvas {
+              max-width: 100vw !important;
+              max-height: 100vh !important;
+            }
+          `;
+          (document.head || document.documentElement).appendChild(style);
+        } catch (_) {}
+      };
+      injectDistroSeaStyles();
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', injectDistroSeaStyles);
       }
     }
 

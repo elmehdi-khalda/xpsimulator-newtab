@@ -1,0 +1,20 @@
+/* Windows XP Simulator - DistroSea Live Distros Screen Isolation */
+html, body {
+  background: #0f172a !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  overflow: auto !important;
+}
+
+/* Hide website headers, navbars, ads and supporter widgets */
+header, footer, nav, #info, .supporter-avatar, [data-v-c05018cf], #ad-container, .adsbygoogle {
+  display: none !important;
+}
+
+/* Ensure the VM viewport scales cleanly to full screen */
+iframe, #vnc, #display, canvas {
+  max-width: 100vw !important;
+  max-height: 100vh !important;
+}
