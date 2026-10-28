@@ -63,6 +63,7 @@
     },
     {
       "matches": [
+        "*://runtime/*",
         "*://*.runtime/*"
       ],
       "all_frames": true,
@@ -73,6 +74,7 @@
     },
     {
       "matches": [
+        "*://copy.sh/*",
         "*://*.copy.sh/*"
       ],
       "all_frames": true,
@@ -83,6 +85,7 @@
     },
     {
       "matches": [
+        "*://pcjs.org/*",
         "*://*.pcjs.org/*"
       ],
       "all_frames": true,
@@ -93,6 +96,7 @@
     },
     {
       "matches": [
+        "*://distrosea.com/*",
         "*://*.distrosea.com/*"
       ],
       "all_frames": true,

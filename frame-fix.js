@@ -1099,6 +1099,9 @@
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', injectV86Styles);
       }
+      window.addEventListener('load', injectV86Styles);
+      const v86Timer = setInterval(injectV86Styles, 500);
+      setTimeout(() => clearInterval(v86Timer), 10000);
     }
 
     // Auto-isolate & screen-fit pcjs.org historic machines (Remote Access Services)
