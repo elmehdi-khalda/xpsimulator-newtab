@@ -1,0 +1,79 @@
+/* Windows XP Simulator - copy.sh v86 OS Screen Isolation */
+html, body {
+  background: #000000 !important;
+  color: #ffffff !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  overflow: hidden !important;
+}
+
+/* Hide all website headers, control buttons bar, runtime statistics and info text */
+#boot_options,
+#runtime_options,
+#runtime_infos,
+#description,
+#links,
+h1, h2, h3, h4, hr, footer, header {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Isolate the OS screen container to fill the window completely */
+#screen_container {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: #000000 !important;
+  z-index: 999999 !important;
+  overflow: hidden !important;
+}
+
+/* Canvas scales smoothly to fit the window while preserving aspect ratio */
+#vga {
+  display: block !important;
+  max-width: 100vw !important;
+  max-height: 100vh !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  image-rendering: pixelated !important;
+  image-rendering: crisp-edges !important;
+  margin: auto !important;
+}
+
+/* Text terminal mode */
+#screen {
+  max-width: 100vw !important;
+  max-height: 100vh !important;
+  margin: auto !important;
+  font-family: monospace !important;
+}
+
+/* Clean loading indicator centered on screen */
+#loading {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  color: #ffffff !important;
+  background: rgba(0, 0, 0, 0.85) !important;
+  padding: 12px 24px !important;
+  border-radius: 6px !important;
+  font-family: monospace !important;
+  font-size: 14px !important;
+  z-index: 1000000 !important;
+}
