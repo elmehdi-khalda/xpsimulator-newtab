@@ -54,27 +54,34 @@ async function init() {
 }
 
 async function loadSimulator(url) {
+  offlineScreen.classList.add('hidden');
   iframe.src = url;
+
+  iframe.onload = () => {
+    offlineScreen.classList.add('hidden');
+  };
 
   // Background prewarm/cache for fast subsequent sessions
   preloadSimulatorAssets(url);
 
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 2500);
-    await fetch(url, { method: 'HEAD', mode: 'no-cors', signal: controller.signal });
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
+    await fetch(url, { method: 'GET', mode: 'no-cors', signal: controller.signal });
     clearTimeout(timeoutId);
     offlineScreen.classList.add('hidden');
   } catch (err) {
+    // Only show offline dialog after ample time and only if iframe hasn't loaded
     setTimeout(() => {
       try {
-        if (!iframe.contentWindow || iframe.contentWindow.location.href === 'about:blank') {
+        if (iframe && iframe.contentWindow && iframe.contentWindow.location.href === 'about:blank') {
           offlineScreen.classList.remove('hidden');
         }
       } catch (e) {
+        // Cross-origin access exception means iframe has navigated to the simulator domain!
         offlineScreen.classList.add('hidden');
       }
-    }, 1500);
+    }, 6000);
   }
 }
 
@@ -115,6 +122,9 @@ function applyFullSimulationMode() {
 
 function setupFullscreenListener() {
   window.addEventListener('message', (e) => {
+    if (e.data) {
+      offlineScreen.classList.add('hidden');
+    }
     if (e.data && e.data.type === 'IE_FRAME_NAVIGATED') {
       if (iframe && iframe.contentWindow) {
         iframe.contentWindow.postMessage(e.data, '*');
