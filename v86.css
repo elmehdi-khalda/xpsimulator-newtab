@@ -9,24 +9,32 @@ html, body {
   overflow: hidden !important;
 }
 
-/* Hide all website headers, control buttons bar, runtime statistics and info text */
+/* Hide all website chrome, options, control buttons, side statistics, filesystem, and debug info */
+body > *:not(#screen_container),
 #boot_options,
 #runtime_options,
 #runtime_infos,
 #description,
 #links,
+#filesystem_panel,
+#terminal,
+#toggle_ui,
+#theatre_background,
+code,
 h1, h2, h3, h4, hr, footer, header {
   display: none !important;
   visibility: hidden !important;
   pointer-events: none !important;
   height: 0 !important;
   max-height: 0 !important;
+  width: 0 !important;
+  max-width: 0 !important;
   margin: 0 !important;
   padding: 0 !important;
   overflow: hidden !important;
 }
 
-/* Isolate the OS screen container to fill the window completely */
+/* Isolate the OS screen container to fill the window completely and center canvas */
 #screen_container {
   display: flex !important;
   align-items: center !important;
