@@ -269,7 +269,25 @@ async function setupRules() {
     "condition": {
       "urlFilter": "*",
       "resourceTypes": [
-        "sub_frame"
+        "sub_frame",
+        "xmlhttprequest",
+        "other",
+        "media"
+      ]
+    }
+  },
+  {
+    "id": 12,
+    "priority": 10,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||a-ads.com/",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest"
       ]
     }
   }

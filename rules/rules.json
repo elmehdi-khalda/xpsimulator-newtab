@@ -274,7 +274,10 @@
     "condition": {
       "urlFilter": "*",
       "resourceTypes": [
-        "sub_frame"
+        "sub_frame",
+        "xmlhttprequest",
+        "other",
+        "media"
       ]
     }
   },
@@ -402,6 +405,21 @@
       "urlFilter": "||static.itch.io/htmlgame.js",
       "resourceTypes": [
         "script"
+      ]
+    }
+  },
+  {
+    "id": 12,
+    "priority": 10,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||a-ads.com/",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest"
       ]
     }
   }

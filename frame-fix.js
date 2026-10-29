@@ -103,10 +103,34 @@
       };
     } catch (_) {}
 
-    // Ensure dynamically clicked anchor elements with download attribute are attached to DOM and trigger download
+    // Ensure dynamically clicked anchor elements with download attribute in subframes route to XP simulator filesystem
     try {
       const origAnchorClick = HTMLAnchorElement.prototype.click;
       HTMLAnchorElement.prototype.click = function() {
+        if (this.download && this.href && window.self !== window.top) {
+          const downloadName = this.download || 'download';
+          const hrefUrl = this.href;
+          try {
+            fetch(hrefUrl)
+              .then(res => res.arrayBuffer())
+              .then(buf => {
+                window.parent.postMessage({
+                  type: 'xp_sim_request_save_file',
+                  name: downloadName,
+                  suggestedName: downloadName,
+                  buffer: buf,
+                  bytes: buf,
+                  mimeType: 'application/octet-stream'
+                }, '*');
+              })
+              .catch(() => {
+                origAnchorClick.apply(this, arguments);
+              });
+            return;
+          } catch (_) {
+            return origAnchorClick.apply(this, arguments);
+          }
+        }
         if (this.download && this.href) {
           if (!document.documentElement.contains(this)) {
             (document.body || document.documentElement).appendChild(this);
@@ -114,6 +138,18 @@
           }
         }
         return origAnchorClick.apply(this, arguments);
+      };
+    } catch (_) {}
+
+    // Forward requestFullscreen from subframes to native XP window fullscreen
+    try {
+      const origReqFullscreen = Element.prototype.requestFullscreen;
+      Element.prototype.requestFullscreen = function() {
+        if (window.self !== window.top) {
+          window.parent.postMessage({ type: 'xp-toggle-fullscreen' }, '*');
+          return Promise.resolve();
+        }
+        return origReqFullscreen.apply(this, arguments);
       };
     } catch (_) {}
 
@@ -148,61 +184,87 @@
       }
     } catch (_) {}
 
-    // Polyfill / safe-guard showOpenFilePicker for cross-origin subframes
+    // Polyfill / safe-guard showOpenFilePicker for cross-origin subframes to use XP Simulator file modal
     try {
-      if (typeof window.showOpenFilePicker === 'function') {
+      if (typeof window.showOpenFilePicker === 'function' || window.self !== window.top) {
         const origShowOpenFilePicker = window.showOpenFilePicker;
         window.showOpenFilePicker = async function(options) {
-          try {
-            return await origShowOpenFilePicker.call(window, options);
-          } catch (err) {
-            if (err && (err.name === 'SecurityError' || String(err).includes('sub frames') || String(err).includes('Cross origin'))) {
-              return new Promise((resolve, reject) => {
-                const input = document.createElement('input');
-                input.type = 'file';
-                if (options && options.multiple) input.multiple = true;
-                if (options && options.types && Array.isArray(options.types)) {
-                  const exts = [];
-                  for (const t of options.types) {
-                    if (t.accept) {
-                      for (const [mime, extList] of Object.entries(t.accept)) {
-                        exts.push(mime);
-                        if (Array.isArray(extList)) exts.push(...extList);
-                      }
-                    }
-                  }
-                  if (exts.length) input.accept = exts.join(',');
-                }
-                input.style.position = 'fixed';
-                input.style.top = '-9999px';
-                input.style.opacity = '0';
-                (document.body || document.documentElement).appendChild(input);
-                input.onchange = () => {
-                  const files = Array.from(input.files || []);
-                  input.remove();
-                  if (files.length === 0) {
+          if (window.self !== window.top) {
+            return new Promise((resolve, reject) => {
+              const reqId = 'req_' + Math.random().toString(36).substring(2);
+              const handler = (evt) => {
+                if (evt.data && evt.data.type === 'xp_sim_open_file_response' && evt.data.requestId === reqId) {
+                  window.removeEventListener('message', handler);
+                  if (evt.data.cancelled || !evt.data.files || evt.data.files.length === 0) {
                     reject(new DOMException('The user aborted a request.', 'AbortError'));
                     return;
                   }
-                  const handles = files.map(file => ({
-                    kind: 'file',
-                    name: file.name,
-                    getFile: async () => file,
-                    createWritable: async () => { throw new Error('File writing not supported in fallback'); }
-                  }));
-                  resolve(options && options.multiple ? handles : handles);
-                };
-                input.oncancel = () => {
-                  input.remove();
-                  reject(new DOMException('The user aborted a request.', 'AbortError'));
-                };
-                input.click();
-              });
-            }
-            throw err;
+                  const handles = evt.data.files.map(item => {
+                    const f = new File([item.buffer], item.name, { type: item.type, lastModified: item.lastModified });
+                    return {
+                      kind: 'file',
+                      name: item.name,
+                      getFile: async () => f,
+                      createWritable: async () => ({
+                        async write(data) {},
+                        async close() {}
+                      })
+                    };
+                  });
+                  resolve(options && options.multiple ? handles : (handles[0] ? [handles[0]] : handles));
+                }
+              };
+              window.addEventListener('message', handler);
+              window.parent.postMessage({
+                type: 'xp_sim_request_open_file',
+                requestId: reqId,
+                multiple: !!(options && options.multiple),
+                desc: (options && options.types && options.types[0]?.description) || 'Supported Files'
+              }, '*');
+            });
+          }
+          if (typeof origShowOpenFilePicker === 'function') {
+            return await origShowOpenFilePicker.call(window, options);
           }
         };
       }
+    } catch (_) {}
+
+    // Hook HTMLInputElement click to redirect file open inputs to simulated XP dialog
+    try {
+      const origInputClick = HTMLInputElement.prototype.click;
+      HTMLInputElement.prototype.click = function() {
+        if (this.type === 'file' && window.self !== window.top) {
+          const reqId = 'req_' + Math.random().toString(36).substring(2);
+          const inputEl = this;
+          const handler = (evt) => {
+            if (evt.data && evt.data.type === 'xp_sim_open_file_response' && evt.data.requestId === reqId) {
+              window.removeEventListener('message', handler);
+              if (!evt.data.cancelled && evt.data.files && evt.data.files.length > 0) {
+                try {
+                  const dt = new DataTransfer();
+                  for (const f of evt.data.files) {
+                    const fileObj = new File([f.buffer], f.name, { type: f.type, lastModified: f.lastModified });
+                    dt.items.add(fileObj);
+                  }
+                  inputEl.files = dt.files;
+                  inputEl.dispatchEvent(new Event('change', { bubbles: true }));
+                  inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+                } catch (_) {}
+              }
+            }
+          };
+          window.addEventListener('message', handler);
+          window.parent.postMessage({
+            type: 'xp_sim_request_open_file',
+            requestId: reqId,
+            multiple: this.multiple,
+            desc: this.accept || 'All Files'
+          }, '*');
+          return;
+        }
+        return origInputClick.call(this);
+      };
     } catch (_) {}
 
     // Polyfill / safe-guard showSaveFilePicker for cross-origin subframes
@@ -254,6 +316,19 @@
             }
             const blob = new Blob(chunks, { type: mimeType });
             savedFile = new File([blob], fileName, { type: mimeType });
+
+            if (window.parent && window.parent !== window) {
+              try {
+                const arrayBuf = await blob.arrayBuffer();
+                window.parent.postMessage({
+                  type: 'xp_sim_request_save_file',
+                  name: fileName,
+                  suggestedName: fileName,
+                  mimeType: mimeType,
+                  buffer: arrayBuf
+                }, '*');
+              } catch (_) {}
+            }
 
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -1033,16 +1108,23 @@
               height: 100vh !important;
               overflow: hidden !important;
             }
+            body > *:not(#screen_container),
             #boot_options,
             #runtime_options,
             #runtime_infos,
             #description,
             #links,
+            #filesystem_panel,
+            #terminal,
+            #toggle_ui,
+            #theatre_background,
+            code,
             h1, h2, h3, h4, hr, footer, header {
               display: none !important;
               visibility: hidden !important;
               pointer-events: none !important;
               height: 0 !important;
+              width: 0 !important;
               margin: 0 !important;
               padding: 0 !important;
               overflow: hidden !important;
@@ -1125,8 +1207,8 @@
             .pcjs-name, .pcjs-title, .pcjs-copyright, .pcjs-reference,
             .pcjs-controls, .pcjs-control, .pcjs-button, .pcjs-status,
             .pcjs-description, .pcjs-registers, .pcjs-panel, .pcjs-fieldset,
-            .machine-warning, .language-plaintext, .highlight,
-            h1, h2, h3, h4, hr, p, .wrapper > *:not(.machine-placeholder):not(.pcjs-machine) {
+            .machine-warning, .language-plaintext, .highlight, .pcjs-explorer,
+            h1, h2, h3, h4, hr, p {
               display: none !important;
               visibility: hidden !important;
               pointer-events: none !important;
@@ -1135,7 +1217,7 @@
               padding: 0 !important;
               overflow: hidden !important;
             }
-            .wrapper, .machine-placeholder, .pcjs-machine {
+            .wrapper, section {
               position: fixed !important;
               inset: 0 !important;
               width: 100vw !important;
@@ -1148,36 +1230,47 @@
               display: flex !important;
               align-items: center !important;
               justify-content: center !important;
+              z-index: 10 !important;
             }
-            .pcjs-screen, .pcjs-video, .pcjs-surface, .pcjs-monitor {
-              position: fixed !important;
-              inset: 0 !important;
-              width: 100vw !important;
-              height: 100vh !important;
+            .machine-placeholder, .pcjs-machine, .pcjs-chassis, .pcjs-video, .pcjs-monitor, .pcjs-surface {
+              position: relative !important;
               margin: 0 !important;
               padding: 0 !important;
+              border: none !important;
               background: #000000 !important;
-              z-index: 999999 !important;
               display: flex !important;
               align-items: center !important;
               justify-content: center !important;
-              overflow: hidden !important;
+              max-width: 100vw !important;
+              max-height: 100vh !important;
+            }
+            .pcjs-screen {
+              margin: auto !important;
+              display: flex !important;
+              align-items: center !important;
+              justify-content: center !important;
+              max-width: 100vw !important;
+              max-height: 100vh !important;
+              background: #000000 !important;
             }
             canvas.pcjs-canvas {
               display: block !important;
               max-width: 100vw !important;
               max-height: 100vh !important;
-              width: 100% !important;
-              height: 100% !important;
+              width: auto !important;
+              height: auto !important;
               object-fit: contain !important;
               image-rendering: pixelated !important;
               image-rendering: crisp-edges !important;
               margin: auto !important;
             }
             textarea.pcjs-overlay {
+              position: absolute !important;
+              inset: 0 !important;
               max-width: 100vw !important;
               max-height: 100vh !important;
               margin: auto !important;
+              opacity: 0 !important;
             }
           `;
           (document.head || document.documentElement).appendChild(style);

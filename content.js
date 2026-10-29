@@ -264,7 +264,7 @@
         s.id = 'xp-v86-content-style';
         s.textContent = `
           html, body { background: #000 !important; color: #fff !important; margin: 0 !important; padding: 0 !important; width: 100vw !important; height: 100vh !important; overflow: hidden !important; }
-          #boot_options, #runtime_options, #runtime_infos, #description, #links, h1, h2, h3, h4, hr, footer, header { display: none !important; visibility: hidden !important; pointer-events: none !important; height: 0 !important; margin: 0 !important; padding: 0 !important; overflow: hidden !important; }
+          body > *:not(#screen_container), #boot_options, #runtime_options, #runtime_infos, #description, #links, #filesystem_panel, #terminal, #toggle_ui, #theatre_background, code, h1, h2, h3, h4, hr, footer, header { display: none !important; visibility: hidden !important; pointer-events: none !important; height: 0 !important; width: 0 !important; margin: 0 !important; padding: 0 !important; overflow: hidden !important; }
           #screen_container { display: flex !important; align-items: center !important; justify-content: center !important; position: fixed !important; inset: 0 !important; width: 100vw !important; height: 100vh !important; margin: 0 !important; padding: 0 !important; background: #000 !important; z-index: 999999 !important; overflow: hidden !important; }
           #vga { display: block !important; max-width: 100vw !important; max-height: 100vh !important; width: 100% !important; height: 100% !important; object-fit: contain !important; image-rendering: pixelated !important; margin: auto !important; }
           #screen { max-width: 100vw !important; max-height: 100vh !important; margin: auto !important; font-family: monospace !important; }
@@ -277,6 +277,31 @@
     window.addEventListener('load', applyV86);
     const t = setInterval(applyV86, 500);
     setTimeout(() => clearInterval(t), 10000);
+  }
+
+  if (window.location.hostname.includes('pcjs.org')) {
+    const applyPcjs = () => {
+      try {
+        if (document.getElementById('xp-pcjs-content-style')) return;
+        const s = document.createElement('style');
+        s.id = 'xp-pcjs-content-style';
+        s.textContent = `
+          html, body { background: #000 !important; color: #fff !important; margin: 0 !important; padding: 0 !important; width: 100vw !important; height: 100vh !important; overflow: hidden !important; }
+          header, footer, .menu, #pcjs-machines, #pcjs-heading, .pcjs-name, .pcjs-title, .pcjs-copyright, .pcjs-reference, .pcjs-controls, .pcjs-control, .pcjs-button, .pcjs-status, .pcjs-description, .pcjs-registers, .pcjs-panel, .pcjs-fieldset, .machine-warning, .language-plaintext, .highlight, .pcjs-explorer, h1, h2, h3, h4, hr, p { display: none !important; visibility: hidden !important; pointer-events: none !important; height: 0 !important; margin: 0 !important; padding: 0 !important; overflow: hidden !important; }
+          .wrapper, section { position: fixed !important; inset: 0 !important; width: 100vw !important; height: 100vh !important; margin: 0 !important; padding: 0 !important; border: none !important; background: #000 !important; overflow: hidden !important; display: flex !important; align-items: center !important; justify-content: center !important; z-index: 10 !important; }
+          .machine-placeholder, .pcjs-machine, .pcjs-chassis, .pcjs-video, .pcjs-monitor, .pcjs-surface { position: relative !important; margin: 0 !important; padding: 0 !important; border: none !important; background: #000 !important; display: flex !important; align-items: center !important; justify-content: center !important; max-width: 100vw !important; max-height: 100vh !important; }
+          .pcjs-screen { margin: auto !important; display: flex !important; align-items: center !important; justify-content: center !important; max-width: 100vw !important; max-height: 100vh !important; background: #000 !important; }
+          canvas.pcjs-canvas { display: block !important; max-width: 100vw !important; max-height: 100vh !important; width: auto !important; height: auto !important; object-fit: contain !important; image-rendering: pixelated !important; margin: auto !important; }
+          textarea.pcjs-overlay { position: absolute !important; inset: 0 !important; max-width: 100vw !important; max-height: 100vh !important; margin: auto !important; opacity: 0 !important; }
+        `;
+        (document.head || document.documentElement).appendChild(s);
+      } catch (_) {}
+    };
+    applyPcjs();
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', applyPcjs);
+    window.addEventListener('load', applyPcjs);
+    const pt = setInterval(applyPcjs, 500);
+    setTimeout(() => clearInterval(pt), 10000);
   }
 
   // Filter out ad / tracking / metrics iframes
