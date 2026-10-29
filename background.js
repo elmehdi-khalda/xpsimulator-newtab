@@ -57,18 +57,6 @@ async function setupRules() {
           "operation": "remove"
         },
         {
-          "header": "cross-origin-opener-policy",
-          "operation": "remove"
-        },
-        {
-          "header": "cross-origin-embedder-policy",
-          "operation": "remove"
-        },
-        {
-          "header": "cross-origin-resource-policy",
-          "operation": "remove"
-        },
-        {
           "header": "permissions-policy",
           "operation": "remove"
         },
@@ -258,6 +246,21 @@ async function setupRules() {
           "header": "access-control-allow-headers",
           "operation": "set",
           "value": "*"
+        },
+        {
+          "header": "cross-origin-opener-policy",
+          "operation": "set",
+          "value": "same-origin"
+        },
+        {
+          "header": "cross-origin-embedder-policy",
+          "operation": "set",
+          "value": "credentialless"
+        },
+        {
+          "header": "cross-origin-resource-policy",
+          "operation": "set",
+          "value": "cross-origin"
         }
       ]
     },
@@ -265,38 +268,6 @@ async function setupRules() {
       "urlFilter": "*",
       "resourceTypes": [
         "sub_frame"
-      ]
-    }
-  },
-  {
-    "id": 7,
-    "priority": 1,
-    "action": {
-      "type": "modifyHeaders",
-      "responseHeaders": [
-        {
-          "header": "access-control-allow-origin",
-          "operation": "set",
-          "value": "*"
-        },
-        {
-          "header": "access-control-allow-methods",
-          "operation": "set",
-          "value": "GET, POST, PUT, DELETE, OPTIONS, HEAD"
-        },
-        {
-          "header": "access-control-allow-headers",
-          "operation": "set",
-          "value": "*"
-        }
-      ]
-    },
-    "condition": {
-      "urlFilter": "*",
-      "resourceTypes": [
-        "xmlhttprequest",
-        "other",
-        "media"
       ]
     }
   },

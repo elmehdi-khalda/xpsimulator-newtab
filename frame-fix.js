@@ -122,39 +122,71 @@
       }
     } catch (_) {}
 
-    // Style viewport-filling canvas for embedded apps (e.g. wasmarcade.com, emulators)
+    // Style viewport-filling canvas & isolate app iframe for embedded apps (e.g. wasmarcade.com, fifastreet.online, pes12.online, emulators)
     try {
       if (window.self !== window.top) {
-        const applyCanvasFullView = () => {
-          if (document.querySelector('canvas#canvas, #canvas, canvas.emscripten')) {
-            const style = document.createElement('style');
-            style.id = 'xp-canvas-fullview-fix';
-            style.textContent = `
-              html, body {
-                margin: 0 !important;
-                padding: 0 !important;
-                overflow: hidden !important;
-                width: 100vw !important;
-                height: 100vh !important;
-                background: #000 !important;
-              }
-              canvas#canvas, canvas.emscripten {
-                display: block !important;
-                max-width: 100vw !important;
-                max-height: 100vh !important;
-                margin: auto !important;
-              }
-            `;
-            if (!document.getElementById('xp-canvas-fullview-fix')) {
+        const applyGameViewportFix = () => {
+          const hasGame = document.querySelector('canvas#canvas, #canvas, canvas.emscripten, #app-frame, .screen, #stage, .player, #player');
+          if (hasGame) {
+            let style = document.getElementById('xp-app-viewport-fix');
+            if (!style) {
+              style = document.createElement('style');
+              style.id = 'xp-app-viewport-fix';
+              style.textContent = `
+                html, body {
+                  margin: 0 !important;
+                  padding: 0 !important;
+                  overflow: hidden !important;
+                  width: 100vw !important;
+                  height: 100vh !important;
+                  background: #000 !important;
+                }
+                /* Isolate app screen/frame/canvas to 100% full viewport */
+                .screen, #app-frame, #stage, .player, #player, #canvas-container, #player-container {
+                  position: fixed !important;
+                  top: 0 !important;
+                  left: 0 !important;
+                  width: 100vw !important;
+                  height: 100vh !important;
+                  max-width: 100vw !important;
+                  max-height: 100vh !important;
+                  margin: 0 !important;
+                  padding: 0 !important;
+                  border: none !important;
+                  z-index: 999999 !important;
+                  background: #000 !important;
+                }
+                canvas#canvas, canvas.emscripten, .screen iframe, #app-frame, .screen canvas, #stage canvas, .player canvas {
+                  width: 100% !important;
+                  height: 100% !important;
+                  max-width: 100vw !important;
+                  max-height: 100vh !important;
+                  display: block !important;
+                  margin: auto !important;
+                  border: none !important;
+                  object-fit: contain !important;
+                }
+                /* Hide website headers, sidebars, footers and advertisements */
+                header, footer, aside, .sidebar-column, .sidebar, #sidebar, #top-bar, .player-actions, .player-status, .gamepad-hint, #ad-banner-slot-wrap, #loading-ad, .ad-rail, .leaderboard-rail, .promo-card, .seo-about, .footer-contact, .footer-bottom, .dialog-heading, .chat-frame, #chatFrame, .brand, .tabs, .modal-footer {
+                  display: none !important;
+                }
+              `;
               (document.head || document.documentElement).appendChild(style);
             }
           }
         };
 
         if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', applyCanvasFullView, { once: true });
+          document.addEventListener('DOMContentLoaded', applyGameViewportFix, { once: true });
         } else {
-          applyCanvasFullView();
+          applyGameViewportFix();
+        }
+
+        // Re-evaluate when dynamic app elements attach
+        const vpObserver = new MutationObserver(() => applyGameViewportFix());
+        if (document.documentElement) {
+          vpObserver.observe(document.documentElement, { childList: true, subtree: true });
+          setTimeout(() => vpObserver.disconnect(), 15000);
         }
       }
     } catch (_) {}
@@ -1489,6 +1521,9 @@
   try {
     const originalPostMessage = window.postMessage;
     window.postMessage = function(message, targetOrigin, transfer) {
+      if (location.hostname.includes('cloudflare') || location.hostname.includes('turnstile') || (message && typeof message === 'object' && ('turnstile' in message || 'source' in message || 'chlPage' in message))) {
+        return originalPostMessage.apply(this, arguments);
+      }
       if (!targetOrigin || targetOrigin === 'undefined' || (typeof targetOrigin === 'string' && targetOrigin !== '*' && !targetOrigin.startsWith('/'))) {
         targetOrigin = '*';
       }
