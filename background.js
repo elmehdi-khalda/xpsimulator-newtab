@@ -250,11 +250,6 @@ async function setupRules() {
           "value": "*"
         },
         {
-          "header": "access-control-allow-credentials",
-          "operation": "set",
-          "value": "true"
-        },
-        {
           "header": "access-control-allow-methods",
           "operation": "set",
           "value": "GET, POST, PUT, DELETE, OPTIONS, HEAD"
@@ -283,11 +278,6 @@ async function setupRules() {
           "header": "access-control-allow-origin",
           "operation": "set",
           "value": "*"
-        },
-        {
-          "header": "access-control-allow-credentials",
-          "operation": "set",
-          "value": "true"
         },
         {
           "header": "access-control-allow-methods",
@@ -324,12 +314,67 @@ async function setupRules() {
         "xmlhttprequest"
       ]
     }
+  },
+  {
+    "id": 13,
+    "priority": 10,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||czernik.org/",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 14,
+    "priority": 10,
+    "action": {
+      "type": "modifyHeaders",
+      "responseHeaders": [
+        {
+          "header": "Cross-Origin-Opener-Policy",
+          "operation": "set",
+          "value": "same-origin"
+        },
+        {
+          "header": "Cross-Origin-Embedder-Policy",
+          "operation": "set",
+          "value": "credentialless"
+        },
+        {
+          "header": "Cross-Origin-Resource-Policy",
+          "operation": "set",
+          "value": "cross-origin"
+        },
+        {
+          "header": "Access-Control-Allow-Origin",
+          "operation": "set",
+          "value": "*"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "||cyberpunk2077.lol/",
+      "resourceTypes": [
+        "sub_frame",
+        "script",
+        "xmlhttprequest",
+        "other"
+      ]
+    }
   }
 ];
 
     const existingRules = await chrome.declarativeNetRequest.getDynamicRules();
     const existingRuleIds = existingRules.map(r => r.id);
-    const removeIds = Array.from(new Set([...existingRuleIds, 1, 2, 3, 4, 5, 6, 7, 8, 12]));
+    const removeIds = Array.from(new Set([...existingRuleIds, 1, 2, 3, 4, 5, 6, 7, 8, 12, 13, 14]));
 
     await chrome.declarativeNetRequest.updateDynamicRules({
       removeRuleIds: removeIds,

@@ -245,11 +245,6 @@
           "value": "*"
         },
         {
-          "header": "access-control-allow-credentials",
-          "operation": "set",
-          "value": "true"
-        },
-        {
           "header": "access-control-allow-methods",
           "operation": "set",
           "value": "GET, POST, PUT, DELETE, OPTIONS, HEAD"
@@ -290,11 +285,6 @@
           "value": "*"
         },
         {
-          "header": "access-control-allow-credentials",
-          "operation": "set",
-          "value": "true"
-        },
-        {
           "header": "access-control-allow-methods",
           "operation": "set",
           "value": "GET, POST, PUT, DELETE, OPTIONS, HEAD"
@@ -325,11 +315,6 @@
           "header": "access-control-allow-origin",
           "operation": "set",
           "value": "*"
-        },
-        {
-          "header": "access-control-allow-credentials",
-          "operation": "set",
-          "value": "true"
         },
         {
           "header": "access-control-allow-methods",
@@ -454,6 +439,61 @@
         "script",
         "sub_frame",
         "xmlhttprequest"
+      ]
+    }
+  },
+  {
+    "id": 13,
+    "priority": 10,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||czernik.org/",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 14,
+    "priority": 10,
+    "action": {
+      "type": "modifyHeaders",
+      "responseHeaders": [
+        {
+          "header": "Cross-Origin-Opener-Policy",
+          "operation": "set",
+          "value": "same-origin"
+        },
+        {
+          "header": "Cross-Origin-Embedder-Policy",
+          "operation": "set",
+          "value": "credentialless"
+        },
+        {
+          "header": "Cross-Origin-Resource-Policy",
+          "operation": "set",
+          "value": "cross-origin"
+        },
+        {
+          "header": "Access-Control-Allow-Origin",
+          "operation": "set",
+          "value": "*"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "||cyberpunk2077.lol/",
+      "resourceTypes": [
+        "sub_frame",
+        "script",
+        "xmlhttprequest",
+        "other"
       ]
     }
   }

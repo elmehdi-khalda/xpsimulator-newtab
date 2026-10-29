@@ -57,7 +57,9 @@ async function loadSimulator(url) {
   offlineScreen.classList.add('hidden');
   iframe.src = url;
 
+  let loaded = false;
   iframe.onload = () => {
+    loaded = true;
     offlineScreen.classList.add('hidden');
   };
 
@@ -66,13 +68,18 @@ async function loadSimulator(url) {
 
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8000);
+    const timeoutId = setTimeout(() => controller.abort(), 12000);
     await fetch(url, { method: 'GET', mode: 'no-cors', signal: controller.signal });
     clearTimeout(timeoutId);
     offlineScreen.classList.add('hidden');
   } catch (err) {
-    // Only show offline dialog after ample time and only if iframe hasn't loaded
+    // Only show offline dialog if actually offline and iframe failed to load
     setTimeout(() => {
+      if (loaded) return;
+      if (!navigator.onLine) {
+        offlineScreen.classList.remove('hidden');
+        return;
+      }
       try {
         if (iframe && iframe.contentWindow && iframe.contentWindow.location.href === 'about:blank') {
           offlineScreen.classList.remove('hidden');
@@ -81,7 +88,7 @@ async function loadSimulator(url) {
         // Cross-origin access exception means iframe has navigated to the simulator domain!
         offlineScreen.classList.add('hidden');
       }
-    }, 6000);
+    }, 12000);
   }
 }
 

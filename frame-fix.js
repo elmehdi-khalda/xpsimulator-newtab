@@ -78,7 +78,86 @@
       }
     }, { capture: true, passive: false });
 
+    // Auto-skip landing splash screen on web games / emulators (fifa14.online, residentevil4.online, etc.)
+    try {
+      const autoSkipLanding = () => {
+        const soloBtn = document.querySelector('#start-panel #solo, #start-panel button.primary, button#solo');
+        if (soloBtn && !soloBtn.__xp_auto_clicked) {
+          soloBtn.__xp_auto_clicked = true;
+          try {
+            soloBtn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+            soloBtn.click();
+          } catch (_) {}
+          const startPanel = document.getElementById('start-panel');
+          if (startPanel) {
+            startPanel.style.setProperty('display', 'none', 'important');
+          }
+        }
+      };
 
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', autoSkipLanding, { once: true });
+      } else {
+        autoSkipLanding();
+      }
+
+      const landingObserver = new MutationObserver((mutations, obs) => {
+        const soloBtn = document.querySelector('#start-panel #solo, #start-panel button.primary, button#solo');
+        if (soloBtn && !soloBtn.__xp_auto_clicked) {
+          soloBtn.__xp_auto_clicked = true;
+          try {
+            soloBtn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+            soloBtn.click();
+          } catch (_) {}
+          const startPanel = document.getElementById('start-panel');
+          if (startPanel) {
+            startPanel.style.setProperty('display', 'none', 'important');
+          }
+          obs.disconnect();
+        }
+      });
+      if (document.documentElement) {
+        landingObserver.observe(document.documentElement, { childList: true, subtree: true });
+        setTimeout(() => landingObserver.disconnect(), 15000);
+      }
+    } catch (_) {}
+
+    // Style viewport-filling canvas for embedded games (e.g. wasmarcade.com, emulators)
+    try {
+      if (window.self !== window.top) {
+        const applyCanvasFullView = () => {
+          if (document.querySelector('canvas#canvas, #canvas, canvas.emscripten')) {
+            const style = document.createElement('style');
+            style.id = 'xp-canvas-fullview-fix';
+            style.textContent = `
+              html, body {
+                margin: 0 !important;
+                padding: 0 !important;
+                overflow: hidden !important;
+                width: 100vw !important;
+                height: 100vh !important;
+                background: #000 !important;
+              }
+              canvas#canvas, canvas.emscripten {
+                display: block !important;
+                max-width: 100vw !important;
+                max-height: 100vh !important;
+                margin: auto !important;
+              }
+            `;
+            if (!document.getElementById('xp-canvas-fullview-fix')) {
+              (document.head || document.documentElement).appendChild(style);
+            }
+          }
+        };
+
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', applyCanvasFullView, { once: true });
+        } else {
+          applyCanvasFullView();
+        }
+      }
+    } catch (_) {}
 
     // Filter harmless warnings in console
     try {
