@@ -19,9 +19,22 @@
       document.documentElement.style.setProperty('color-scheme', 'light', 'important');
     }
 
-    // Ensure crossOriginIsolated is reported as true in subframes for emulators & WebAssembly engines (rugby08, Sports Media, fifa, godofwar, etc.)
+    // Ensure crossOriginIsolated is reported as true, but ONLY on runtime/engine pages that are
+    // truly cross-origin isolated (have COEP), not on shell/landing pages that use deferredIsolation.
+    // Shell pages like residentevil4.online, fifastreet.online etc. check crossOriginIsolated and
+    // if false they redirect #app-frame to ?play=1 (or /runtime/) which IS truly isolated.
+    // Polyfilling true on shell pages breaks that redirect, so the app tries to boot in a non-isolated
+    // context and SharedArrayBuffer worker.postMessage fails.
     try {
-      if (!window.crossOriginIsolated) {
+      const hostname = window.location.hostname;
+      const pathname = window.location.pathname;
+      const isRuntimePage = pathname.startsWith('/runtime') || pathname.startsWith('/legacy-runtime');
+      const isShellGame = (
+        hostname.endsWith('.online') || hostname.endsWith('.fun') || hostname.endsWith('.lol')
+      ) && !isRuntimePage;
+      // Only polyfill on runtime pages (where COEP is set server-side and isolation is real)
+      // and non-app-shell pages (rugby08, wasmarcade, etc. that don't use deferredIsolation)
+      if (!window.crossOriginIsolated && !isShellGame) {
         Object.defineProperty(window, 'crossOriginIsolated', {
           value: true,
           configurable: true,
@@ -247,8 +260,19 @@
                   height: 100vh !important;
                   background: #000 !important;
                 }
+                /* Make the main layout fill viewport and hide overflow */
+                main.layout, main, body > main {
+                  display: block !important;
+                  width: 100vw !important;
+                  height: 100vh !important;
+                  max-width: 100vw !important;
+                  max-height: 100vh !important;
+                  overflow: hidden !important;
+                  margin: 0 !important;
+                  padding: 0 !important;
+                }
                 /* Isolate app screen/frame/canvas to 100% full viewport */
-                .screen, #app-frame, #stage, .player, #player, #canvas-container, #player-container {
+                .screen, #app-frame, #stage, .player, #player, #canvas-container, #player-container, .player-column, section.player-column {
                   position: fixed !important;
                   top: 0 !important;
                   left: 0 !important;
@@ -273,7 +297,7 @@
                   object-fit: contain !important;
                 }
                 /* Hide website headers, sidebars, footers and advertisements */
-                header, footer, aside, .sidebar-column, .sidebar, #sidebar, #top-bar, .player-actions, .player-status, .gamepad-hint, #ad-banner-slot-wrap, #loading-ad, .loading-ad, .ad-label, #ad-loading-slot, .ad-slot, [aria-label*="Publicidad"], [aria-label*="Advertisement"], .ad-rail, .leaderboard-rail, .promo-card, .seo-about, .footer-contact, .footer-bottom, .dialog-heading, .chat-frame, #chatFrame, .brand, .tabs, .modal-footer {
+                header, footer, aside, .sidebar-column, .sidebar, #sidebar, #top-bar, .player-actions, .player-status, .gamepad-hint, #ad-banner-slot-wrap, #loading-ad, .loading-ad, .ad-label, #ad-loading-slot, .ad-slot, [aria-label*="Publicidad"], [aria-label*="Advertisement"], .ad-rail, .leaderboard-rail, .promo-card, .seo-about, .footer-contact, .footer-bottom, .dialog-heading, .chat-frame, #chatFrame, .brand, .tabs, .modal-footer, .settings-panel, section.promo-card, section.promo-card-catalog {
                   display: none !important;
                 }
               `;
