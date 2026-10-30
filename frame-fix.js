@@ -25,15 +25,19 @@
     // if false they redirect #game-frame to ?play=1 (or /runtime/) which IS truly isolated.
     // Polyfilling true on shell pages breaks that redirect, so the game tries to boot in a non-isolated
     // context and SharedArrayBuffer worker.postMessage fails.
+    // We DO polyfill on ?play=1 pages and /runtime/ pages (where isolation is enforced via
+    // Document-Isolation-Policy injected by the DNR rule).
     try {
       const hostname = window.location.hostname;
       const pathname = window.location.pathname;
+      const searchParams = new URLSearchParams(window.location.search);
       const isRuntimePage = pathname.startsWith('/runtime') || pathname.startsWith('/legacy-runtime');
+      const isPlayPage = searchParams.get('play') === '1';
+      // isShellGame = the bare shell page (no ?play=1, not a runtime page) on .online/.fun/.lol
       const isShellGame = (
         hostname.endsWith('.online') || hostname.endsWith('.fun') || hostname.endsWith('.lol')
-      ) && !isRuntimePage;
-      // Only polyfill on runtime pages (where COEP is set server-side and isolation is real)
-      // and non-game-shell pages (rugby08, wasmarcade, etc. that don't use deferredIsolation)
+      ) && !isRuntimePage && !isPlayPage;
+      // Polyfill ONLY when NOT on a bare shell page (skip so deferredIsolation redirects to ?play=1)
       if (!window.crossOriginIsolated && !isShellGame) {
         Object.defineProperty(window, 'crossOriginIsolated', {
           value: true,
