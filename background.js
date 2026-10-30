@@ -206,7 +206,7 @@ async function setupRules() {
   },
   {
     "id": 5,
-    "priority": 1,
+    "priority": 15,
     "action": {
       "type": "modifyHeaders",
       "requestHeaders": [
@@ -261,6 +261,16 @@ async function setupRules() {
           "header": "cross-origin-resource-policy",
           "operation": "set",
           "value": "cross-origin"
+        },
+        {
+          "header": "permissions-policy",
+          "operation": "set",
+          "value": "screen-wake-lock=*, cross-origin-isolated=*"
+        },
+        {
+          "header": "Permissions-Policy",
+          "operation": "set",
+          "value": "screen-wake-lock=*, cross-origin-isolated=*"
         }
       ]
     },

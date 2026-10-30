@@ -89,6 +89,84 @@
       }
     }, { capture: true, passive: false });
 
+    // Ensure all nested iframes (such as #app-frame in residentevil4.online, pes12.online, etc.)
+    // have the 'credentialless' attribute and 'cross-origin-isolated' permission before navigating.
+    // This allows Chromium to isolate the subframe and permits SharedArrayBuffer transfer to Workers.
+    try {
+      const ensureIframeIsolation = (iframe) => {
+        if (!iframe || !(iframe instanceof HTMLIFrameElement || iframe.tagName === 'IFRAME')) return;
+        try {
+          if (!iframe.hasAttribute('credentialless')) {
+            iframe.setAttribute('credentialless', '');
+          }
+          const allow = iframe.getAttribute('allow') || '';
+          if (!allow.includes('cross-origin-isolated')) {
+            iframe.setAttribute('allow', (allow ? allow + '; ' : '') + 'cross-origin-isolated *; autoplay *; fullscreen *; gamepad *');
+          }
+        } catch (_) {}
+      };
+
+      // 1. Intercept iframe.src property setter
+      const iframeProto = HTMLIFrameElement.prototype;
+      const srcDescriptor = Object.getOwnPropertyDescriptor(iframeProto, 'src');
+      if (srcDescriptor && srcDescriptor.set) {
+        const origSrcSet = srcDescriptor.set;
+        Object.defineProperty(iframeProto, 'src', {
+          set: function(val) {
+            ensureIframeIsolation(this);
+            return origSrcSet.call(this, val);
+          },
+          get: srcDescriptor.get,
+          configurable: true,
+          enumerable: true
+        });
+      }
+
+      // 2. Intercept Element.prototype.setAttribute for src
+      const origSetAttribute = Element.prototype.setAttribute;
+      Element.prototype.setAttribute = function(name, val) {
+        if (this instanceof HTMLIFrameElement && typeof name === 'string' && name.toLowerCase() === 'src') {
+          ensureIframeIsolation(this);
+        }
+        return origSetAttribute.call(this, name, val);
+      };
+
+      // 3. Intercept Document.prototype.createElement for iframes
+      const origCreateElement = Document.prototype.createElement;
+      Document.prototype.createElement = function(tagName, options) {
+        const el = origCreateElement.call(this, tagName, options);
+        if (typeof tagName === 'string' && tagName.toLowerCase() === 'iframe') {
+          ensureIframeIsolation(el);
+        }
+        return el;
+      };
+
+      // 4. Scan existing and observe DOM
+      const scanIframes = () => {
+        document.querySelectorAll('iframe').forEach(ensureIframeIsolation);
+      };
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', scanIframes, { once: true });
+      } else {
+        scanIframes();
+      }
+
+      if (document.documentElement) {
+        const iframeObserver = new MutationObserver((mutations) => {
+          for (const m of mutations) {
+            for (const node of m.addedNodes) {
+              if (node.tagName === 'IFRAME') {
+                ensureIframeIsolation(node);
+              } else if (node.querySelectorAll) {
+                node.querySelectorAll('iframe').forEach(ensureIframeIsolation);
+              }
+            }
+          }
+        });
+        iframeObserver.observe(document.documentElement, { childList: true, subtree: true });
+      }
+    } catch (_) {}
+
     // Auto-skip landing splash screen on web apps / emulators (fifa14.online, pes12.online, residentevil4.online, fiveplay.lol, etc.)
     try {
       const tryClickLaunchButton = () => {
