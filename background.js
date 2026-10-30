@@ -271,6 +271,11 @@ async function setupRules() {
           "header": "Permissions-Policy",
           "operation": "set",
           "value": "screen-wake-lock=*, cross-origin-isolated=*"
+        },
+        {
+          "header": "Document-Isolation-Policy",
+          "operation": "set",
+          "value": "isolate-and-credentialless"
         }
       ]
     },
