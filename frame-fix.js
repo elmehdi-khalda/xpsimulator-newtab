@@ -19,6 +19,17 @@
       document.documentElement.style.setProperty('color-scheme', 'light', 'important');
     }
 
+    // Ensure crossOriginIsolated is reported as true in subframes for emulators & WebAssembly engines (rugby08, pes, fifa, godofwar, etc.)
+    try {
+      if (!window.crossOriginIsolated) {
+        Object.defineProperty(window, 'crossOriginIsolated', {
+          value: true,
+          configurable: true,
+          writable: true
+        });
+      }
+    } catch (_) {}
+
     // Force Light Mode by default so web pages treat user's browser as Light Mode
     const origMatchMedia = window.matchMedia;
     window.matchMedia = function(query) {
@@ -78,47 +89,64 @@
       }
     }, { capture: true, passive: false });
 
-    // Auto-skip landing splash screen on web games / emulators (fifa14.online, residentevil4.online, etc.)
+    // Auto-skip landing splash screen on web games / emulators (fifa14.online, pes12.online, residentevil4.online, fiveplay.lol, etc.)
     try {
-      const autoSkipLanding = () => {
-        const soloBtn = document.querySelector('#start-panel #solo, #start-panel button.primary, button#solo');
-        if (soloBtn && !soloBtn.__xp_auto_clicked) {
-          soloBtn.__xp_auto_clicked = true;
+      const tryClickLaunchButton = () => {
+        const btn = document.querySelector('#start-panel #solo, #start-panel button.primary, button#solo, #solo, button#start, .start#start');
+        if (btn && !btn.disabled && !btn.__xp_auto_clicked) {
+          btn.__xp_auto_clicked = true;
           try {
-            soloBtn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
-            soloBtn.click();
+            btn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+            btn.click();
           } catch (_) {}
           const startPanel = document.getElementById('start-panel');
           if (startPanel) {
             startPanel.style.setProperty('display', 'none', 'important');
+          }
+          return true;
+        }
+        return false;
+      };
+
+      // Poll periodically (every 200ms up to 30s) so when the WebAssembly runtime finishes downloading and enables the button, it triggers instantly
+      let attempts = 150;
+      const launchPoll = setInterval(() => {
+        attempts--;
+        if (tryClickLaunchButton() || attempts <= 0) {
+          clearInterval(launchPoll);
+        }
+      }, 200);
+
+      const setupLaunchObserver = () => {
+        const btn = document.querySelector('#start-panel #solo, #start-panel button.primary, button#solo, #solo, button#start, .start#start');
+        if (btn) {
+          if (!btn.disabled) {
+            tryClickLaunchButton();
+          } else {
+            const attrObs = new MutationObserver(() => {
+              if (!btn.disabled) {
+                tryClickLaunchButton();
+                attrObs.disconnect();
+              }
+            });
+            attrObs.observe(btn, { attributes: true, attributeFilter: ['disabled'] });
+            setTimeout(() => attrObs.disconnect(), 30000);
           }
         }
       };
 
       if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', autoSkipLanding, { once: true });
+        document.addEventListener('DOMContentLoaded', setupLaunchObserver, { once: true });
       } else {
-        autoSkipLanding();
+        setupLaunchObserver();
       }
 
-      const landingObserver = new MutationObserver((mutations, obs) => {
-        const soloBtn = document.querySelector('#start-panel #solo, #start-panel button.primary, button#solo');
-        if (soloBtn && !soloBtn.__xp_auto_clicked) {
-          soloBtn.__xp_auto_clicked = true;
-          try {
-            soloBtn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
-            soloBtn.click();
-          } catch (_) {}
-          const startPanel = document.getElementById('start-panel');
-          if (startPanel) {
-            startPanel.style.setProperty('display', 'none', 'important');
-          }
-          obs.disconnect();
-        }
+      const landingObserver = new MutationObserver(() => {
+        setupLaunchObserver();
       });
       if (document.documentElement) {
         landingObserver.observe(document.documentElement, { childList: true, subtree: true });
-        setTimeout(() => landingObserver.disconnect(), 15000);
+        setTimeout(() => landingObserver.disconnect(), 30000);
       }
     } catch (_) {}
 
@@ -167,7 +195,7 @@
                   object-fit: contain !important;
                 }
                 /* Hide website headers, sidebars, footers and advertisements */
-                header, footer, aside, .sidebar-column, .sidebar, #sidebar, #top-bar, .player-actions, .player-status, .gamepad-hint, #ad-banner-slot-wrap, #loading-ad, .ad-rail, .leaderboard-rail, .promo-card, .seo-about, .footer-contact, .footer-bottom, .dialog-heading, .chat-frame, #chatFrame, .brand, .tabs, .modal-footer {
+                header, footer, aside, .sidebar-column, .sidebar, #sidebar, #top-bar, .player-actions, .player-status, .gamepad-hint, #ad-banner-slot-wrap, #loading-ad, .loading-ad, .ad-label, #ad-loading-slot, .ad-slot, [aria-label*="Publicidad"], [aria-label*="Advertisement"], .ad-rail, .leaderboard-rail, .promo-card, .seo-about, .footer-contact, .footer-bottom, .dialog-heading, .chat-frame, #chatFrame, .brand, .tabs, .modal-footer {
                   display: none !important;
                 }
               `;
