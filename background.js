@@ -272,7 +272,20 @@ async function setupRules() {
           "operation": "set",
           "value": "?1"
         }
-      ],
+      ]
+    },
+    "condition": {
+      "urlFilter": "*",
+      "resourceTypes": [
+        "sub_frame"
+      ]
+    }
+  },
+  {
+    "id": 9,
+    "priority": 12,
+    "action": {
+      "type": "modifyHeaders",
       "responseHeaders": [
         {
           "header": "cross-origin-opener-policy",
@@ -555,7 +568,7 @@ async function setupRules() {
 
     const existingRules = await chrome.declarativeNetRequest.getDynamicRules();
     const existingRuleIds = existingRules.map(r => r.id);
-    const removeIds = Array.from(new Set([...existingRuleIds, 1, 2, 3, 4, 5, 6, 7, 8, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22]));
+    const removeIds = Array.from(new Set([...existingRuleIds, 1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22]));
 
     await chrome.declarativeNetRequest.updateDynamicRules({
       removeRuleIds: removeIds,

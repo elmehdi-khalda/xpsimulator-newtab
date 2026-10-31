@@ -267,7 +267,20 @@
           "operation": "set",
           "value": "?1"
         }
-      ],
+      ]
+    },
+    "condition": {
+      "urlFilter": "*",
+      "resourceTypes": [
+        "sub_frame"
+      ]
+    }
+  },
+  {
+    "id": 9,
+    "priority": 12,
+    "action": {
+      "type": "modifyHeaders",
       "responseHeaders": [
         {
           "header": "cross-origin-opener-policy",
