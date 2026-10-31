@@ -1,0 +1,115 @@
+/* Windows XP Simulator - Web Apps Viewport & Frame Isolation */
+html, body {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  overflow: hidden !important;
+  background: #000 !important;
+}
+
+/* Hide website chrome, headers, footers, sidebars, ads, tabs, settings */
+header,
+footer,
+aside,
+.sidebar-column,
+.sidebar,
+#sidebar,
+#top-bar,
+.player-actions,
+.player-status,
+.gamepad-hint,
+#ad-banner-slot-wrap,
+#loading-ad,
+.loading-ad,
+.ad-label,
+#ad-loading-slot,
+.ad-slot,
+.ad-rail,
+.leaderboard-rail,
+.promo-card,
+.seo-about,
+.footer-contact,
+.footer-bottom,
+.dialog-heading,
+.chat-frame,
+#chatFrame,
+.brand,
+.header-tools,
+.header-note,
+.language-picker,
+.tabs,
+.modal-footer,
+.settings-panel,
+section.promo-card,
+section.promo-card-catalog,
+#start-panel,
+#fullscreen-exit,
+.touch-controls {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Stretch the main layout, player column, screen and app frame/canvas to fill viewport */
+main.layout,
+main,
+body > main,
+section.player-column,
+.player-col,
+.player-column {
+  display: block !important;
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  max-width: 100vw !important;
+  max-height: 100vh !important;
+  border: none !important;
+  overflow: hidden !important;
+  background: #000 !important;
+  z-index: 1 !important;
+}
+
+.screen,
+#app-frame,
+#stage,
+.player,
+#player,
+#canvas-container,
+#player-container {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: 100vw !important;
+  max-height: 100vh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  background: #000 !important;
+  z-index: 999999 !important;
+}
+
+#app-frame,
+iframe#app-frame,
+canvas#canvas,
+canvas.emscripten,
+.screen iframe,
+.screen canvas,
+#stage canvas,
+.player canvas {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100vw !important;
+  max-height: 100vh !important;
+  border: none !important;
+  display: block !important;
+  margin: auto !important;
+  object-fit: contain !important;
+  z-index: 999999 !important;
+}
