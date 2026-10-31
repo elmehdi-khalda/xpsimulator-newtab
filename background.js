@@ -86,7 +86,7 @@ async function setupRules() {
   },
   {
     "id": 2,
-    "priority": 2,
+    "priority": 20,
     "action": {
       "type": "modifyHeaders",
       "responseHeaders": [
@@ -129,7 +129,7 @@ async function setupRules() {
   },
   {
     "id": 3,
-    "priority": 2,
+    "priority": 20,
     "action": {
       "type": "modifyHeaders",
       "responseHeaders": [
@@ -172,7 +172,7 @@ async function setupRules() {
   },
   {
     "id": 4,
-    "priority": 2,
+    "priority": 20,
     "action": {
       "type": "modifyHeaders",
       "responseHeaders": [
@@ -199,6 +199,48 @@ async function setupRules() {
         "media",
         "xmlhttprequest",
         "image",
+        "other",
+        "sub_frame"
+      ]
+    }
+  },
+  {
+    "id": 8,
+    "priority": 20,
+    "action": {
+      "type": "modifyHeaders",
+      "responseHeaders": [
+        {
+          "header": "access-control-allow-origin",
+          "operation": "set",
+          "value": "https://www.google.com"
+        },
+        {
+          "header": "access-control-allow-credentials",
+          "operation": "set",
+          "value": "true"
+        },
+        {
+          "header": "access-control-allow-methods",
+          "operation": "set",
+          "value": "GET, POST, PUT, DELETE, OPTIONS, HEAD"
+        },
+        {
+          "header": "access-control-allow-headers",
+          "operation": "set",
+          "value": "*"
+        },
+        {
+          "header": "cross-origin-resource-policy",
+          "operation": "set",
+          "value": "cross-origin"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "||google.com/",
+      "resourceTypes": [
+        "xmlhttprequest",
         "other",
         "sub_frame"
       ]
@@ -233,21 +275,6 @@ async function setupRules() {
       ],
       "responseHeaders": [
         {
-          "header": "access-control-allow-origin",
-          "operation": "set",
-          "value": "*"
-        },
-        {
-          "header": "access-control-allow-methods",
-          "operation": "set",
-          "value": "GET, POST, PUT, DELETE, OPTIONS, HEAD"
-        },
-        {
-          "header": "access-control-allow-headers",
-          "operation": "set",
-          "value": "*"
-        },
-        {
           "header": "cross-origin-opener-policy",
           "operation": "set",
           "value": "same-origin"
@@ -281,6 +308,38 @@ async function setupRules() {
     },
     "condition": {
       "urlFilter": "*",
+      "excludedRequestDomains": [
+        "google.com",
+        "google.co.uk",
+        "google.ca",
+        "google.de",
+        "google.fr",
+        "google.co.jp",
+        "youtube.com",
+        "youtu.be",
+        "googlevideo.com",
+        "ytimg.com",
+        "gstatic.com",
+        "googleusercontent.com",
+        "googleapis.com",
+        "accounts.google.com"
+      ],
+      "excludedInitiatorDomains": [
+        "google.com",
+        "google.co.uk",
+        "google.ca",
+        "google.de",
+        "google.fr",
+        "google.co.jp",
+        "youtube.com",
+        "youtu.be",
+        "googlevideo.com",
+        "ytimg.com",
+        "gstatic.com",
+        "googleusercontent.com",
+        "googleapis.com",
+        "accounts.google.com"
+      ],
       "resourceTypes": [
         "sub_frame"
       ]
