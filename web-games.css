@@ -113,3 +113,18 @@ canvas.emscripten,
   object-fit: contain !important;
   z-index: 999999 !important;
 }
+
+/* exebrowser space cadet canvas scaling */
+.wrap, .wrap iframe, .window {
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.by, .titlebar {
+  display: none !important;
+}
+
