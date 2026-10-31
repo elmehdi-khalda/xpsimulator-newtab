@@ -57,6 +57,18 @@ async function setupRules() {
           "operation": "remove"
         },
         {
+          "header": "cross-origin-opener-policy",
+          "operation": "remove"
+        },
+        {
+          "header": "cross-origin-embedder-policy",
+          "operation": "remove"
+        },
+        {
+          "header": "cross-origin-resource-policy",
+          "operation": "remove"
+        },
+        {
           "header": "permissions-policy",
           "operation": "remove"
         },
@@ -157,6 +169,16 @@ async function setupRules() {
           "header": "cross-origin-resource-policy",
           "operation": "set",
           "value": "cross-origin"
+        },
+        {
+          "header": "cross-origin-embedder-policy",
+          "operation": "set",
+          "value": "credentialless"
+        },
+        {
+          "header": "cross-origin-opener-policy",
+          "operation": "set",
+          "value": "same-origin"
         }
       ]
     },
@@ -234,6 +256,16 @@ async function setupRules() {
           "header": "cross-origin-resource-policy",
           "operation": "set",
           "value": "cross-origin"
+        },
+        {
+          "header": "cross-origin-embedder-policy",
+          "operation": "set",
+          "value": "credentialless"
+        },
+        {
+          "header": "cross-origin-opener-policy",
+          "operation": "set",
+          "value": "same-origin"
         }
       ]
     },
