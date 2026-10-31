@@ -186,13 +186,16 @@
 
     // Auto-skip landing splash screen on web apps / emulators (fifa14.online, pes12.online, residentevil4.online, fiveplay.lol, etc.)
     try {
+      let launchDone = false; // guard: only fire once per page load
+
       const tryClickLaunchButton = () => {
+        if (launchDone) return false;
         const btn = document.querySelector('#start-panel #solo, #start-panel button.primary, button#solo, #solo, button#start, .start#start');
         if (btn && !btn.disabled && !btn.__xp_auto_clicked) {
+          launchDone = true;
           btn.__xp_auto_clicked = true;
           try {
-            btn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
-            btn.click();
+            btn.click(); // single click only — avoids double boot() race
           } catch (_) {}
           const startPanel = document.getElementById('start-panel');
           if (startPanel) {
@@ -212,18 +215,22 @@
         }
       }, 200);
 
+      let attrObsRef = null;
       const setupLaunchObserver = () => {
+        if (launchDone) return;
         const btn = document.querySelector('#start-panel #solo, #start-panel button.primary, button#solo, #solo, button#start, .start#start');
         if (btn) {
           if (!btn.disabled) {
             tryClickLaunchButton();
-          } else {
+          } else if (!btn.__xp_obs_attached) {
+            btn.__xp_obs_attached = true; // prevent multiple attrObs on same button
             const attrObs = new MutationObserver(() => {
               if (!btn.disabled) {
                 tryClickLaunchButton();
                 attrObs.disconnect();
               }
             });
+            attrObsRef = attrObs;
             attrObs.observe(btn, { attributes: true, attributeFilter: ['disabled'] });
             setTimeout(() => attrObs.disconnect(), 30000);
           }
@@ -237,6 +244,7 @@
       }
 
       const landingObserver = new MutationObserver(() => {
+        if (launchDone) { landingObserver.disconnect(); return; }
         setupLaunchObserver();
       });
       if (document.documentElement) {
