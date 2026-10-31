@@ -50,6 +50,18 @@
           "operation": "remove"
         },
         {
+          "header": "cross-origin-opener-policy",
+          "operation": "remove"
+        },
+        {
+          "header": "cross-origin-embedder-policy",
+          "operation": "remove"
+        },
+        {
+          "header": "cross-origin-resource-policy",
+          "operation": "remove"
+        },
+        {
           "header": "permissions-policy",
           "operation": "set",
           "value": "screen-wake-lock=*"
@@ -152,6 +164,16 @@
           "header": "cross-origin-resource-policy",
           "operation": "set",
           "value": "cross-origin"
+        },
+        {
+          "header": "cross-origin-embedder-policy",
+          "operation": "set",
+          "value": "credentialless"
+        },
+        {
+          "header": "cross-origin-opener-policy",
+          "operation": "set",
+          "value": "same-origin"
         }
       ]
     },
@@ -229,6 +251,16 @@
           "header": "cross-origin-resource-policy",
           "operation": "set",
           "value": "cross-origin"
+        },
+        {
+          "header": "cross-origin-embedder-policy",
+          "operation": "set",
+          "value": "credentialless"
+        },
+        {
+          "header": "cross-origin-opener-policy",
+          "operation": "set",
+          "value": "same-origin"
         }
       ]
     },
