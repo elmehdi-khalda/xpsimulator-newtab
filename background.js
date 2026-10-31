@@ -282,7 +282,7 @@ async function setupRules() {
     }
   },
   {
-    "id": 9,
+    "id": 7,
     "priority": 12,
     "action": {
       "type": "modifyHeaders",
