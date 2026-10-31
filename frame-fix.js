@@ -88,7 +88,7 @@
       }
     } catch (_) {}
 
-    // Forward ESC and F11 key press to parent XP Simulator window for fullscreen handling
+    // Forward ESC key press from subframe to parent XP Simulator window for fullscreen handling
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' || e.keyCode === 27) {
         try {
@@ -96,15 +96,8 @@
             window.parent.postMessage({ type: 'xp-exit-fullscreen' }, '*');
           }
         } catch (_) {}
-      } else if (e.key === 'F11' || e.keyCode === 122) {
-        e.preventDefault();
-        try {
-          if (window.parent && window.parent !== window) {
-            window.parent.postMessage({ type: 'xp-toggle-fullscreen' }, '*');
-          }
-        } catch (_) {}
       }
-    }, { capture: true, passive: false });
+    }, { capture: true, passive: true });
 
     // Ensure all nested iframes (such as #game-frame in residentevil4.online, pes12.online, etc.)
     // have the 'credentialless' attribute and 'cross-origin-isolated' permission before navigating.
