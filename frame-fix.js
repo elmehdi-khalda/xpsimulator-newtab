@@ -99,81 +99,144 @@
       }
     }, { capture: true, passive: true });
 
-    // Ensure all nested iframes (such as #game-frame in residentevil4.online, pes12.online, etc.)
+    // Ensure nested game iframes (such as #game-frame in residentevil4.online, pes12.online, etc.)
     // have the 'credentialless' attribute and 'cross-origin-isolated' permission before navigating.
     // This allows Chromium to isolate the subframe and permits SharedArrayBuffer transfer to Workers.
+    // STRICT GUARD: NEVER apply credentialless to Google, YouTube, or general user-authenticated sites,
+    // as credentialless strips user cookies and partitions authentication sessions!
     try {
-      const ensureIframeIsolation = (iframe) => {
-        if (!iframe || !(iframe instanceof HTMLIFrameElement || iframe.tagName === 'IFRAME')) return;
+      const isProtectedOrigin = () => {
         try {
-          if (!iframe.hasAttribute('credentialless')) {
-            iframe.setAttribute('credentialless', '');
-          }
-          const allow = iframe.getAttribute('allow') || '';
-          if (!allow.includes('cross-origin-isolated')) {
-            iframe.setAttribute('allow', (allow ? allow + '; ' : '') + 'cross-origin-isolated *; autoplay *; fullscreen *; gamepad *');
-          }
-        } catch (_) {}
+          const h = (window.location.hostname || '').toLowerCase();
+          return (
+            h.includes('google.') ||
+            h.includes('youtube.') ||
+            h.includes('gstatic.') ||
+            h.includes('googleusercontent.') ||
+            h.includes('googleapis.') ||
+            h.includes('googlevideo.') ||
+            h.includes('ytimg.') ||
+            h.includes('bing.com') ||
+            h.includes('yahoo.com') ||
+            h.includes('reddit.com') ||
+            h.includes('twitter.com') ||
+            h.includes('x.com') ||
+            h.includes('facebook.com')
+          );
+        } catch (_) {
+          return false;
+        }
       };
 
-      // 1. Intercept iframe.src property setter
-      const iframeProto = HTMLIFrameElement.prototype;
-      const srcDescriptor = Object.getOwnPropertyDescriptor(iframeProto, 'src');
-      if (srcDescriptor && srcDescriptor.set) {
-        const origSrcSet = srcDescriptor.set;
-        Object.defineProperty(iframeProto, 'src', {
-          set: function(val) {
+      if (!isProtectedOrigin()) {
+        const isGameIframe = (iframe) => {
+          if (!iframe) return false;
+          try {
+            const id = (iframe.id || '').toLowerCase();
+            const cls = (iframe.className || '').toLowerCase();
+            const src = (iframe.getAttribute('src') || iframe.src || '').toLowerCase();
+            if (
+              src.includes('google.') ||
+              src.includes('youtube.') ||
+              src.includes('accounts.google.') ||
+              src.includes('gstatic.')
+            ) {
+              return false; // NEVER treat Google / YouTube as game iframe
+            }
+            const h = (window.location.hostname || '').toLowerCase();
+            return (
+              id.includes('game') ||
+              cls.includes('game') ||
+              h.endsWith('.online') ||
+              h.endsWith('.lol') ||
+              h.endsWith('.fun') ||
+              h.includes('wasmarcade') ||
+              h.includes('exebrowser') ||
+              h.includes('vel.gg') ||
+              h.includes('itch.io') ||
+              src.includes('.online') ||
+              src.includes('.lol') ||
+              src.includes('.fun') ||
+              src.includes('exebrowser')
+            );
+          } catch (_) {
+            return false;
+          }
+        };
+
+        const ensureIframeIsolation = (iframe) => {
+          if (!iframe || !(iframe instanceof HTMLIFrameElement || iframe.tagName === 'IFRAME')) return;
+          if (!isGameIframe(iframe)) return;
+          try {
+            if (!iframe.hasAttribute('credentialless')) {
+              iframe.setAttribute('credentialless', '');
+            }
+            const allow = iframe.getAttribute('allow') || '';
+            if (!allow.includes('cross-origin-isolated')) {
+              iframe.setAttribute('allow', (allow ? allow + '; ' : '') + 'cross-origin-isolated *; autoplay *; fullscreen *; gamepad *');
+            }
+          } catch (_) {}
+        };
+
+        // 1. Intercept iframe.src property setter
+        const iframeProto = HTMLIFrameElement.prototype;
+        const srcDescriptor = Object.getOwnPropertyDescriptor(iframeProto, 'src');
+        if (srcDescriptor && srcDescriptor.set) {
+          const origSrcSet = srcDescriptor.set;
+          Object.defineProperty(iframeProto, 'src', {
+            set: function(val) {
+              ensureIframeIsolation(this);
+              return origSrcSet.call(this, val);
+            },
+            get: srcDescriptor.get,
+            configurable: true,
+            enumerable: true
+          });
+        }
+
+        // 2. Intercept Element.prototype.setAttribute for src
+        const origSetAttribute = Element.prototype.setAttribute;
+        Element.prototype.setAttribute = function(name, val) {
+          if (this instanceof HTMLIFrameElement && typeof name === 'string' && name.toLowerCase() === 'src') {
             ensureIframeIsolation(this);
-            return origSrcSet.call(this, val);
-          },
-          get: srcDescriptor.get,
-          configurable: true,
-          enumerable: true
-        });
-      }
+          }
+          return origSetAttribute.call(this, name, val);
+        };
 
-      // 2. Intercept Element.prototype.setAttribute for src
-      const origSetAttribute = Element.prototype.setAttribute;
-      Element.prototype.setAttribute = function(name, val) {
-        if (this instanceof HTMLIFrameElement && typeof name === 'string' && name.toLowerCase() === 'src') {
-          ensureIframeIsolation(this);
+        // 3. Intercept Document.prototype.createElement for iframes
+        const origCreateElement = Document.prototype.createElement;
+        Document.prototype.createElement = function(tagName, options) {
+          const el = origCreateElement.call(this, tagName, options);
+          if (typeof tagName === 'string' && tagName.toLowerCase() === 'iframe') {
+            ensureIframeIsolation(el);
+          }
+          return el;
+        };
+
+        // 4. Scan existing and observe DOM
+        const scanIframes = () => {
+          document.querySelectorAll('iframe').forEach(ensureIframeIsolation);
+        };
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', scanIframes, { once: true });
+        } else {
+          scanIframes();
         }
-        return origSetAttribute.call(this, name, val);
-      };
 
-      // 3. Intercept Document.prototype.createElement for iframes
-      const origCreateElement = Document.prototype.createElement;
-      Document.prototype.createElement = function(tagName, options) {
-        const el = origCreateElement.call(this, tagName, options);
-        if (typeof tagName === 'string' && tagName.toLowerCase() === 'iframe') {
-          ensureIframeIsolation(el);
-        }
-        return el;
-      };
-
-      // 4. Scan existing and observe DOM
-      const scanIframes = () => {
-        document.querySelectorAll('iframe').forEach(ensureIframeIsolation);
-      };
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', scanIframes, { once: true });
-      } else {
-        scanIframes();
-      }
-
-      if (document.documentElement) {
-        const iframeObserver = new MutationObserver((mutations) => {
-          for (const m of mutations) {
-            for (const node of m.addedNodes) {
-              if (node.tagName === 'IFRAME') {
-                ensureIframeIsolation(node);
-              } else if (node.querySelectorAll) {
-                node.querySelectorAll('iframe').forEach(ensureIframeIsolation);
+        if (document.documentElement) {
+          const iframeObserver = new MutationObserver((mutations) => {
+            for (const m of mutations) {
+              for (const node of m.addedNodes) {
+                if (node.tagName === 'IFRAME') {
+                  ensureIframeIsolation(node);
+                } else if (node.querySelectorAll) {
+                  node.querySelectorAll('iframe').forEach(ensureIframeIsolation);
+                }
               }
             }
-          }
-        });
-        iframeObserver.observe(document.documentElement, { childList: true, subtree: true });
+          });
+          iframeObserver.observe(document.documentElement, { childList: true, subtree: true });
+        }
       }
     } catch (_) {}
 
@@ -250,6 +313,26 @@
     try {
       if (window.self !== window.top) {
         const applyGameViewportFix = () => {
+          const host = (window.location.hostname || '').toLowerCase();
+          // STRICT EXCLUSION: Never apply game viewport CSS to YouTube, Google, Bing, Wikipedia, or other standard websites!
+          if (
+            host.includes('youtube.com') ||
+            host.includes('googlevideo.com') ||
+            host.includes('ytimg.com') ||
+            host.includes('google.') ||
+            host.includes('gstatic.com') ||
+            host.includes('bing.com') ||
+            host.includes('yahoo.com') ||
+            host.includes('wikipedia.org') ||
+            host.includes('reddit.com') ||
+            host.includes('github.com') ||
+            host.includes('x.com') ||
+            host.includes('twitter.com') ||
+            host.includes('facebook.com')
+          ) {
+            return;
+          }
+
           const hasGame = document.querySelector('canvas#canvas, #canvas, canvas.emscripten, #game-frame, .screen, #stage, .player, #player');
           if (hasGame) {
             let style = document.getElementById('xp-game-viewport-fix');
