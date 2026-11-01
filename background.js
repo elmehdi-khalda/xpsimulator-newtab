@@ -123,7 +123,7 @@ async function setupRules() {
         {
           "header": "access-control-allow-headers",
           "operation": "set",
-          "value": "*"
+          "value": "authorization, content-type, x-requested-with, accept, origin, x-client-data, x-goog-authuser, x-goog-visitor-id, x-goog-encode-response-if-executable, x-goog-api-client, x-user-agent, x-youtube-client-name, x-youtube-client-version, range, cache-control, pragma, *"
         },
         {
           "header": "cross-origin-resource-policy",
@@ -166,7 +166,7 @@ async function setupRules() {
         {
           "header": "access-control-allow-headers",
           "operation": "set",
-          "value": "*"
+          "value": "authorization, content-type, x-requested-with, accept, origin, x-client-data, x-goog-authuser, x-goog-visitor-id, x-goog-encode-response-if-executable, x-goog-api-client, x-user-agent, x-youtube-client-name, x-youtube-client-version, range, cache-control, pragma, *"
         },
         {
           "header": "cross-origin-resource-policy",
@@ -253,7 +253,7 @@ async function setupRules() {
         {
           "header": "access-control-allow-headers",
           "operation": "set",
-          "value": "*"
+          "value": "authorization, content-type, x-requested-with, accept, origin, x-client-data, x-goog-authuser, x-goog-visitor-id, x-goog-encode-response-if-executable, x-goog-api-client, x-user-agent, x-youtube-client-name, x-youtube-client-version, range, cache-control, pragma, *"
         },
         {
           "header": "cross-origin-resource-policy",
