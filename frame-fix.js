@@ -31,6 +31,42 @@
       } catch (_) {}
     }
 
+    // Ensure navigator.cookieEnabled reports true and document.cookie works in subframes
+    try {
+      if (Object.getOwnPropertyDescriptor(Navigator.prototype, 'cookieEnabled')) {
+        Object.defineProperty(Navigator.prototype, 'cookieEnabled', {
+          get: () => true,
+          configurable: true
+        });
+      }
+      if (typeof document.hasStorageAccess === 'function') {
+        document.hasStorageAccess = async function() { return true; };
+      }
+      if (typeof document.requestStorageAccess === 'function') {
+        document.requestStorageAccess = async function() { return true; };
+      }
+    } catch (_) {}
+
+    // Support SameSite=None; Secure for document.cookie in iframe context
+    try {
+      const origCookieDesc = Object.getOwnPropertyDescriptor(Document.prototype, 'cookie') ||
+                             Object.getOwnPropertyDescriptor(HTMLDocument.prototype, 'cookie');
+      if (origCookieDesc && origCookieDesc.set) {
+        Object.defineProperty(document, 'cookie', {
+          get: function() {
+            return origCookieDesc.get.call(this);
+          },
+          set: function(val) {
+            if (typeof val === 'string' && !val.toLowerCase().includes('samesite')) {
+              val += '; SameSite=None; Secure';
+            }
+            return origCookieDesc.set.call(this, val);
+          },
+          configurable: true
+        });
+      }
+    } catch (_) {}
+
     // Ensure crossOriginIsolated is reported as true, but ONLY on runtime/engine pages that are
     // truly cross-origin isolated (have COEP), not on shell/landing pages that use deferredIsolation.
     // Shell pages like residentevil4.online, fifastreet.online etc. check crossOriginIsolated and
