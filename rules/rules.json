@@ -115,7 +115,7 @@
         {
           "header": "access-control-allow-headers",
           "operation": "set",
-          "value": "authorization, content-type, x-requested-with, accept, origin, x-client-data, x-goog-authuser, x-goog-visitor-id, x-goog-encode-response-if-executable, x-goog-api-client, x-user-agent, x-youtube-client-name, x-youtube-client-version, range, cache-control, pragma, *"
+          "value": "*"
         },
         {
           "header": "cross-origin-resource-policy",
@@ -158,12 +158,22 @@
         {
           "header": "access-control-allow-headers",
           "operation": "set",
-          "value": "authorization, content-type, x-requested-with, accept, origin, x-client-data, x-goog-authuser, x-goog-visitor-id, x-goog-encode-response-if-executable, x-goog-api-client, x-user-agent, x-youtube-client-name, x-youtube-client-version, range, cache-control, pragma, *"
+          "value": "*"
         },
         {
           "header": "cross-origin-resource-policy",
           "operation": "set",
           "value": "cross-origin"
+        },
+        {
+          "header": "cross-origin-embedder-policy",
+          "operation": "set",
+          "value": "credentialless"
+        },
+        {
+          "header": "cross-origin-opener-policy",
+          "operation": "set",
+          "value": "same-origin"
         }
       ]
     },
@@ -235,12 +245,22 @@
         {
           "header": "access-control-allow-headers",
           "operation": "set",
-          "value": "authorization, content-type, x-requested-with, accept, origin, x-client-data, x-goog-authuser, x-goog-visitor-id, x-goog-encode-response-if-executable, x-goog-api-client, x-user-agent, x-youtube-client-name, x-youtube-client-version, range, cache-control, pragma, *"
+          "value": "*"
         },
         {
           "header": "cross-origin-resource-policy",
           "operation": "set",
           "value": "cross-origin"
+        },
+        {
+          "header": "cross-origin-embedder-policy",
+          "operation": "set",
+          "value": "credentialless"
+        },
+        {
+          "header": "cross-origin-opener-policy",
+          "operation": "set",
+          "value": "same-origin"
         }
       ]
     },
@@ -389,7 +409,7 @@
         {
           "header": "access-control-allow-headers",
           "operation": "set",
-          "value": "authorization, content-type, x-requested-with, accept, origin, x-client-data, x-goog-authuser, x-goog-visitor-id, x-goog-encode-response-if-executable, x-goog-api-client, x-user-agent, x-youtube-client-name, x-youtube-client-version, range, cache-control, pragma, *"
+          "value": "*"
         },
         {
           "header": "cross-origin-resource-policy",
