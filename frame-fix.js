@@ -31,69 +31,85 @@
       } catch (_) {}
     }
 
-    // Ensure navigator.cookieEnabled reports true and document.cookie works in subframes
-    try {
-      if (Object.getOwnPropertyDescriptor(Navigator.prototype, 'cookieEnabled')) {
-        Object.defineProperty(Navigator.prototype, 'cookieEnabled', {
-          get: () => true,
-          configurable: true
-        });
-      }
-      if (typeof document.hasStorageAccess === 'function') {
-        document.hasStorageAccess = async function() { return true; };
-      }
-      if (typeof document.requestStorageAccess === 'function') {
-        document.requestStorageAccess = async function() { return true; };
-      }
-    } catch (_) {}
+    const host = (window.location.hostname || '').toLowerCase();
+    const isGoogleOrYoutube = (
+      host === 'google.com' ||
+      host.endsWith('.google.com') ||
+      host.includes('google.') ||
+      host === 'youtube.com' ||
+      host.endsWith('.youtube.com') ||
+      host.includes('youtube.') ||
+      host.includes('googlevideo.') ||
+      host.includes('ytimg.') ||
+      host.endsWith('youtu.be')
+    );
 
-    // Support SameSite=None; Secure for document.cookie in iframe context
-    try {
-      const origCookieDesc = Object.getOwnPropertyDescriptor(Document.prototype, 'cookie') ||
-                             Object.getOwnPropertyDescriptor(HTMLDocument.prototype, 'cookie');
-      if (origCookieDesc && origCookieDesc.set) {
-        Object.defineProperty(document, 'cookie', {
-          get: function() {
-            return origCookieDesc.get.call(this);
-          },
-          set: function(val) {
-            if (typeof val === 'string' && !val.toLowerCase().includes('samesite')) {
-              val += '; SameSite=None; Secure';
-            }
-            return origCookieDesc.set.call(this, val);
-          },
-          configurable: true
-        });
-      }
-    } catch (_) {}
+    // Dynamic 10.56 enhancements for general external subframes (skipped for Google & YouTube to restore 2-weeks-ago native behavior)
+    if (!isGoogleOrYoutube) {
+      // Ensure navigator.cookieEnabled reports true and document.cookie works in subframes
+      try {
+        if (Object.getOwnPropertyDescriptor(Navigator.prototype, 'cookieEnabled')) {
+          Object.defineProperty(Navigator.prototype, 'cookieEnabled', {
+            get: () => true,
+            configurable: true
+          });
+        }
+        if (typeof document.hasStorageAccess === 'function') {
+          document.hasStorageAccess = async function() { return true; };
+        }
+        if (typeof document.requestStorageAccess === 'function') {
+          document.requestStorageAccess = async function() { return true; };
+        }
+      } catch (_) {}
 
-    // Ensure crossOriginIsolated is reported as true, but ONLY on runtime/engine pages that are
-    // truly cross-origin isolated (have COEP), not on shell/landing pages that use deferredIsolation.
-    // Shell pages like residentevil4.online, fifastreet.online etc. check crossOriginIsolated and
-    // if false they redirect #game-frame to ?play=1 (or /runtime/) which IS truly isolated.
-    // Polyfilling true on shell pages breaks that redirect, so the game tries to boot in a non-isolated
-    // context and SharedArrayBuffer worker.postMessage fails.
-    // We DO polyfill on ?play=1 pages and /runtime/ pages (where isolation is enforced via
-    // Document-Isolation-Policy injected by the DNR rule).
-    try {
-      const hostname = window.location.hostname;
-      const pathname = window.location.pathname;
-      const searchParams = new URLSearchParams(window.location.search);
-      const isRuntimePage = pathname.startsWith('/runtime') || pathname.startsWith('/legacy-runtime');
-      const isPlayPage = searchParams.get('play') === '1';
-      // isShellGame = the bare shell page (no ?play=1, not a runtime page) on .online/.fun/.lol
-      const isShellGame = (
-        hostname.endsWith('.online') || hostname.endsWith('.fun') || hostname.endsWith('.lol')
-      ) && !isRuntimePage && !isPlayPage;
-      // Polyfill ONLY when NOT on a bare shell page (skip so deferredIsolation redirects to ?play=1)
-      if (!window.crossOriginIsolated && !isShellGame) {
-        Object.defineProperty(window, 'crossOriginIsolated', {
-          value: true,
-          configurable: true,
-          writable: true
-        });
-      }
-    } catch (_) {}
+      // Support SameSite=None; Secure for document.cookie in iframe context
+      try {
+        const origCookieDesc = Object.getOwnPropertyDescriptor(Document.prototype, 'cookie') ||
+                               Object.getOwnPropertyDescriptor(HTMLDocument.prototype, 'cookie');
+        if (origCookieDesc && origCookieDesc.set) {
+          Object.defineProperty(document, 'cookie', {
+            get: function() {
+              return origCookieDesc.get.call(this);
+            },
+            set: function(val) {
+              if (typeof val === 'string' && !val.toLowerCase().includes('samesite')) {
+                val += '; SameSite=None; Secure';
+              }
+              return origCookieDesc.set.call(this, val);
+            },
+            configurable: true
+          });
+        }
+      } catch (_) {}
+
+      // Ensure crossOriginIsolated is reported as true, but ONLY on runtime/engine pages that are
+      // truly cross-origin isolated (have COEP), not on shell/landing pages that use deferredIsolation.
+      // Shell pages like residentevil4.online, fifastreet.online etc. check crossOriginIsolated and
+      // if false they redirect #game-frame to ?play=1 (or /runtime/) which IS truly isolated.
+      // Polyfilling true on shell pages breaks that redirect, so the game tries to boot in a non-isolated
+      // context and SharedArrayBuffer worker.postMessage fails.
+      // We DO polyfill on ?play=1 pages and /runtime/ pages (where isolation is enforced via
+      // Document-Isolation-Policy injected by the DNR rule).
+      try {
+        const hostname = window.location.hostname;
+        const pathname = window.location.pathname;
+        const searchParams = new URLSearchParams(window.location.search);
+        const isRuntimePage = pathname.startsWith('/runtime') || pathname.startsWith('/legacy-runtime');
+        const isPlayPage = searchParams.get('play') === '1';
+        // isShellGame = the bare shell page (no ?play=1, not a runtime page) on .online/.fun/.lol
+        const isShellGame = (
+          hostname.endsWith('.online') || hostname.endsWith('.fun') || hostname.endsWith('.lol')
+        ) && !isRuntimePage && !isPlayPage;
+        // Polyfill ONLY when NOT on a bare shell page (skip so deferredIsolation redirects to ?play=1)
+        if (!window.crossOriginIsolated && !isShellGame) {
+          Object.defineProperty(window, 'crossOriginIsolated', {
+            value: true,
+            configurable: true,
+            writable: true
+          });
+        }
+      } catch (_) {}
+    }
 
     // Force Light Mode by default so web pages treat user's browser as Light Mode
     const origMatchMedia = window.matchMedia;
@@ -1783,22 +1799,36 @@
     } catch (e) {}
   }
 
-  // Fix cross-subdomain postMessage targetOrigin mismatches (e.g. google.com vs ogs.google.com)
+  // Fix cross-subdomain postMessage targetOrigin mismatches (skip Google & YouTube to preserve native OAuth/GIS token exchanges)
   try {
     const originalPostMessage = window.postMessage;
-    window.postMessage = function(message, targetOrigin, transfer) {
-      if (location.hostname.includes('cloudflare') || location.hostname.includes('turnstile') || (message && typeof message === 'object' && ('turnstile' in message || 'source' in message || 'chlPage' in message))) {
-        return originalPostMessage.apply(this, arguments);
-      }
-      if (!targetOrigin || targetOrigin === 'undefined' || (typeof targetOrigin === 'string' && targetOrigin !== '*' && !targetOrigin.startsWith('/'))) {
-        targetOrigin = '*';
-      }
-      try {
-        return originalPostMessage.call(this, message, targetOrigin, transfer);
-      } catch (e) {
-        return originalPostMessage.call(this, message, '*', transfer);
-      }
-    };
+    const currentHost = (window.location.hostname || '').toLowerCase();
+    const isGoogleOrYoutubeForPM = (
+      currentHost === 'google.com' ||
+      currentHost.endsWith('.google.com') ||
+      currentHost.includes('google.') ||
+      currentHost === 'youtube.com' ||
+      currentHost.endsWith('.youtube.com') ||
+      currentHost.includes('youtube.') ||
+      currentHost.includes('googlevideo.') ||
+      currentHost.includes('ytimg.') ||
+      currentHost.endsWith('youtu.be')
+    );
+    if (!isGoogleOrYoutubeForPM) {
+      window.postMessage = function(message, targetOrigin, transfer) {
+        if (location.hostname.includes('cloudflare') || location.hostname.includes('turnstile') || (message && typeof message === 'object' && ('turnstile' in message || 'source' in message || 'chlPage' in message))) {
+          return originalPostMessage.apply(this, arguments);
+        }
+        if (!targetOrigin || targetOrigin === 'undefined' || (typeof targetOrigin === 'string' && targetOrigin !== '*' && !targetOrigin.startsWith('/'))) {
+          targetOrigin = '*';
+        }
+        try {
+          return originalPostMessage.call(this, message, targetOrigin, transfer);
+        } catch (e) {
+          return originalPostMessage.call(this, message, '*', transfer);
+        }
+      };
+    }
   } catch (e) {}
 
   // Prevent link breakouts (_top, _parent) from escaping Internet Explorer simulation
