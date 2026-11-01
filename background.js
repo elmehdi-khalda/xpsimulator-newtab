@@ -123,7 +123,7 @@ async function setupRules() {
         {
           "header": "access-control-allow-headers",
           "operation": "set",
-          "value": "authorization, content-type, x-requested-with, accept, origin, x-client-data, x-goog-authuser, x-goog-visitor-id, x-goog-encode-response-if-executable, x-goog-api-client, x-user-agent, x-youtube-client-name, x-youtube-client-version, range, cache-control, pragma, *"
+          "value": "*"
         },
         {
           "header": "cross-origin-resource-policy",
@@ -166,12 +166,22 @@ async function setupRules() {
         {
           "header": "access-control-allow-headers",
           "operation": "set",
-          "value": "authorization, content-type, x-requested-with, accept, origin, x-client-data, x-goog-authuser, x-goog-visitor-id, x-goog-encode-response-if-executable, x-goog-api-client, x-user-agent, x-youtube-client-name, x-youtube-client-version, range, cache-control, pragma, *"
+          "value": "*"
         },
         {
           "header": "cross-origin-resource-policy",
           "operation": "set",
           "value": "cross-origin"
+        },
+        {
+          "header": "cross-origin-embedder-policy",
+          "operation": "set",
+          "value": "credentialless"
+        },
+        {
+          "header": "cross-origin-opener-policy",
+          "operation": "set",
+          "value": "same-origin"
         }
       ]
     },
@@ -243,12 +253,22 @@ async function setupRules() {
         {
           "header": "access-control-allow-headers",
           "operation": "set",
-          "value": "authorization, content-type, x-requested-with, accept, origin, x-client-data, x-goog-authuser, x-goog-visitor-id, x-goog-encode-response-if-executable, x-goog-api-client, x-user-agent, x-youtube-client-name, x-youtube-client-version, range, cache-control, pragma, *"
+          "value": "*"
         },
         {
           "header": "cross-origin-resource-policy",
           "operation": "set",
           "value": "cross-origin"
+        },
+        {
+          "header": "cross-origin-embedder-policy",
+          "operation": "set",
+          "value": "credentialless"
+        },
+        {
+          "header": "cross-origin-opener-policy",
+          "operation": "set",
+          "value": "same-origin"
         }
       ]
     },
@@ -588,7 +608,7 @@ async function setupRules() {
 
     const existingRules = await chrome.declarativeNetRequest.getDynamicRules();
     const existingRuleIds = existingRules.map(r => r.id);
-    const removeIds = Array.from(new Set([...existingRuleIds, 1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]));
+    const removeIds = Array.from(new Set([...existingRuleIds, 1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22]));
 
     await chrome.declarativeNetRequest.updateDynamicRules({
       removeRuleIds: removeIds,

@@ -1709,85 +1709,41 @@
                           window.location.pathname.includes('/html/');
   if (isInternalFrame) return;
 
-  // Spoof top, parent, and frameElement so Internet Explorer simulated tabs act as standalone browser windows
-  const isIEFrame = Boolean(
-    window.name === 'xp-ie-iframe' ||
-    (typeof window.name === 'string' && window.name.includes('xp-ie')) ||
-    (function() {
-      try {
-        if (window.parent && window.parent !== window && typeof window.parent.name === 'string' && window.parent.name.includes('xp-ie')) {
-          return true;
-        }
-      } catch (_) {}
-      return false;
-    })() ||
-    window.location.hostname.includes('youtube.com') ||
-    window.location.hostname.includes('googlevideo.com')
-  );
+  // Spoof top, parent, and frameElement so YouTube acts as a standalone browser window ONLY on YouTube!
+  const isYouTube = window.location.hostname.includes('youtube.com') || window.location.hostname.includes('googlevideo.com');
+  if (isYouTube) {
+    try {
+      Object.defineProperty(window, 'top', {
+        get: () => window,
+        set: () => {},
+        configurable: true
+      });
+    } catch (e) {}
 
-  if (isIEFrame) {
-    const isOutermostIE = window.name === 'xp-ie-iframe' || (window.location.hostname.includes('youtube.com') && window.top !== window);
-    if (isOutermostIE) {
-      try {
-        Object.defineProperty(window, 'top', {
-          get: () => window,
-          set: () => {},
-          configurable: true
-        });
-      } catch (e) {}
+    try {
+      Object.defineProperty(window, 'parent', {
+        get: () => window,
+        set: () => {},
+        configurable: true
+      });
+    } catch (e) {}
 
-      try {
-        Object.defineProperty(window, 'parent', {
-          get: () => window,
-          set: () => {},
-          configurable: true
-        });
-      } catch (e) {}
-
-      try {
-        Object.defineProperty(window, 'frameElement', {
-          get: () => null,
-          set: () => {},
-          configurable: true
-        });
-      } catch (e) {}
-    } else {
-      try {
-        let ieTop = window;
-        let curr = window;
-        while (curr && curr.parent && curr.parent !== curr) {
-          if (curr.name === 'xp-ie-iframe' || (curr.parent && curr.parent.name === 'xp-ie-iframe')) {
-            ieTop = curr.name === 'xp-ie-iframe' ? curr : curr.parent;
-            break;
-          }
-          curr = curr.parent;
-        }
-        if (ieTop && ieTop !== window.top) {
-          Object.defineProperty(window, 'top', {
-            get: () => ieTop,
-            set: () => {},
-            configurable: true
-          });
-        }
-      } catch (_) {}
-    }
+    try {
+      Object.defineProperty(window, 'frameElement', {
+        get: () => null,
+        set: () => {},
+        configurable: true
+      });
+    } catch (e) {}
   }
 
-  // Spoof document.referrer on YouTube frames or when leaking simulator host
-  if (isIEFrame) {
+  // Spoof document.referrer to YouTube origin ONLY on YouTube frames so player tokens remain valid
+  if (window.location.hostname.includes('youtube.com') || window.location.hostname.includes('googlevideo.com')) {
     try {
-      const isYT = window.location.hostname.includes('youtube.com') || window.location.hostname.includes('googlevideo.com');
-      if (isYT) {
-        Object.defineProperty(document, 'referrer', {
-          get: () => 'https://www.youtube.com/',
-          configurable: true
-        });
-      } else if (document.referrer && (document.referrer.includes('vercel.app') || document.referrer.includes('localhost') || document.referrer.includes('127.0.0.1') || document.referrer.includes('elmehdikhalda'))) {
-        Object.defineProperty(document, 'referrer', {
-          get: () => '',
-          configurable: true
-        });
-      }
+      Object.defineProperty(document, 'referrer', {
+        get: () => 'https://www.youtube.com/',
+        configurable: true
+      });
     } catch (e) {}
   }
 
@@ -1809,30 +1765,17 @@
     };
   } catch (e) {}
 
-  // Prevent link breakouts (_top, _parent, _blank) from escaping Internet Explorer simulation
+  // Prevent link breakouts (_top, _parent) from escaping Internet Explorer simulation
   try {
     document.addEventListener('click', (e) => {
       const a = e.target && e.target.closest ? e.target.closest('a') : null;
-      if (a && isIEFrame) {
-        const target = (a.target || '').toLowerCase();
-        if (target === '_top' || target === '_parent' || target === '_blank') {
+      if (a) {
+        if (a.target === '_top' || a.target === '_parent') {
           a.target = '_self';
         }
       }
     }, true);
   } catch (e) {}
-
-  // Override window.open inside IE simulation so popups and search results stay inside IE
-  try {
-    const originalWindowOpen = window.open;
-    window.open = function(url, target, features) {
-      if (isIEFrame && url && typeof url === 'string') {
-        window.location.href = url;
-        return window;
-      }
-      return originalWindowOpen.apply(this, arguments);
-    };
-  } catch (_) {}
 
   // Inject authoritative sizing and anti-preview CSS for smooth wide-window mounts
   const injectAuthoritativePlayerStyles = () => {
