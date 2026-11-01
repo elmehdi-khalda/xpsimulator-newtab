@@ -69,15 +69,18 @@ async function setupRules() {
         },
         {
           "header": "cross-origin-resource-policy",
-          "operation": "remove"
+          "operation": "set",
+          "value": "cross-origin"
         },
         {
           "header": "permissions-policy",
-          "operation": "remove"
+          "operation": "set",
+          "value": "screen-wake-lock=*"
         },
         {
           "header": "Permissions-Policy",
-          "operation": "remove"
+          "operation": "set",
+          "value": "screen-wake-lock=*"
         },
         {
           "header": "feature-policy",
@@ -244,11 +247,43 @@ async function setupRules() {
           "header": "sec-fetch-user",
           "operation": "set",
           "value": "?1"
+        }
+      ],
+      "responseHeaders": [
+        {
+          "header": "access-control-allow-origin",
+          "operation": "set",
+          "value": "*"
         },
         {
-          "header": "sec-ch-prefers-color-scheme",
+          "header": "access-control-allow-credentials",
           "operation": "set",
-          "value": colorSchemeVal
+          "value": "true"
+        },
+        {
+          "header": "access-control-allow-methods",
+          "operation": "set",
+          "value": "GET, POST, PUT, DELETE, OPTIONS, HEAD"
+        },
+        {
+          "header": "access-control-allow-headers",
+          "operation": "set",
+          "value": "*"
+        },
+        {
+          "header": "cross-origin-resource-policy",
+          "operation": "set",
+          "value": "cross-origin"
+        },
+        {
+          "header": "permissions-policy",
+          "operation": "set",
+          "value": "screen-wake-lock=*"
+        },
+        {
+          "header": "Permissions-Policy",
+          "operation": "set",
+          "value": "screen-wake-lock=*"
         }
       ]
     },
@@ -298,41 +333,134 @@ async function setupRules() {
       ]
     },
     "condition": {
-      "urlFilter": "*",
-      "excludedRequestDomains": [
-        "google.com",
-        "google.co.uk",
-        "google.ca",
-        "google.de",
-        "google.fr",
-        "google.co.jp",
-        "youtube.com",
-        "youtu.be",
-        "googlevideo.com",
-        "ytimg.com",
-        "gstatic.com",
-        "googleusercontent.com",
-        "googleapis.com",
-        "accounts.google.com"
-      ],
-      "excludedInitiatorDomains": [
-        "google.com",
-        "google.co.uk",
-        "google.ca",
-        "google.de",
-        "google.fr",
-        "google.co.jp",
-        "youtube.com",
-        "youtu.be",
-        "googlevideo.com",
-        "ytimg.com",
-        "gstatic.com",
-        "googleusercontent.com",
-        "googleapis.com",
-        "accounts.google.com"
-      ],
+      "urlFilter": "||residentevil4.online/",
       "resourceTypes": [
-        "sub_frame"
+        "sub_frame",
+        "script",
+        "xmlhttprequest",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 6,
+    "priority": 3,
+    "action": {
+      "type": "modifyHeaders",
+      "responseHeaders": [
+        {
+          "header": "access-control-allow-origin",
+          "operation": "set",
+          "value": "*"
+        },
+        {
+          "header": "access-control-allow-methods",
+          "operation": "set",
+          "value": "GET, POST, PUT, DELETE, OPTIONS, HEAD"
+        },
+        {
+          "header": "access-control-allow-headers",
+          "operation": "set",
+          "value": "*"
+        },
+        {
+          "header": "cross-origin-resource-policy",
+          "operation": "set",
+          "value": "cross-origin"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "||vimm.net/*",
+      "resourceTypes": [
+        "main_frame",
+        "sub_frame",
+        "stylesheet",
+        "script",
+        "image",
+        "font",
+        "object",
+        "xmlhttprequest",
+        "ping",
+        "media",
+        "websocket",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 9,
+    "priority": 10,
+    "action": {
+      "type": "modifyHeaders",
+      "responseHeaders": [
+        {
+          "header": "Cross-Origin-Opener-Policy",
+          "operation": "set",
+          "value": "same-origin"
+        },
+        {
+          "header": "Cross-Origin-Embedder-Policy",
+          "operation": "set",
+          "value": "credentialless"
+        },
+        {
+          "header": "Cross-Origin-Resource-Policy",
+          "operation": "set",
+          "value": "cross-origin"
+        },
+        {
+          "header": "Document-Isolation-Policy",
+          "operation": "set",
+          "value": "isolate-and-credentialless"
+        },
+        {
+          "header": "Access-Control-Allow-Origin",
+          "operation": "set",
+          "value": "*"
+        },
+        {
+          "header": "Permissions-Policy",
+          "operation": "set",
+          "value": "screen-wake-lock=*, cross-origin-isolated=*"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "||vel.gg/",
+      "resourceTypes": [
+        "sub_frame",
+        "script",
+        "xmlhttprequest",
+        "other"
+      ]
+    }
+  },
+  {
+    "id": 10,
+    "priority": 10,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||pagead2.googlesyndication.com/",
+      "resourceTypes": [
+        "script",
+        "sub_frame",
+        "xmlhttprequest"
+      ]
+    }
+  },
+  {
+    "id": 11,
+    "priority": 10,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||static.itch.io/htmlgame.js",
+      "resourceTypes": [
+        "script"
       ]
     }
   },
@@ -539,6 +667,174 @@ async function setupRules() {
         "xmlhttprequest",
         "ping",
         "other"
+      ]
+    }
+  },
+  {
+    "id": 8,
+    "priority": 25,
+    "action": {
+      "type": "modifyHeaders",
+      "responseHeaders": [
+        {
+          "header": "access-control-allow-origin",
+          "operation": "set",
+          "value": "https://www.google.com"
+        },
+        {
+          "header": "access-control-allow-credentials",
+          "operation": "set",
+          "value": "true"
+        },
+        {
+          "header": "access-control-allow-methods",
+          "operation": "set",
+          "value": "GET, POST, PUT, DELETE, OPTIONS, HEAD"
+        },
+        {
+          "header": "access-control-allow-headers",
+          "operation": "set",
+          "value": "authorization, content-type, x-requested-with, accept, origin, x-client-data, x-goog-authuser, x-goog-visitor-id, x-goog-encode-response-if-executable, x-goog-api-client, x-user-agent, range, cache-control, pragma, *"
+        },
+        {
+          "header": "cross-origin-resource-policy",
+          "operation": "set",
+          "value": "cross-origin"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "||google.com/",
+      "resourceTypes": [
+        "xmlhttprequest",
+        "other",
+        "sub_frame"
+      ]
+    }
+  },
+  {
+    "id": 25,
+    "priority": 25,
+    "action": {
+      "type": "modifyHeaders",
+      "responseHeaders": [
+        {
+          "header": "access-control-allow-origin",
+          "operation": "set",
+          "value": "https://www.google.com"
+        },
+        {
+          "header": "access-control-allow-credentials",
+          "operation": "set",
+          "value": "true"
+        },
+        {
+          "header": "access-control-allow-methods",
+          "operation": "set",
+          "value": "GET, POST, PUT, DELETE, OPTIONS, HEAD"
+        },
+        {
+          "header": "access-control-allow-headers",
+          "operation": "set",
+          "value": "authorization, content-type, x-requested-with, accept, origin, x-client-data, x-goog-authuser, x-goog-visitor-id, x-goog-encode-response-if-executable, x-goog-api-client, x-user-agent, range, cache-control, pragma, *"
+        },
+        {
+          "header": "cross-origin-resource-policy",
+          "operation": "set",
+          "value": "cross-origin"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "||clients6.google.com/",
+      "resourceTypes": [
+        "xmlhttprequest",
+        "other",
+        "sub_frame"
+      ]
+    }
+  },
+  {
+    "id": 26,
+    "priority": 25,
+    "action": {
+      "type": "modifyHeaders",
+      "responseHeaders": [
+        {
+          "header": "access-control-allow-origin",
+          "operation": "set",
+          "value": "https://www.google.com"
+        },
+        {
+          "header": "access-control-allow-credentials",
+          "operation": "set",
+          "value": "true"
+        },
+        {
+          "header": "access-control-allow-methods",
+          "operation": "set",
+          "value": "GET, POST, PUT, DELETE, OPTIONS, HEAD"
+        },
+        {
+          "header": "access-control-allow-headers",
+          "operation": "set",
+          "value": "authorization, content-type, x-requested-with, accept, origin, x-client-data, x-goog-authuser, x-goog-visitor-id, x-goog-encode-response-if-executable, x-goog-api-client, x-user-agent, range, cache-control, pragma, *"
+        },
+        {
+          "header": "cross-origin-resource-policy",
+          "operation": "set",
+          "value": "cross-origin"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "||play.google.com/",
+      "resourceTypes": [
+        "xmlhttprequest",
+        "other",
+        "sub_frame"
+      ]
+    }
+  },
+  {
+    "id": 24,
+    "priority": 25,
+    "action": {
+      "type": "modifyHeaders",
+      "responseHeaders": [
+        {
+          "header": "access-control-allow-origin",
+          "operation": "set",
+          "value": "https://www.google.com"
+        },
+        {
+          "header": "access-control-allow-credentials",
+          "operation": "set",
+          "value": "true"
+        },
+        {
+          "header": "access-control-allow-methods",
+          "operation": "set",
+          "value": "GET, POST, PUT, DELETE, OPTIONS, HEAD"
+        },
+        {
+          "header": "access-control-allow-headers",
+          "operation": "set",
+          "value": "authorization, content-type, x-requested-with, accept, origin, x-client-data, x-goog-authuser, x-goog-visitor-id, x-goog-encode-response-if-executable, x-goog-api-client, x-user-agent, range, cache-control, pragma, *"
+        },
+        {
+          "header": "cross-origin-resource-policy",
+          "operation": "set",
+          "value": "cross-origin"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "||accounts.google.com/",
+      "resourceTypes": [
+        "xmlhttprequest",
+        "other",
+        "sub_frame"
       ]
     }
   }
