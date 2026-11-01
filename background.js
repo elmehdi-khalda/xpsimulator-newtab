@@ -172,16 +172,6 @@ async function setupRules() {
           "header": "cross-origin-resource-policy",
           "operation": "set",
           "value": "cross-origin"
-        },
-        {
-          "header": "cross-origin-embedder-policy",
-          "operation": "set",
-          "value": "credentialless"
-        },
-        {
-          "header": "cross-origin-opener-policy",
-          "operation": "set",
-          "value": "same-origin"
         }
       ]
     },
@@ -259,16 +249,6 @@ async function setupRules() {
           "header": "cross-origin-resource-policy",
           "operation": "set",
           "value": "cross-origin"
-        },
-        {
-          "header": "cross-origin-embedder-policy",
-          "operation": "set",
-          "value": "credentialless"
-        },
-        {
-          "header": "cross-origin-opener-policy",
-          "operation": "set",
-          "value": "same-origin"
         }
       ]
     },
@@ -601,36 +581,6 @@ async function setupRules() {
         "xmlhttprequest",
         "ping",
         "other"
-      ]
-    }
-  },
-  {
-    "id": 23,
-    "priority": 18,
-    "action": {
-      "type": "modifyHeaders",
-      "responseHeaders": [
-        {
-          "header": "cross-origin-embedder-policy",
-          "operation": "set",
-          "value": "credentialless"
-        },
-        {
-          "header": "cross-origin-resource-policy",
-          "operation": "set",
-          "value": "cross-origin"
-        },
-        {
-          "header": "cross-origin-opener-policy",
-          "operation": "set",
-          "value": "same-origin"
-        }
-      ]
-    },
-    "condition": {
-      "urlFilter": "*",
-      "resourceTypes": [
-        "sub_frame"
       ]
     }
   }
