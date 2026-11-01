@@ -172,16 +172,6 @@ async function setupRules() {
           "header": "cross-origin-resource-policy",
           "operation": "set",
           "value": "cross-origin"
-        },
-        {
-          "header": "cross-origin-embedder-policy",
-          "operation": "set",
-          "value": "credentialless"
-        },
-        {
-          "header": "cross-origin-opener-policy",
-          "operation": "set",
-          "value": "same-origin"
         }
       ]
     },
@@ -224,118 +214,6 @@ async function setupRules() {
         "media",
         "xmlhttprequest",
         "image",
-        "other",
-        "sub_frame"
-      ]
-    }
-  },
-  {
-    "id": 8,
-    "priority": 20,
-    "action": {
-      "type": "modifyHeaders",
-      "responseHeaders": [
-        {
-          "header": "access-control-allow-origin",
-          "operation": "set",
-          "value": "https://www.google.com"
-        },
-        {
-          "header": "access-control-allow-credentials",
-          "operation": "set",
-          "value": "true"
-        },
-        {
-          "header": "access-control-allow-methods",
-          "operation": "set",
-          "value": "GET, POST, PUT, DELETE, OPTIONS, HEAD"
-        },
-        {
-          "header": "access-control-allow-headers",
-          "operation": "set",
-          "value": "authorization, content-type, x-requested-with, accept, origin, x-client-data, x-goog-authuser, x-goog-visitor-id, x-goog-encode-response-if-executable, x-goog-api-client, x-user-agent, range, cache-control, pragma, *"
-        },
-        {
-          "header": "cross-origin-resource-policy",
-          "operation": "set",
-          "value": "cross-origin"
-        },
-        {
-          "header": "cross-origin-embedder-policy",
-          "operation": "set",
-          "value": "credentialless"
-        },
-        {
-          "header": "cross-origin-opener-policy",
-          "operation": "set",
-          "value": "same-origin"
-        }
-      ]
-    },
-    "condition": {
-      "urlFilter": "||google.com/",
-      "excludedInitiatorDomains": [
-        "accounts.google.com",
-        "play.google.com",
-        "myaccount.google.com"
-      ],
-      "resourceTypes": [
-        "xmlhttprequest",
-        "other",
-        "sub_frame"
-      ]
-    }
-  },
-  {
-    "id": 24,
-    "priority": 25,
-    "action": {
-      "type": "modifyHeaders",
-      "responseHeaders": [
-        {
-          "header": "access-control-allow-origin",
-          "operation": "set",
-          "value": "https://accounts.google.com"
-        },
-        {
-          "header": "access-control-allow-credentials",
-          "operation": "set",
-          "value": "true"
-        },
-        {
-          "header": "access-control-allow-methods",
-          "operation": "set",
-          "value": "GET, POST, PUT, DELETE, OPTIONS, HEAD"
-        },
-        {
-          "header": "access-control-allow-headers",
-          "operation": "set",
-          "value": "authorization, content-type, x-requested-with, accept, origin, x-client-data, x-goog-authuser, x-goog-visitor-id, x-goog-encode-response-if-executable, x-goog-api-client, x-user-agent, range, cache-control, pragma, *"
-        },
-        {
-          "header": "cross-origin-resource-policy",
-          "operation": "set",
-          "value": "cross-origin"
-        },
-        {
-          "header": "cross-origin-embedder-policy",
-          "operation": "set",
-          "value": "credentialless"
-        },
-        {
-          "header": "cross-origin-opener-policy",
-          "operation": "set",
-          "value": "same-origin"
-        }
-      ]
-    },
-    "condition": {
-      "urlFilter": "||google.com/",
-      "initiatorDomains": [
-        "accounts.google.com"
-      ],
-      "resourceTypes": [
-        "xmlhttprequest",
         "other",
         "sub_frame"
       ]
