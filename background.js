@@ -3,7 +3,15 @@
  * Manages iframe unblocking, YouTube 403 videoplayback Referer/Origin headers, and standalone app window.
  */
 
+let isSettingUpRules = false;
+let pendingSetupRules = false;
+
 async function setupRules() {
+  if (isSettingUpRules) {
+    pendingSetupRules = true;
+    return;
+  }
+  isSettingUpRules = true;
   try {
     const storage = await chrome.storage.local.get(['themeMode']);
     const themeMode = storage.themeMode || 'light';
@@ -842,7 +850,9 @@ async function setupRules() {
 
     const existingRules = await chrome.declarativeNetRequest.getDynamicRules();
     const existingRuleIds = existingRules.map(r => r.id);
-    const removeIds = Array.from(new Set([...existingRuleIds, 1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]));
+    const dynamicRuleIds = dynamicRules.map(r => r.id);
+    const fallbackIds = Array.from({ length: 100 }, (_, i) => i + 1);
+    const removeIds = Array.from(new Set([...existingRuleIds, ...dynamicRuleIds, ...fallbackIds]));
 
     await chrome.declarativeNetRequest.updateDynamicRules({
       removeRuleIds: removeIds,
@@ -851,6 +861,12 @@ async function setupRules() {
     console.log('[Windows XP] DeclarativeNetRequest active: Subframes unblocked, CORS headers enabled & YouTube playback authorized.');
   } catch (err) {
     console.error('[Windows XP] Error updating declarativeNetRequest:', err);
+  } finally {
+    isSettingUpRules = false;
+    if (pendingSetupRules) {
+      pendingSetupRules = false;
+      setupRules();
+    }
   }
 }
 
