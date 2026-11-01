@@ -228,36 +228,105 @@
         display: none !important;
       }
 
-      /* Dark Mode Support for Classic Google */
+      /* Clean Light Mode Styling (eliminates dark-mode inversion glitches) */
+      html:not([data-xp-theme-mode="dark"]),
+      html:not([data-xp-theme-mode="dark"]) body {
+        background-color: #ffffff !important;
+        color: #222222 !important;
+        color-scheme: light !important;
+      }
+
+      html:not([data-xp-theme-mode="dark"]) .RNNXgb,
+      html:not([data-xp-theme-mode="dark"]) div[jsname="RNNXgb"] {
+        background: #ffffff !important;
+        border: 1px solid #707070 !important;
+        border-top-color: #555555 !important;
+      }
+
+      html:not([data-xp-theme-mode="dark"]) .gLFyf,
+      html:not([data-xp-theme-mode="dark"]) textarea[name="q"],
+      html:not([data-xp-theme-mode="dark"]) input[name="q"] {
+        color: #000000 !important;
+        background: transparent !important;
+      }
+
+      html:not([data-xp-theme-mode="dark"]) a {
+        color: #0000cc !important;
+      }
+
+      html:not([data-xp-theme-mode="dark"]) a:visited {
+        color: #660099 !important;
+      }
+
+      html:not([data-xp-theme-mode="dark"]) input[name="btnK"],
+      html:not([data-xp-theme-mode="dark"]) input[name="btnI"],
+      html:not([data-xp-theme-mode="dark"]) .gNO89b,
+      html:not([data-xp-theme-mode="dark"]) .RNmpXc {
+        background: #ece9d8 !important;
+        color: #000000 !important;
+        border: 1px solid #707070 !important;
+      }
+
+      /* Clean Dark Mode Styling */
       html[data-xp-theme-mode="dark"],
       html[data-xp-theme-mode="dark"] body {
-        background-color: #121212 !important;
+        background-color: #202124 !important;
         color: #e8eaed !important;
+        color-scheme: dark !important;
       }
 
       html[data-xp-theme-mode="dark"] .RNNXgb,
       html[data-xp-theme-mode="dark"] div[jsname="RNNXgb"] {
-        background: #202124 !important;
-        border-color: #5f6368 !important;
+        background: #303134 !important;
+        border: 1px solid #5f6368 !important;
       }
 
       html[data-xp-theme-mode="dark"] .gLFyf,
       html[data-xp-theme-mode="dark"] textarea[name="q"],
       html[data-xp-theme-mode="dark"] input[name="q"] {
         color: #ffffff !important;
+        background: transparent !important;
       }
 
       html[data-xp-theme-mode="dark"] input[name="btnK"],
       html[data-xp-theme-mode="dark"] input[name="btnI"],
       html[data-xp-theme-mode="dark"] .gNO89b,
       html[data-xp-theme-mode="dark"] .RNmpXc {
-        background: #303134 !important;
+        background: #3c4043 !important;
         color: #e8eaed !important;
-        border-color: #5f6368 !important;
+        border: 1px solid #5f6368 !important;
       }
 
       html[data-xp-theme-mode="dark"] a {
         color: #8ab4f8 !important;
+      }
+
+      html[data-xp-theme-mode="dark"] a:visited {
+        color: #c58af9 !important;
+      }
+
+      html[data-xp-theme-mode="dark"] .r a,
+      html[data-xp-theme-mode="dark"] h3.r a,
+      html[data-xp-theme-mode="dark"] h3 a {
+        color: #8ab4f8 !important;
+      }
+
+      html[data-xp-theme-mode="dark"] .kv,
+      html[data-xp-theme-mode="dark"] .s cite,
+      html[data-xp-theme-mode="dark"] cite {
+        color: #81c995 !important;
+      }
+
+      html[data-xp-theme-mode="dark"] .st,
+      html[data-xp-theme-mode="dark"] .s,
+      html[data-xp-theme-mode="dark"] .VwiC3b,
+      html[data-xp-theme-mode="dark"] .xp-result-number {
+        color: #bdc1c6 !important;
+      }
+
+      html[data-xp-theme-mode="dark"] li.g:hover,
+      html[data-xp-theme-mode="dark"] div.g:hover {
+        background-color: #2d2e30 !important;
       }
 
       .u732Oi, .fbar.p4ecBe {

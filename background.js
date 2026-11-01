@@ -5,6 +5,9 @@
 
 async function setupRules() {
   try {
+    const storage = await chrome.storage.local.get(['themeMode']);
+    const themeMode = storage.themeMode || 'light';
+    const colorSchemeVal = themeMode === 'dark' ? '"dark"' : '"light"';
     const dynamicRules = [
   {
     "id": 1,
@@ -303,6 +306,11 @@ async function setupRules() {
           "header": "sec-fetch-user",
           "operation": "set",
           "value": "?1"
+        },
+        {
+          "header": "sec-ch-prefers-color-scheme",
+          "operation": "set",
+          "value": colorSchemeVal
         }
       ]
     },
@@ -595,12 +603,42 @@ async function setupRules() {
         "other"
       ]
     }
+  },
+  {
+    "id": 23,
+    "priority": 18,
+    "action": {
+      "type": "modifyHeaders",
+      "responseHeaders": [
+        {
+          "header": "cross-origin-embedder-policy",
+          "operation": "set",
+          "value": "credentialless"
+        },
+        {
+          "header": "cross-origin-resource-policy",
+          "operation": "set",
+          "value": "cross-origin"
+        },
+        {
+          "header": "cross-origin-opener-policy",
+          "operation": "set",
+          "value": "same-origin"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "*",
+      "resourceTypes": [
+        "sub_frame"
+      ]
+    }
   }
 ];
 
     const existingRules = await chrome.declarativeNetRequest.getDynamicRules();
     const existingRuleIds = existingRules.map(r => r.id);
-    const removeIds = Array.from(new Set([...existingRuleIds, 1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22]));
+    const removeIds = Array.from(new Set([...existingRuleIds, 1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]));
 
     await chrome.declarativeNetRequest.updateDynamicRules({
       removeRuleIds: removeIds,
@@ -611,6 +649,12 @@ async function setupRules() {
     console.error('[Windows XP] Error updating declarativeNetRequest:', err);
   }
 }
+
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === 'local' && changes.themeMode) {
+    setupRules();
+  }
+});
 
 function initDefaultSettings() {
   chrome.storage.local.get(['openInIE'], (res) => {

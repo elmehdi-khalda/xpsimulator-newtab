@@ -16,7 +16,19 @@
     }
     if (document.documentElement) {
       document.documentElement.setAttribute('data-xp-extension', 'true');
-      document.documentElement.style.setProperty('color-scheme', 'light', 'important');
+      const initMode = document.documentElement.getAttribute('data-xp-theme-mode') || 'light';
+      document.documentElement.style.setProperty('color-scheme', initMode, 'important');
+      try {
+        const themeObserver = new MutationObserver((mutations) => {
+          for (const m of mutations) {
+            if (m.type === 'attributes' && m.attributeName === 'data-xp-theme-mode') {
+              const currentMode = document.documentElement.getAttribute('data-xp-theme-mode') || 'light';
+              document.documentElement.style.setProperty('color-scheme', currentMode, 'important');
+            }
+          }
+        });
+        themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-xp-theme-mode'] });
+      } catch (_) {}
     }
 
     // Ensure crossOriginIsolated is reported as true, but ONLY on runtime/engine pages that are
@@ -1697,41 +1709,85 @@
                           window.location.pathname.includes('/html/');
   if (isInternalFrame) return;
 
-  // Spoof top, parent, and frameElement so YouTube acts as a standalone browser window ONLY on YouTube!
-  const isYouTube = window.location.hostname.includes('youtube.com') || window.location.hostname.includes('googlevideo.com');
-  if (isYouTube) {
-    try {
-      Object.defineProperty(window, 'top', {
-        get: () => window,
-        set: () => {},
-        configurable: true
-      });
-    } catch (e) {}
+  // Spoof top, parent, and frameElement so Internet Explorer simulated tabs act as standalone browser windows
+  const isIEFrame = Boolean(
+    window.name === 'xp-ie-iframe' ||
+    (typeof window.name === 'string' && window.name.includes('xp-ie')) ||
+    (function() {
+      try {
+        if (window.parent && window.parent !== window && typeof window.parent.name === 'string' && window.parent.name.includes('xp-ie')) {
+          return true;
+        }
+      } catch (_) {}
+      return false;
+    })() ||
+    window.location.hostname.includes('youtube.com') ||
+    window.location.hostname.includes('googlevideo.com')
+  );
 
-    try {
-      Object.defineProperty(window, 'parent', {
-        get: () => window,
-        set: () => {},
-        configurable: true
-      });
-    } catch (e) {}
+  if (isIEFrame) {
+    const isOutermostIE = window.name === 'xp-ie-iframe' || (window.location.hostname.includes('youtube.com') && window.top !== window);
+    if (isOutermostIE) {
+      try {
+        Object.defineProperty(window, 'top', {
+          get: () => window,
+          set: () => {},
+          configurable: true
+        });
+      } catch (e) {}
 
-    try {
-      Object.defineProperty(window, 'frameElement', {
-        get: () => null,
-        set: () => {},
-        configurable: true
-      });
-    } catch (e) {}
+      try {
+        Object.defineProperty(window, 'parent', {
+          get: () => window,
+          set: () => {},
+          configurable: true
+        });
+      } catch (e) {}
+
+      try {
+        Object.defineProperty(window, 'frameElement', {
+          get: () => null,
+          set: () => {},
+          configurable: true
+        });
+      } catch (e) {}
+    } else {
+      try {
+        let ieTop = window;
+        let curr = window;
+        while (curr && curr.parent && curr.parent !== curr) {
+          if (curr.name === 'xp-ie-iframe' || (curr.parent && curr.parent.name === 'xp-ie-iframe')) {
+            ieTop = curr.name === 'xp-ie-iframe' ? curr : curr.parent;
+            break;
+          }
+          curr = curr.parent;
+        }
+        if (ieTop && ieTop !== window.top) {
+          Object.defineProperty(window, 'top', {
+            get: () => ieTop,
+            set: () => {},
+            configurable: true
+          });
+        }
+      } catch (_) {}
+    }
   }
 
-  // Spoof document.referrer to YouTube origin ONLY on YouTube frames so player tokens remain valid
-  if (window.location.hostname.includes('youtube.com') || window.location.hostname.includes('googlevideo.com')) {
+  // Spoof document.referrer on YouTube frames or when leaking simulator host
+  if (isIEFrame) {
     try {
-      Object.defineProperty(document, 'referrer', {
-        get: () => 'https://www.youtube.com/',
-        configurable: true
-      });
+      const isYT = window.location.hostname.includes('youtube.com') || window.location.hostname.includes('googlevideo.com');
+      if (isYT) {
+        Object.defineProperty(document, 'referrer', {
+          get: () => 'https://www.youtube.com/',
+          configurable: true
+        });
+      } else if (document.referrer && (document.referrer.includes('vercel.app') || document.referrer.includes('localhost') || document.referrer.includes('127.0.0.1') || document.referrer.includes('elmehdikhalda'))) {
+        Object.defineProperty(document, 'referrer', {
+          get: () => '',
+          configurable: true
+        });
+      }
     } catch (e) {}
   }
 

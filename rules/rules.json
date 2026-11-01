@@ -298,6 +298,11 @@
           "header": "sec-fetch-user",
           "operation": "set",
           "value": "?1"
+        },
+        {
+          "header": "sec-ch-prefers-color-scheme",
+          "operation": "set",
+          "value": "\"light\""
         }
       ]
     },
@@ -710,6 +715,36 @@
         "xmlhttprequest",
         "ping",
         "other"
+      ]
+    }
+  },
+  {
+    "id": 23,
+    "priority": 18,
+    "action": {
+      "type": "modifyHeaders",
+      "responseHeaders": [
+        {
+          "header": "cross-origin-embedder-policy",
+          "operation": "set",
+          "value": "credentialless"
+        },
+        {
+          "header": "cross-origin-resource-policy",
+          "operation": "set",
+          "value": "cross-origin"
+        },
+        {
+          "header": "cross-origin-opener-policy",
+          "operation": "set",
+          "value": "same-origin"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "*",
+      "resourceTypes": [
+        "sub_frame"
       ]
     }
   }
