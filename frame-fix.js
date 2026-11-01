@@ -1809,17 +1809,30 @@
     };
   } catch (e) {}
 
-  // Prevent link breakouts (_top, _parent) from escaping Internet Explorer simulation
+  // Prevent link breakouts (_top, _parent, _blank) from escaping Internet Explorer simulation
   try {
     document.addEventListener('click', (e) => {
       const a = e.target && e.target.closest ? e.target.closest('a') : null;
-      if (a) {
-        if (a.target === '_top' || a.target === '_parent') {
+      if (a && isIEFrame) {
+        const target = (a.target || '').toLowerCase();
+        if (target === '_top' || target === '_parent' || target === '_blank') {
           a.target = '_self';
         }
       }
     }, true);
   } catch (e) {}
+
+  // Override window.open inside IE simulation so popups and search results stay inside IE
+  try {
+    const originalWindowOpen = window.open;
+    window.open = function(url, target, features) {
+      if (isIEFrame && url && typeof url === 'string') {
+        window.location.href = url;
+        return window;
+      }
+      return originalWindowOpen.apply(this, arguments);
+    };
+  } catch (_) {}
 
   // Inject authoritative sizing and anti-preview CSS for smooth wide-window mounts
   const injectAuthoritativePlayerStyles = () => {
