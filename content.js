@@ -208,6 +208,31 @@
           });
         } catch (_) {}
       }
+      if (event.data.type === 'XP_LAN_FETCH') {
+        const reqId = event.data.requestId;
+        try {
+          chrome.runtime.sendMessage({
+            action: 'XP_LAN_FETCH',
+            url: event.data.url,
+            method: event.data.method || 'GET',
+            headers: event.data.headers || {},
+            body: event.data.body
+          }, (res) => {
+            window.postMessage({
+              type: 'XP_LAN_FETCH_RESULT',
+              requestId: reqId,
+              ...(res || { success: false, error: 'No response from extension background' })
+            }, '*');
+          });
+        } catch (err) {
+          window.postMessage({
+            type: 'XP_LAN_FETCH_RESULT',
+            requestId: reqId,
+            success: false,
+            error: err.message
+          }, '*');
+        }
+      }
     });
 
     function checkAndPushClipboard() {

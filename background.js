@@ -1100,6 +1100,46 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     });
     return true;
   }
+
+  if (message.action === 'XP_LAN_FETCH') {
+    (async () => {
+      try {
+        const fetchOpts = {
+          method: message.method || 'GET',
+          headers: message.headers || {}
+        };
+        if (message.body && message.method !== 'GET' && message.method !== 'HEAD') {
+          fetchOpts.body = message.body;
+        }
+        const response = await fetch(message.url, fetchOpts);
+        const contentType = response.headers.get('content-type') || '';
+        let data;
+        if (contentType.includes('application/json')) {
+          data = await response.json();
+        } else if (contentType.includes('text/') || contentType.includes('xml')) {
+          data = await response.text();
+        } else {
+          const buf = await response.arrayBuffer();
+          const bytes = new Uint8Array(buf);
+          let binary = '';
+          for (let i = 0; i < bytes.byteLength; i++) {
+            binary += String.fromCharCode(bytes[i]);
+          }
+          data = btoa(binary);
+        }
+        sendResponse({
+          success: true,
+          status: response.status,
+          statusText: response.statusText,
+          contentType,
+          data
+        });
+      } catch (err) {
+        sendResponse({ success: false, error: err.message });
+      }
+    })();
+    return true;
+  }
 });
 
 // Helper to recursively extract the full bookmarks hierarchy (folders and links)
