@@ -279,6 +279,38 @@
     },
     "condition": {
       "urlFilter": "*",
+      "excludedRequestDomains": [
+        "google.com",
+        "google.co.uk",
+        "google.ca",
+        "google.de",
+        "google.fr",
+        "google.co.jp",
+        "youtube.com",
+        "youtu.be",
+        "googlevideo.com",
+        "ytimg.com",
+        "gstatic.com",
+        "googleusercontent.com",
+        "googleapis.com",
+        "accounts.google.com"
+      ],
+      "excludedInitiatorDomains": [
+        "google.com",
+        "google.co.uk",
+        "google.ca",
+        "google.de",
+        "google.fr",
+        "google.co.jp",
+        "youtube.com",
+        "youtu.be",
+        "googlevideo.com",
+        "ytimg.com",
+        "gstatic.com",
+        "googleusercontent.com",
+        "googleapis.com",
+        "accounts.google.com"
+      ],
       "resourceTypes": [
         "sub_frame"
       ]
