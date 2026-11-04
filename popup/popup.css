@@ -5,7 +5,7 @@
 }
 
 html, body.xp-popup-body {
-  width: 250px;
+  width: 270px;
   font-family: Tahoma, "Segoe UI", Arial, sans-serif;
   font-size: 11px;
   background: #ece9d8;
@@ -228,6 +228,43 @@ html, body.xp-popup-body {
   gap: 6px;
   justify-content: flex-end;
   margin-top: 2px;
+}
+
+.xp-action-row {
+  width: 100%;
+}
+
+.xp-xp-btn {
+  font-family: Tahoma, "Segoe UI", Arial, sans-serif;
+  font-size: 11px;
+  color: #000000;
+  min-width: 75px;
+  height: 23px;
+  padding: 0 12px;
+  background: linear-gradient(to bottom, #ffffff 0%, #ece9d8 60%, #ded6c0 100%);
+  border: 1px solid #003c74;
+  border-radius: 3px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  outline: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.xp-xp-btn:hover {
+  background: linear-gradient(to bottom, #ffffff 0%, #f4edd9 60%, #e8e0c8 100%);
+  border-color: #0058e6;
+  box-shadow: inset 0 0 0 1px #ffcc66, inset 0 1px 0 #ffffff;
+}
+
+.xp-xp-btn:active {
+  background: linear-gradient(to bottom, #dbd6c4 0%, #ece9d8 100%);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.xp-xp-btn-primary {
+  box-shadow: inset 0 0 0 1px #f5a623, inset 0 1px 0 #ffffff;
 }
 
 .xp-btn {

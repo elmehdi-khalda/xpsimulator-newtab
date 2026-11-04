@@ -22,9 +22,47 @@
         </div>
       </div>
 
-
+      <div class="xp-switch-row">
+        <span class="xp-switch-label">Enable Google Overlay HUD</span>
+        <div class="switch">
+          <input role="switch" type="checkbox" class="switch-input" id="check-overlay-master" />
+          <label class="switch-input-label" for="check-overlay-master"></label>
+        </div>
+      </div>
 
       <div class="xp-switch-row">
+        <span class="xp-switch-label">Apply Old Google in real browser</span>
+        <div class="switch">
+          <input role="switch" type="checkbox" class="switch-input" id="check-old-google-real" />
+          <label class="switch-input-label" for="check-old-google-real"></label>
+        </div>
+      </div>
+
+      <div class="xp-switch-row">
+        <span class="xp-switch-label">Apply Old YouTube in real browser</span>
+        <div class="switch">
+          <input role="switch" type="checkbox" class="switch-input" id="check-old-youtube-real" />
+          <label class="switch-input-label" for="check-old-youtube-real"></label>
+        </div>
+      </div>
+
+      <div class="xp-switch-row">
+        <span class="xp-switch-label">Enable Meme Pack 1</span>
+        <div class="switch">
+          <input role="switch" type="checkbox" class="switch-input" id="check-meme-pack" />
+          <label class="switch-input-label" for="check-meme-pack"></label>
+        </div>
+      </div>
+
+      <div class="xp-switch-row">
+        <span class="xp-switch-label">Keep windows open in next session</span>
+        <div class="switch">
+          <input role="switch" type="checkbox" class="switch-input" id="check-keep-windows" />
+          <label class="switch-input-label" for="check-keep-windows"></label>
+        </div>
+      </div>
+
+      <div class="xp-switch-row" style="margin-top: 4px;">
         <span class="xp-switch-label">Extension Theme Mode:</span>
         <select id="select-theme-mode" class="xp-select">
           <option value="light" selected>Light Mode</option>
@@ -33,56 +71,28 @@
         </select>
       </div>
 
-      <div class="xp-divider"></div>
-
-      <!-- Real Browser Overlay (HUD) Controls -->
-      <fieldset class="xp-fieldset">
-        <legend class="xp-legend">Google Search Overlay (HUD)</legend>
-        <div class="xp-check-row">
-          <input type="checkbox" id="check-overlay-master" />
-          <label for="check-overlay-master" class="xp-bold-label">Enable Google Overlay HUD</label>
-        </div>
-      </fieldset>
-
-      <!-- Real Browser Restyling Controls (Disabled by Default) -->
-      <fieldset class="xp-fieldset" style="margin-top: 8px;">
-        <legend class="xp-legend">Real Browser Restyling (Optional)</legend>
-        <div class="xp-check-row">
-          <input type="checkbox" id="check-old-google-real" />
-          <label for="check-old-google-real">Apply Old Google in real browser</label>
-        </div>
-        <div class="xp-check-row" style="margin-top: 4px;">
-          <input type="checkbox" id="check-old-youtube-real" />
-          <label for="check-old-youtube-real">Apply Old YouTube in real browser</label>
-        </div>
-      </fieldset>
-
-      <div class="xp-divider"></div>
-
-      <div class="xp-bookmark-row">
-        <button id="btn-import-bookmarks" class="xp-btn xp-btn-bookmark" type="button" title="Read your browser bookmarks and create a Bookmarks folder with website logos on the XP Desktop">
-          <span class="xp-btn-star">★</span> Import Bookmarks
+      <div class="xp-action-row" style="margin-top: 6px;">
+        <button id="btn-import-bookmarks" class="xp-xp-btn" style="width: 100%;" type="button">
+          Import Bookmarks
         </button>
       </div>
       <div id="bookmark-status-msg" class="xp-status-msg"></div>
 
-      <div class="xp-bookmark-row" style="margin-top: 2px;">
-        <button id="btn-import-shortcuts" class="xp-btn xp-btn-bookmark" type="button" title="Read your top visited shortcuts and create a Shortcuts folder on the XP Desktop">
-          <span class="xp-btn-star">🚀</span> Import Shortcuts
+      <div class="xp-action-row" style="margin-top: 4px;">
+        <button id="btn-import-shortcuts" class="xp-xp-btn" style="width: 100%;" type="button">
+          Import Shortcuts
         </button>
       </div>
       <div id="shortcut-status-msg" class="xp-status-msg"></div>
 
-      <div class="xp-divider"></div>
-
-      <div class="xp-section-label">Redirection URL:</div>
+      <div class="xp-section-label" style="margin-top: 8px;">Redirection URL:</div>
       <div class="xp-input-group">
         <input type="text" id="input-simulator-url" class="xp-input" spellcheck="false" placeholder="https://xpsimulator.vercel.app" />
       </div>
 
-      <div class="xp-btn-row">
-        <button id="btn-save-url" class="xp-btn xp-btn-primary">Apply</button>
-        <button id="btn-reset-url" class="xp-btn">Reset</button>
+      <div class="xp-btn-row" style="margin-top: 8px;">
+        <button id="btn-save-url" class="xp-xp-btn xp-xp-btn-primary">Apply</button>
+        <button id="btn-reset-url" class="xp-xp-btn">Reset</button>
       </div>
       <div id="status-msg" class="xp-status-msg"></div>
     </div>

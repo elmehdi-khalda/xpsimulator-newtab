@@ -7,19 +7,25 @@
 (function () {
   // Helper to sync extension state to the simulator window
   function initSimulatorBridge() {
-    function applyBridgeState(openInIE) {
+    function applyBridgeState(openInIE, enableMemePack = false, keepWindowsOpen = false) {
       const openInIeStr = String(openInIE);
+      const memePackStr = String(enableMemePack === true);
+      const keepWindowsStr = String(keepWindowsOpen === true);
 
       if (document.documentElement) {
         document.documentElement.setAttribute('data-xp-extension', 'true');
         document.documentElement.setAttribute('data-xp-extension-open-in-ie', openInIeStr);
+        document.documentElement.setAttribute('data-xp-meme-pack', memePackStr);
+        document.documentElement.setAttribute('data-xp-keep-windows', keepWindowsStr);
         document.documentElement.setAttribute('data-xp-games', 'true');
       }
 
       try {
         localStorage.setItem('xp_extension_installed', 'true');
         localStorage.setItem('xp_extension_enabled', 'true');
-        localStorage.setItem('xp_extension_open_in_ie', openInIeStr);
+        localStorage.setItem('xp_extension_open-in-ie', openInIeStr);
+        localStorage.setItem('xp_meme_pack', enableMemePack ? '1' : '0');
+        localStorage.setItem('xp_keep_windows_open', keepWindowsOpen ? '1' : '0');
         localStorage.setItem('xp_extension_games', 'true');
       } catch (_) {}
 
@@ -29,18 +35,22 @@
           installed: true,
           enabled: true,
           openInIE: openInIE,
+          enableMemePack: enableMemePack,
+          keepWindowsOpen: keepWindowsOpen,
           games: true
         }, '*');
         window.dispatchEvent(new CustomEvent('xp-extension-status', {
-          detail: { installed: true, enabled: true, openInIE: openInIE, games: true }
+          detail: { installed: true, enabled: true, openInIE: openInIE, enableMemePack: enableMemePack, keepWindowsOpen: keepWindowsOpen, games: true }
         }));
       } catch (_) {}
     }
 
     // 1. Initial load from storage
-    chrome.storage.local.get(['openInIE', 'xpOverlaySettings'], (data) => {
+    chrome.storage.local.get(['openInIE', 'xpOverlaySettings', 'enableMemePack', 'keepWindowsOpen'], (data) => {
       const openInIE = data.openInIE !== false;
-      applyBridgeState(openInIE);
+      const enableMemePack = data.enableMemePack === true;
+      const keepWindowsOpen = data.keepWindowsOpen === true;
+      applyBridgeState(openInIE, enableMemePack, keepWindowsOpen);
       if (data.xpOverlaySettings) {
         window.postMessage({
           type: 'XP_OVERLAY_SETTINGS_CHANGED',
@@ -51,8 +61,8 @@
 
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => {
-        chrome.storage.local.get(['openInIE', 'xpOverlaySettings', 'themeMode'], (data) => {
-          applyBridgeState(data.openInIE !== false);
+        chrome.storage.local.get(['openInIE', 'xpOverlaySettings', 'themeMode', 'enableMemePack', 'keepWindowsOpen'], (data) => {
+          applyBridgeState(data.openInIE !== false, data.enableMemePack === true, data.keepWindowsOpen === true);
           if (document.documentElement) {
             document.documentElement.setAttribute('data-xp-theme-mode', data.themeMode || 'light');
           }
@@ -76,14 +86,18 @@
     window.addEventListener('message', (event) => {
       if (!event.data || typeof event.data !== 'object') return;
       if (event.data.type === 'XP_EXTENSION_PING' || event.data.type === 'XP_EXTENSION_CHECK') {
-        chrome.storage.local.get(['openInIE', 'xpOverlaySettings'], (res) => {
+        chrome.storage.local.get(['openInIE', 'xpOverlaySettings', 'enableMemePack', 'keepWindowsOpen'], (res) => {
           const currentOpenInIE = res.openInIE !== false;
-          applyBridgeState(currentOpenInIE);
+          const currentMemePack = res.enableMemePack === true;
+          const currentKeepWindows = res.keepWindowsOpen === true;
+          applyBridgeState(currentOpenInIE, currentMemePack, currentKeepWindows);
           window.postMessage({
             type: 'XP_EXTENSION_STATUS',
             installed: true,
             enabled: true,
             openInIE: currentOpenInIE,
+            enableMemePack: currentMemePack,
+            keepWindowsOpen: currentKeepWindows,
             games: true
           }, '*');
           if (res.xpOverlaySettings) {
@@ -100,7 +114,15 @@
     chrome.runtime.onMessage.addListener((msg) => {
       if (msg && msg.action === 'XP_EXTENSION_SETTINGS_CHANGED') {
         const newOpenInIE = msg.openInIE !== false;
-        applyBridgeState(newOpenInIE);
+        const newMemePack = msg.enableMemePack === true;
+        const newKeepWindows = msg.keepWindowsOpen === true;
+        applyBridgeState(newOpenInIE, newMemePack, newKeepWindows);
+        window.postMessage({
+          type: 'XP_EXTENSION_SETTINGS_CHANGED',
+          openInIE: newOpenInIE,
+          enableMemePack: newMemePack,
+          keepWindowsOpen: newKeepWindows
+        }, '*');
         if (msg.themeMode && document.documentElement) {
           document.documentElement.setAttribute('data-xp-theme-mode', msg.themeMode);
         }

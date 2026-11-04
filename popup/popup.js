@@ -30,9 +30,11 @@ function applyTheme(mode) {
 
 const checkOldGoogleReal = document.getElementById('check-old-google-real');
 const checkOldYouTubeReal = document.getElementById('check-old-youtube-real');
+const checkMemePack = document.getElementById('check-meme-pack');
+const checkKeepWindows = document.getElementById('check-keep-windows');
 
 // Load initial settings
-chrome.storage.local.get(['simulatorUrl', 'openInIE', 'themeMode', 'xpOverlaySettings', 'oldGoogleRealBrowser', 'oldYouTubeRealBrowser'], (data) => {
+chrome.storage.local.get(['simulatorUrl', 'openInIE', 'themeMode', 'xpOverlaySettings', 'oldGoogleRealBrowser', 'oldYouTubeRealBrowser', 'enableMemePack', 'keepWindowsOpen'], (data) => {
   inputUrl.value = data.simulatorUrl || DEFAULT_SIMULATOR_URL;
   switchOpenIe.checked = data.openInIE !== false;
   const initialTheme = data.themeMode || 'light';
@@ -46,6 +48,8 @@ chrome.storage.local.get(['simulatorUrl', 'openInIE', 'themeMode', 'xpOverlaySet
 
   if (checkOldGoogleReal) checkOldGoogleReal.checked = data.oldGoogleRealBrowser === true;
   if (checkOldYouTubeReal) checkOldYouTubeReal.checked = data.oldYouTubeRealBrowser === true;
+  if (checkMemePack) checkMemePack.checked = data.enableMemePack === true;
+  if (checkKeepWindows) checkKeepWindows.checked = data.keepWindowsOpen === true;
 });
 
 if (checkOldGoogleReal) {
@@ -57,6 +61,18 @@ if (checkOldGoogleReal) {
 if (checkOldYouTubeReal) {
   checkOldYouTubeReal.addEventListener('change', () => {
     chrome.storage.local.set({ oldYouTubeRealBrowser: checkOldYouTubeReal.checked });
+  });
+}
+
+if (checkMemePack) {
+  checkMemePack.addEventListener('change', () => {
+    chrome.storage.local.set({ enableMemePack: checkMemePack.checked }, notifySettingsChange);
+  });
+}
+
+if (checkKeepWindows) {
+  checkKeepWindows.addEventListener('change', () => {
+    chrome.storage.local.set({ keepWindowsOpen: checkKeepWindows.checked }, notifySettingsChange);
   });
 }
 
@@ -92,7 +108,9 @@ function notifySettingsChange() {
         if (tab.id) {
           chrome.tabs.sendMessage(tab.id, {
             action: 'XP_EXTENSION_SETTINGS_CHANGED',
-            openInIE: switchOpenIe.checked,
+            openInIE: switchOpenIe ? switchOpenIe.checked : true,
+            enableMemePack: checkMemePack ? checkMemePack.checked : false,
+            keepWindowsOpen: checkKeepWindows ? checkKeepWindows.checked : false,
             games: true
           }).catch(() => {});
         }
