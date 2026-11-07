@@ -18,7 +18,7 @@
         document.documentElement.setAttribute('data-xp-meme-pack', memePackStr);
         document.documentElement.setAttribute('data-xp-keep-windows', keepWindowsStr);
         document.documentElement.setAttribute('data-xp-single-click', String(singleClickOpen === true));
-        document.documentElement.setAttribute('data-xp-games', 'true');
+        document.documentElement.setAttribute('data-xp-games', 'false');
       }
 
       try {
@@ -28,7 +28,7 @@
         localStorage.setItem('xp_meme_pack', enableMemePack ? '1' : '0');
         localStorage.setItem('xp_keep_windows_open', keepWindowsOpen ? '1' : '0');
         localStorage.setItem('xp_single_click_open', singleClickOpen ? '1' : '0');
-        localStorage.setItem('xp_extension_games', 'true');
+        localStorage.setItem('xp_extension_games', 'false');
       } catch (_) {}
 
       try {
@@ -40,10 +40,10 @@
           enableMemePack: enableMemePack,
           keepWindowsOpen: keepWindowsOpen,
           singleClickOpen: singleClickOpen,
-          games: true
+          games: false
         }, '*');
         window.dispatchEvent(new CustomEvent('xp-extension-status', {
-          detail: { installed: true, enabled: true, openInIE: openInIE, enableMemePack: enableMemePack, keepWindowsOpen: keepWindowsOpen, games: true }
+          detail: { installed: true, enabled: true, openInIE: openInIE, enableMemePack: enableMemePack, keepWindowsOpen: keepWindowsOpen, games: false }
         }));
       } catch (_) {}
     }
@@ -108,7 +108,7 @@
             openInIE: currentOpenInIE,
             enableMemePack: currentMemePack,
             keepWindowsOpen: currentKeepWindows,
-            games: true
+            games: false
           }, '*');
           if (res.xpOverlaySettings) {
             window.postMessage({
