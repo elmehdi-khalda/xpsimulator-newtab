@@ -37,11 +37,10 @@
           openInIE: openInIE,
           enableMemePack: enableMemePack,
           keepWindowsOpen: keepWindowsOpen,
-          singleClickOpen: singleClickOpen,
-          apps: true
+          singleClickOpen: singleClickOpen
         }, '*');
         window.dispatchEvent(new CustomEvent('xp-extension-status', {
-          detail: { installed: true, enabled: true, openInIE: openInIE, enableMemePack: enableMemePack, keepWindowsOpen: keepWindowsOpen, apps: true }
+          detail: { installed: true, enabled: true, openInIE: openInIE, enableMemePack: enableMemePack, keepWindowsOpen: keepWindowsOpen }
         }));
       } catch (_) {}
     }
@@ -105,8 +104,7 @@
             enabled: true,
             openInIE: currentOpenInIE,
             enableMemePack: currentMemePack,
-            keepWindowsOpen: currentKeepWindows,
-            apps: true
+            keepWindowsOpen: currentKeepWindows
           }, '*');
           if (res.xpOverlaySettings) {
             window.postMessage({
