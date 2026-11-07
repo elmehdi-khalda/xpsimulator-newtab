@@ -7,7 +7,7 @@
 (function () {
   // Helper to sync extension state to the simulator window
   function initSimulatorBridge() {
-    function applyBridgeState(openInIE, enableMemePack = false, keepWindowsOpen = false) {
+    function applyBridgeState(openInIE, enableMemePack = false, keepWindowsOpen = false, singleClickOpen = false) {
       const openInIeStr = String(openInIE);
       const memePackStr = String(enableMemePack === true);
       const keepWindowsStr = String(keepWindowsOpen === true);
@@ -17,6 +17,7 @@
         document.documentElement.setAttribute('data-xp-extension-open-in-ie', openInIeStr);
         document.documentElement.setAttribute('data-xp-meme-pack', memePackStr);
         document.documentElement.setAttribute('data-xp-keep-windows', keepWindowsStr);
+        document.documentElement.setAttribute('data-xp-single-click', String(singleClickOpen === true));
         }
 
       try {
@@ -25,6 +26,7 @@
         localStorage.setItem('xp_extension_open-in-ie', openInIeStr);
         localStorage.setItem('xp_meme_pack', enableMemePack ? '1' : '0');
         localStorage.setItem('xp_keep_windows_open', keepWindowsOpen ? '1' : '0');
+        localStorage.setItem('xp_single_click_open', singleClickOpen ? '1' : '0');
         } catch (_) {}
 
       try {
@@ -35,6 +37,7 @@
           openInIE: openInIE,
           enableMemePack: enableMemePack,
           keepWindowsOpen: keepWindowsOpen,
+          singleClickOpen: singleClickOpen,
           apps: true
         }, '*');
         window.dispatchEvent(new CustomEvent('xp-extension-status', {
@@ -44,11 +47,15 @@
     }
 
     // 1. Initial load from storage
-    chrome.storage.local.get(['openInIE', 'xpOverlaySettings', 'enableMemePack', 'keepWindowsOpen'], (data) => {
+    chrome.storage.local.get(['openInIE', 'xpOverlaySettings', 'enableMemePack', 'keepWindowsOpen', 'singleClickOpen', 'brightness'], (data) => {
       const openInIE = data.openInIE !== false;
       const enableMemePack = data.enableMemePack === true;
       const keepWindowsOpen = data.keepWindowsOpen === true;
-      applyBridgeState(openInIE, enableMemePack, keepWindowsOpen);
+      const singleClickOpen = data.singleClickOpen === true;
+      applyBridgeState(openInIE, enableMemePack, keepWindowsOpen, singleClickOpen);
+      if (data.brightness !== undefined) {
+        window.postMessage({ type: 'XP_BRIGHTNESS_CHANGED', brightness: data.brightness }, '*');
+      }
       if (data.xpOverlaySettings) {
         window.postMessage({
           type: 'XP_OVERLAY_SETTINGS_CHANGED',
@@ -59,8 +66,11 @@
 
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => {
-        chrome.storage.local.get(['openInIE', 'xpOverlaySettings', 'themeMode', 'enableMemePack', 'keepWindowsOpen'], (data) => {
-          applyBridgeState(data.openInIE !== false, data.enableMemePack === true, data.keepWindowsOpen === true);
+        chrome.storage.local.get(['openInIE', 'xpOverlaySettings', 'themeMode', 'enableMemePack', 'keepWindowsOpen', 'singleClickOpen', 'brightness'], (data) => {
+          applyBridgeState(data.openInIE !== false, data.enableMemePack === true, data.keepWindowsOpen === true, data.singleClickOpen === true);
+          if (data.brightness !== undefined) {
+            window.postMessage({ type: 'XP_BRIGHTNESS_CHANGED', brightness: data.brightness }, '*');
+          }
           if (document.documentElement) {
             document.documentElement.setAttribute('data-xp-theme-mode', data.themeMode || 'light');
           }
@@ -114,12 +124,14 @@
         const newOpenInIE = msg.openInIE !== false;
         const newMemePack = msg.enableMemePack === true;
         const newKeepWindows = msg.keepWindowsOpen === true;
-        applyBridgeState(newOpenInIE, newMemePack, newKeepWindows);
+        const newSingleClick = msg.singleClickOpen === true;
+        applyBridgeState(newOpenInIE, newMemePack, newKeepWindows, newSingleClick);
         window.postMessage({
           type: 'XP_EXTENSION_SETTINGS_CHANGED',
           openInIE: newOpenInIE,
           enableMemePack: newMemePack,
-          keepWindowsOpen: newKeepWindows
+          keepWindowsOpen: newKeepWindows,
+          singleClickOpen: newSingleClick
         }, '*');
         if (msg.themeMode && document.documentElement) {
           document.documentElement.setAttribute('data-xp-theme-mode', msg.themeMode);
@@ -158,6 +170,35 @@
             share: msg.share
           }, '*');
         } catch (_) {}
+      }
+      if (msg && msg.action === 'XP_BRIGHTNESS_CHANGED') {
+        try {
+          window.postMessage({ type: 'XP_BRIGHTNESS_CHANGED', brightness: msg.brightness }, '*');
+        } catch (_) {}
+      }
+      if (msg && msg.action === 'XP_FS_CREATE_APP') {
+        const reqId = 'req_' + Date.now();
+        const handler = (e) => {
+          if (e.data && e.data.type === 'XP_FS_CREATE_APP_RES' && e.data.requestId === reqId) {
+            window.removeEventListener('message', handler);
+            sendResponse && sendResponse({ success: true, app: e.data.app });
+          }
+        };
+        window.addEventListener('message', handler);
+        window.postMessage({ type: 'XP_FS_CREATE_APP', requestId: reqId, app: msg.app }, '*');
+        return true;
+      }
+      if (msg && msg.action === 'XP_FS_LIST_DIR') {
+        const reqId = 'req_' + Date.now();
+        const handler = (e) => {
+          if (e.data && e.data.type === 'XP_FS_LIST_DIR_RES' && e.data.requestId === reqId) {
+            window.removeEventListener('message', handler);
+            sendResponse && sendResponse({ success: true, items: e.data.items });
+          }
+        };
+        window.addEventListener('message', handler);
+        window.postMessage({ type: 'XP_FS_LIST_DIR', requestId: reqId, parentId: msg.parentId }, '*');
+        return true;
       }
     });
 

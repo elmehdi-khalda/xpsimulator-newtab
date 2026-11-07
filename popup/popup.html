@@ -55,10 +55,30 @@
       </div>
 
       <div class="xp-switch-row">
+        <span class="xp-switch-label">Single click to open</span>
+        <div class="switch">
+          <input role="switch" type="checkbox" class="switch-input" id="check-single-click" />
+          <label class="switch-input-label" for="check-single-click"></label>
+        </div>
+      </div>
+
+      <div class="xp-switch-row">
         <span class="xp-switch-label">Keep windows open in next session</span>
         <div class="switch">
           <input role="switch" type="checkbox" class="switch-input" id="check-keep-windows" />
           <label class="switch-input-label" for="check-keep-windows"></label>
+        </div>
+      </div>
+
+      <div class="xp-slider-row" style="margin-top: 6px; padding: 2px 0;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+          <span class="xp-switch-label">Website Brightness:</span>
+          <span id="brightness-val-label" style="font-size: 11px; font-weight: bold; min-width: 24px; text-align: right;">0</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 13px; font-weight: bold; color: #444;">-</span>
+          <input type="range" id="slider-brightness" min="-50" max="50" value="0" step="1" style="flex: 1; accent-color: #245edb; cursor: pointer;" />
+          <span style="font-size: 13px; font-weight: bold; color: #444;">+</span>
         </div>
       </div>
 
@@ -84,6 +104,17 @@
         </button>
       </div>
       <div id="shortcut-status-msg" class="xp-status-msg"></div>
+
+      <div class="xp-section-label" style="margin-top: 8px; font-weight: bold;">XP Virtual Drive & Apps:</div>
+      <div class="xp-action-row" style="margin-top: 4px; display: flex; gap: 4px;">
+        <button id="btn-create-app" class="xp-xp-btn" style="flex: 1;" type="button">
+          + Create Desktop App
+        </button>
+        <button id="btn-list-drive" class="xp-xp-btn" style="flex: 1;" type="button">
+          Explore Paths
+        </button>
+      </div>
+      <div id="drive-status-msg" class="xp-status-msg"></div>
 
       <div class="xp-section-label" style="margin-top: 8px;">Redirection URL:</div>
       <div class="xp-input-group">
