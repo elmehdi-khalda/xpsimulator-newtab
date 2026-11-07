@@ -35,9 +35,7 @@ const checkKeepWindows = document.getElementById('check-keep-windows');
 const checkSingleClick = document.getElementById('check-single-click');
 const sliderBrightness = document.getElementById('slider-brightness');
 const brightnessValLabel = document.getElementById('brightness-val-label');
-const btnCreateApp = document.getElementById('btn-create-app');
-const btnListDrive = document.getElementById('btn-list-drive');
-const driveStatusMsg = document.getElementById('drive-status-msg');
+
 
 // Load initial settings
 chrome.storage.local.get(['simulatorUrl', 'openInIE', 'themeMode', 'xpOverlaySettings', 'oldGoogleRealBrowser', 'oldYouTubeRealBrowser', 'enableMemePack', 'keepWindowsOpen', 'singleClickOpen', 'brightness'], (data) => {
@@ -115,52 +113,7 @@ if (sliderBrightness) {
   sliderBrightness.addEventListener('change', applyBrightnessChange);
 }
 
-if (btnCreateApp) {
-  btnCreateApp.addEventListener('click', () => {
-    const appName = prompt('Enter App Name (e.g. MyRetroApp.exe):', 'RetroApp.exe');
-    if (!appName) return;
-    const appUrl = prompt('Enter Web URL for this app (e.g. https://google.com):', 'https://');
-    if (!appUrl) return;
 
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (tabs[0]?.id) {
-        chrome.tabs.sendMessage(tabs[0].id, {
-          action: 'XP_FS_CREATE_APP',
-          app: {
-            name: appName,
-            basename: appName.replace(/\.exe$/i, ''),
-            url: './programs/webapp.svelte',
-            webapp: { url: appUrl, title: appName }
-          }
-        }, (res) => {
-          if (driveStatusMsg) {
-            driveStatusMsg.textContent = 'Created ' + appName + ' on XP Desktop!';
-            setTimeout(() => { driveStatusMsg.textContent = ''; }, 3000);
-          }
-        });
-      }
-    });
-  });
-}
-
-if (btnListDrive) {
-  btnListDrive.addEventListener('click', () => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (tabs[0]?.id) {
-        chrome.tabs.sendMessage(tabs[0].id, {
-          action: 'XP_FS_LIST_DIR',
-          parentId: 'root_desktop'
-        }, (res) => {
-          if (driveStatusMsg) {
-            const count = res?.items?.length || 0;
-            driveStatusMsg.textContent = 'Found ' + count + ' items on Desktop path.';
-            setTimeout(() => { driveStatusMsg.textContent = ''; }, 3500);
-          }
-        });
-      }
-    });
-  });
-}
 
 function broadcastOverlaySettings() {
   const settings = {

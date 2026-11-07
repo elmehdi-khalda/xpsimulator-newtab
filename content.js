@@ -96,11 +96,12 @@
     window.addEventListener('message', (event) => {
       if (!event.data || typeof event.data !== 'object') return;
       if (event.data.type === 'XP_EXTENSION_PING' || event.data.type === 'XP_EXTENSION_CHECK') {
-        chrome.storage.local.get(['openInIE', 'xpOverlaySettings', 'enableMemePack', 'keepWindowsOpen'], (res) => {
+        chrome.storage.local.get(['openInIE', 'xpOverlaySettings', 'enableMemePack', 'keepWindowsOpen', 'singleClickOpen', 'brightness'], (res) => {
           const currentOpenInIE = res.openInIE !== false;
           const currentMemePack = res.enableMemePack === true;
           const currentKeepWindows = res.keepWindowsOpen === true;
-          applyBridgeState(currentOpenInIE, currentMemePack, currentKeepWindows);
+          const currentSingleClick = res.singleClickOpen === true;
+          applyBridgeState(currentOpenInIE, currentMemePack, currentKeepWindows, currentSingleClick);
           window.postMessage({
             type: 'XP_EXTENSION_STATUS',
             installed: true,
@@ -108,8 +109,13 @@
             openInIE: currentOpenInIE,
             enableMemePack: currentMemePack,
             keepWindowsOpen: currentKeepWindows,
+            singleClickOpen: currentSingleClick,
             games: false
           }, '*');
+          if (res.brightness !== undefined) {
+            window.postMessage({ type: 'XP_BRIGHTNESS_CHANGED', brightness: res.brightness }, '*');
+            try { localStorage.setItem('xp_site_brightness', String(res.brightness)); } catch (_) {}
+          }
           if (res.xpOverlaySettings) {
             window.postMessage({
               type: 'XP_OVERLAY_SETTINGS_CHANGED',
@@ -176,6 +182,7 @@
       if (msg && msg.action === 'XP_BRIGHTNESS_CHANGED') {
         try {
           window.postMessage({ type: 'XP_BRIGHTNESS_CHANGED', brightness: msg.brightness }, '*');
+          localStorage.setItem('xp_site_brightness', String(msg.brightness));
         } catch (_) {}
       }
       if (msg && msg.action === 'XP_FS_CREATE_APP') {
