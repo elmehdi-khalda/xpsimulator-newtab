@@ -58,12 +58,11 @@
       if (data.brightness !== undefined) {
         window.postMessage({ type: 'XP_BRIGHTNESS_CHANGED', brightness: data.brightness }, '*');
       }
-      if (data.xpOverlaySettings) {
-        window.postMessage({
-          type: 'XP_OVERLAY_SETTINGS_CHANGED',
-          settings: data.xpOverlaySettings
-        }, '*');
-      }
+      const overlaySettings = data.xpOverlaySettings || { masterEnabled: true };
+      window.postMessage({
+        type: 'XP_OVERLAY_SETTINGS_CHANGED',
+        settings: overlaySettings
+      }, '*');
     });
 
     if (document.readyState === 'loading') {
@@ -76,12 +75,11 @@
           if (document.documentElement) {
             document.documentElement.setAttribute('data-xp-theme-mode', data.themeMode || 'light');
           }
-          if (data.xpOverlaySettings) {
-            window.postMessage({
-              type: 'XP_OVERLAY_SETTINGS_CHANGED',
-              settings: data.xpOverlaySettings
-            }, '*');
-          }
+          const overlaySettings = data.xpOverlaySettings || { masterEnabled: true };
+          window.postMessage({
+            type: 'XP_OVERLAY_SETTINGS_CHANGED',
+            settings: overlaySettings
+          }, '*');
         });
       }, { once: true });
     } else {
@@ -116,12 +114,11 @@
             window.postMessage({ type: 'XP_BRIGHTNESS_CHANGED', brightness: res.brightness }, '*');
             try { localStorage.setItem('xp_site_brightness', String(res.brightness)); } catch (_) {}
           }
-          if (res.xpOverlaySettings) {
-            window.postMessage({
-              type: 'XP_OVERLAY_SETTINGS_CHANGED',
-              settings: res.xpOverlaySettings
-            }, '*');
-          }
+          const overlaySettings = res.xpOverlaySettings || { masterEnabled: true };
+          window.postMessage({
+            type: 'XP_OVERLAY_SETTINGS_CHANGED',
+            settings: overlaySettings
+          }, '*');
         });
       }
     });
