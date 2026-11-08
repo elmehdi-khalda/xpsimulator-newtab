@@ -47,8 +47,8 @@ chrome.storage.local.get(['simulatorUrl', 'openInIE', 'themeMode', 'xpOverlaySet
   }
   applyTheme(initialTheme);
 
-  const overlaySettings = data.xpOverlaySettings || { masterEnabled: false };
-  if (checkOverlayMaster) checkOverlayMaster.checked = overlaySettings.masterEnabled === true;
+  const overlaySettings = data.xpOverlaySettings || { masterEnabled: true };
+  if (checkOverlayMaster) checkOverlayMaster.checked = overlaySettings.masterEnabled !== false;
 
   if (checkOldGoogleReal) checkOldGoogleReal.checked = data.oldGoogleRealBrowser === true;
   if (checkOldYouTubeReal) checkOldYouTubeReal.checked = data.oldYouTubeRealBrowser === true;
