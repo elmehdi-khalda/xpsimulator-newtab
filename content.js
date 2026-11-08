@@ -46,14 +46,14 @@
     }
 
     // 1. Initial load from storage
-    chrome.storage.local.get(['openInIE', 'xpOverlaySettings', 'enableMemePack', 'keepWindowsOpen', 'singleClickOpen', 'brightness'], (data) => {
+    chrome.storage.local.get(['openInIE', 'xpOverlaySettings', 'enableMemePack', 'keepWindowsOpen', 'singleClickOpen', 'brightness', 'excludeGoogleUI'], (data) => {
       const openInIE = data.openInIE !== false;
       const enableMemePack = data.enableMemePack === true;
       const keepWindowsOpen = data.keepWindowsOpen === true;
       const singleClickOpen = data.singleClickOpen === true;
       applyBridgeState(openInIE, enableMemePack, keepWindowsOpen, singleClickOpen);
       if (data.brightness !== undefined) {
-        window.postMessage({ type: 'XP_BRIGHTNESS_CHANGED', brightness: data.brightness }, '*');
+        window.postMessage({ type: 'XP_BRIGHTNESS_CHANGED', brightness: data.brightness, excludeGoogleUI: data.excludeGoogleUI !== false }, '*');
       }
       const overlaySettings = data.xpOverlaySettings || { masterEnabled: true };
       window.postMessage({
@@ -64,11 +64,11 @@
 
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => {
-        chrome.storage.local.get(['openInIE', 'xpOverlaySettings', 'themeMode', 'enableMemePack', 'keepWindowsOpen', 'singleClickOpen', 'brightness'], (data) => {
+        chrome.storage.local.get(['openInIE', 'xpOverlaySettings', 'themeMode', 'enableMemePack', 'keepWindowsOpen', 'singleClickOpen', 'brightness', 'excludeGoogleUI'], (data) => {
           applyBridgeState(data.openInIE !== false, data.enableMemePack === true, data.keepWindowsOpen === true, data.singleClickOpen === true);
           if (data.brightness !== undefined) {
-            window.postMessage({ type: 'XP_BRIGHTNESS_CHANGED', brightness: data.brightness }, '*');
-          }
+        window.postMessage({ type: 'XP_BRIGHTNESS_CHANGED', brightness: data.brightness, excludeGoogleUI: data.excludeGoogleUI !== false }, '*');
+      }
           if (document.documentElement) {
             document.documentElement.setAttribute('data-xp-theme-mode', data.themeMode || 'light');
           }
@@ -91,7 +91,7 @@
     window.addEventListener('message', (event) => {
       if (!event.data || typeof event.data !== 'object') return;
       if (event.data.type === 'XP_EXTENSION_PING' || event.data.type === 'XP_EXTENSION_CHECK') {
-        chrome.storage.local.get(['openInIE', 'xpOverlaySettings', 'enableMemePack', 'keepWindowsOpen', 'singleClickOpen', 'brightness'], (res) => {
+        chrome.storage.local.get(['openInIE', 'xpOverlaySettings', 'enableMemePack', 'keepWindowsOpen', 'singleClickOpen', 'brightness', 'excludeGoogleUI'], (res) => {
           const currentOpenInIE = res.openInIE !== false;
           const currentMemePack = res.enableMemePack === true;
           const currentKeepWindows = res.keepWindowsOpen === true;
@@ -107,8 +107,11 @@
             singleClickOpen: currentSingleClick
           }, '*');
           if (res.brightness !== undefined) {
-            window.postMessage({ type: 'XP_BRIGHTNESS_CHANGED', brightness: res.brightness }, '*');
-            try { localStorage.setItem('xp_site_brightness', String(res.brightness)); } catch (_) {}
+            window.postMessage({ type: 'XP_BRIGHTNESS_CHANGED', brightness: res.brightness, excludeGoogleUI: res.excludeGoogleUI !== false }, '*');
+            try {
+              localStorage.setItem('xp_site_brightness', String(res.brightness));
+              localStorage.setItem('xp_exclude_google_ui', res.excludeGoogleUI !== false ? '1' : '0');
+            } catch (_) {}
           }
           const overlaySettings = res.xpOverlaySettings || { masterEnabled: true };
           window.postMessage({
@@ -121,6 +124,27 @@
 
     // 3. Listen for runtime messages from popup
     chrome.runtime.onMessage.addListener((msg) => {
+      if (msg.action === 'XP_BRIGHTNESS_CHANGED' && msg.brightness !== undefined) {
+        window.postMessage({
+          type: 'XP_BRIGHTNESS_CHANGED',
+          brightness: msg.brightness,
+          excludeGoogleUI: msg.excludeGoogleUI !== false
+        }, '*');
+        try {
+          localStorage.setItem('xp_site_brightness', String(msg.brightness));
+          localStorage.setItem('xp_exclude_google_ui', msg.excludeGoogleUI !== false ? '1' : '0');
+        } catch (_) {}
+      }
+      if (msg.action === 'XP_EXCLUDE_GOOGLE_UI_CHANGED' && msg.exclude !== undefined) {
+        window.postMessage({
+          type: 'XP_EXCLUDE_GOOGLE_UI_CHANGED',
+          exclude: msg.exclude !== false
+        }, '*');
+        try {
+          localStorage.setItem('xp_exclude_google_ui', msg.exclude !== false ? '1' : '0');
+        } catch (_) {}
+      }
+
       if (msg && msg.action === 'XP_EXTENSION_SETTINGS_CHANGED') {
         const newOpenInIE = msg.openInIE !== false;
         const newMemePack = msg.enableMemePack === true;
@@ -333,10 +357,21 @@
     window.location.ancestorOrigins[0].startsWith('chrome-extension://')
   );
 
+  const host = (window.location.hostname || '').toLowerCase();
+  const isSimulatorHost = (
+    host === 'localhost' ||
+    host === '127.0.0.1' ||
+    host.includes('xpsimulator') ||
+    host.includes('elmehdikhalda')
+  );
+
   // Initialize extension detection bridge for simulator (top window or newtab iframe)
-  if (isTopWindow || isExtensionIframe) {
+  if (isSimulatorHost || isExtensionIframe) {
     initSimulatorBridge();
     if (isTopWindow) return;
+  } else if (isTopWindow) {
+    // External browser tab: do not inject simulator bridge or theme attributes
+    return;
   }
 
   // Validate URL scheme

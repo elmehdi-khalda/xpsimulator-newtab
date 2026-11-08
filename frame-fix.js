@@ -4,31 +4,67 @@
  * ONLY runs when YouTube is embedded inside an iframe in the XP simulator!
  */
 (function() {
+  function isSimulatorOrSimulatedFrame() {
+    try {
+      const host = (window.location.hostname || '').toLowerCase();
+      const isSimHost = (
+        host === 'localhost' ||
+        host === '127.0.0.1' ||
+        host.includes('xpsimulator') ||
+        host.includes('elmehdikhalda')
+      );
+      if (isSimHost && window.self === window.top) return true;
+
+      if (window.self !== window.top) {
+        if (typeof window.name === 'string' && window.name.includes('xp-ie')) return true;
+        if (window.location.ancestorOrigins && window.location.ancestorOrigins.length > 0) {
+          return Array.from(window.location.ancestorOrigins).some(origin =>
+            origin.includes('localhost') ||
+            origin.includes('127.0.0.1') ||
+            origin.includes('xpsimulator') ||
+            origin.includes('elmehdikhalda') ||
+            origin.startsWith('chrome-extension://')
+          );
+        }
+      }
+    } catch (_) {}
+    return false;
+  }
+
+  const isSimContext = isSimulatorOrSimulatedFrame();
+
+  // If running in a regular top window (external site), do not touch theme or interfere with normal browser tabs
+  if (window.self === window.top && !isSimContext) {
+    return;
+  }
+
   // Expose extension presence synchronously in MAIN world
   try {
-    window.__XP_EXTENSION_INSTALLED__ = true;
-    if (!window.__XP_EXTENSION__) {
-      window.__XP_EXTENSION__ = {
-        installed: true,
-        enabled: true,
-        openInIE: true
-      };
-    }
-    if (document.documentElement) {
-      document.documentElement.setAttribute('data-xp-extension', 'true');
-      const initMode = document.documentElement.getAttribute('data-xp-theme-mode') || 'light';
-      document.documentElement.style.setProperty('color-scheme', initMode, 'important');
-      try {
-        const themeObserver = new MutationObserver((mutations) => {
-          for (const m of mutations) {
-            if (m.type === 'attributes' && m.attributeName === 'data-xp-theme-mode') {
-              const currentMode = document.documentElement.getAttribute('data-xp-theme-mode') || 'light';
-              document.documentElement.style.setProperty('color-scheme', currentMode, 'important');
+    if (isSimContext) {
+      window.__XP_EXTENSION_INSTALLED__ = true;
+      if (!window.__XP_EXTENSION__) {
+        window.__XP_EXTENSION__ = {
+          installed: true,
+          enabled: true,
+          openInIE: true
+        };
+      }
+      if (document.documentElement) {
+        document.documentElement.setAttribute('data-xp-extension', 'true');
+        const initMode = document.documentElement.getAttribute('data-xp-theme-mode') || 'light';
+        document.documentElement.style.setProperty('color-scheme', initMode, 'important');
+        try {
+          const themeObserver = new MutationObserver((mutations) => {
+            for (const m of mutations) {
+              if (m.type === 'attributes' && m.attributeName === 'data-xp-theme-mode') {
+                const currentMode = document.documentElement.getAttribute('data-xp-theme-mode') || 'light';
+                document.documentElement.style.setProperty('color-scheme', currentMode, 'important');
+              }
             }
-          }
-        });
-        themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-xp-theme-mode'] });
-      } catch (_) {}
+          });
+          themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-xp-theme-mode'] });
+        } catch (_) {}
+      }
     }
 
     const host = (window.location.hostname || '').toLowerCase();
@@ -111,26 +147,28 @@
       } catch (_) {}
     }
 
-    // Force Light Mode by default so web pages treat user's browser as Light Mode
-    const origMatchMedia = window.matchMedia;
-    window.matchMedia = function(query) {
-      if (typeof query === 'string' && query.includes('prefers-color-scheme')) {
-        const themeMode = document.documentElement.getAttribute('data-xp-theme-mode') || 'light';
-        const wantDark = (themeMode === 'dark');
-        const matches = query.includes('dark') ? wantDark : !wantDark;
-        return {
-          matches: matches,
-          media: query,
-          onchange: null,
-          addListener: () => {},
-          removeListener: () => {},
-          addEventListener: () => {},
-          removeEventListener: () => {},
-          dispatchEvent: () => true
-        };
-      }
-      return origMatchMedia.call(window, query);
-    };
+    // Force Light Mode ONLY inside simulator or simulated IE frame so user external tabs keep native theme
+    if (isSimContext) {
+      const origMatchMedia = window.matchMedia;
+      window.matchMedia = function(query) {
+        if (typeof query === 'string' && query.includes('prefers-color-scheme')) {
+          const themeMode = document.documentElement.getAttribute('data-xp-theme-mode') || 'light';
+          const wantDark = (themeMode === 'dark');
+          const matches = query.includes('dark') ? wantDark : !wantDark;
+          return {
+            matches: matches,
+            media: query,
+            onchange: null,
+            addListener: () => {},
+            removeListener: () => {},
+            addEventListener: () => {},
+            removeEventListener: () => {},
+            dispatchEvent: () => true
+          };
+        }
+        return origMatchMedia.call(window, query);
+      };
+    }
 
     // Polyfill/safe-guard WakeLock API in frames to prevent permissions policy rejections from crashing Emscripten/WASM
     try {

@@ -1,7 +1,7 @@
 const DEFAULT_SIMULATOR_URL = 'https://xpsimulator.vercel.app';
 
 const switchOpenIe = document.getElementById('switch-open-ie');
-const selectThemeMode = document.getElementById('select-theme-mode');
+const checkExcludeGoogleUI = document.getElementById('check-exclude-google-ui');
 const btnImportBookmarks = document.getElementById('btn-import-bookmarks');
 const bookmarkStatusMsg = document.getElementById('bookmark-status-msg');
 const inputUrl = document.getElementById('input-simulator-url');
@@ -38,14 +38,10 @@ const brightnessValLabel = document.getElementById('brightness-val-label');
 
 
 // Load initial settings
-chrome.storage.local.get(['simulatorUrl', 'openInIE', 'themeMode', 'xpOverlaySettings', 'oldGoogleRealBrowser', 'oldYouTubeRealBrowser', 'enableMemePack', 'keepWindowsOpen', 'singleClickOpen', 'brightness'], (data) => {
+chrome.storage.local.get(['simulatorUrl', 'openInIE', 'themeMode', 'xpOverlaySettings', 'oldGoogleRealBrowser', 'oldYouTubeRealBrowser', 'enableMemePack', 'keepWindowsOpen', 'singleClickOpen', 'brightness', 'excludeGoogleUI'], (data) => {
   inputUrl.value = data.simulatorUrl || DEFAULT_SIMULATOR_URL;
   switchOpenIe.checked = data.openInIE !== false;
-  const initialTheme = data.themeMode || 'light';
-  if (selectThemeMode) {
-    selectThemeMode.value = initialTheme;
-  }
-  applyTheme(initialTheme);
+  applyTheme('light');
 
   const overlaySettings = data.xpOverlaySettings || { masterEnabled: true };
   if (checkOverlayMaster) checkOverlayMaster.checked = overlaySettings.masterEnabled !== false;
@@ -55,6 +51,7 @@ chrome.storage.local.get(['simulatorUrl', 'openInIE', 'themeMode', 'xpOverlaySet
   if (checkMemePack) checkMemePack.checked = data.enableMemePack === true;
   if (checkKeepWindows) checkKeepWindows.checked = data.keepWindowsOpen === true;
   if (checkSingleClick) checkSingleClick.checked = data.singleClickOpen === true;
+  if (checkExcludeGoogleUI) checkExcludeGoogleUI.checked = data.excludeGoogleUI !== false;
   if (sliderBrightness) {
     const b = Number(data.brightness) || 0;
     sliderBrightness.value = b;
@@ -95,14 +92,16 @@ if (checkSingleClick) {
 if (sliderBrightness) {
   function applyBrightnessChange() {
     const b = Number(sliderBrightness.value) || 0;
+    const isExcluded = checkExcludeGoogleUI ? checkExcludeGoogleUI.checked : true;
     if (brightnessValLabel) brightnessValLabel.textContent = b > 0 ? '+' + b : String(b);
-    chrome.storage.local.set({ brightness: b }, () => {
+    chrome.storage.local.set({ brightness: b, excludeGoogleUI: isExcluded }, () => {
       chrome.tabs.query({}, (tabs) => {
         for (const tab of tabs) {
           if (tab.id) {
             chrome.tabs.sendMessage(tab.id, {
               action: 'XP_BRIGHTNESS_CHANGED',
-              brightness: b
+              brightness: b,
+              excludeGoogleUI: isExcluded
             }).catch(() => {});
           }
         }
@@ -111,6 +110,30 @@ if (sliderBrightness) {
   }
   sliderBrightness.addEventListener('input', applyBrightnessChange);
   sliderBrightness.addEventListener('change', applyBrightnessChange);
+}
+
+if (checkExcludeGoogleUI) {
+  checkExcludeGoogleUI.addEventListener('change', () => {
+    const isExcluded = checkExcludeGoogleUI.checked;
+    const b = sliderBrightness ? (Number(sliderBrightness.value) || 0) : 0;
+    chrome.storage.local.set({ excludeGoogleUI: isExcluded }, () => {
+      chrome.tabs.query({}, (tabs) => {
+        for (const tab of tabs) {
+          if (tab.id) {
+            chrome.tabs.sendMessage(tab.id, {
+              action: 'XP_BRIGHTNESS_CHANGED',
+              brightness: b,
+              excludeGoogleUI: isExcluded
+            }).catch(() => {});
+            chrome.tabs.sendMessage(tab.id, {
+              action: 'XP_EXCLUDE_GOOGLE_UI_CHANGED',
+              exclude: isExcluded
+            }).catch(() => {});
+          }
+        }
+      });
+    });
+  });
 }
 
 
@@ -150,8 +173,7 @@ function notifySettingsChange() {
             openInIE: switchOpenIe ? switchOpenIe.checked : true,
             enableMemePack: checkMemePack ? checkMemePack.checked : false,
             keepWindowsOpen: checkKeepWindows ? checkKeepWindows.checked : false,
-            singleClickOpen: checkSingleClick ? checkSingleClick.checked : false,
-            apps: true
+            singleClickOpen: checkSingleClick ? checkSingleClick.checked : false
           }).catch(() => {});
         }
       }
@@ -164,28 +186,6 @@ switchOpenIe.addEventListener('change', () => {
   const isEnabled = switchOpenIe.checked;
   chrome.storage.local.set({ openInIE: isEnabled }, notifySettingsChange);
 });
-
-// Theme Mode Selector
-if (selectThemeMode) {
-  selectThemeMode.addEventListener('change', () => {
-    const mode = selectThemeMode.value || 'light';
-    applyTheme(mode);
-    chrome.storage.local.set({ themeMode: mode }, () => {
-      try {
-        chrome.tabs.query({}, (tabs) => {
-          for (const tab of tabs) {
-            if (tab.id) {
-              chrome.tabs.sendMessage(tab.id, {
-                action: 'XP_EXTENSION_SETTINGS_CHANGED',
-                themeMode: mode
-              }).catch(() => {});
-            }
-          }
-        });
-      } catch (_) {}
-    });
-  });
-}
 
 // Helper to recursively extract the full bookmarks hierarchy (folders and links)
 function extractBookmarkTree(nodes) {
