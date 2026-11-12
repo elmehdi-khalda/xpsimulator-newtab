@@ -5,7 +5,11 @@
   "description": "Transforms your browser new tab into a full Windows XP simulator. Unblocks iframes, provides classic web browsing, custom embedded apps, and full desktop experience.",
   "icons": {
     "16": "icons/icon16.png",
+    "19": "icons/icon19.png",
+    "20": "icons/icon20.png",
+    "24": "icons/icon24.png",
     "32": "icons/icon32.png",
+    "38": "icons/icon38.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
@@ -17,7 +21,11 @@
     "default_title": "Windows XP Simulator Settings",
     "default_icon": {
       "16": "icons/icon16.png",
+      "19": "icons/icon19.png",
+      "20": "icons/icon20.png",
+      "24": "icons/icon24.png",
       "32": "icons/icon32.png",
+      "38": "icons/icon38.png",
       "48": "icons/icon48.png",
       "128": "icons/icon128.png"
     }
