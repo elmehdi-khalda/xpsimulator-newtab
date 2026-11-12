@@ -200,12 +200,6 @@
           }, '*');
         } catch (_) {}
       }
-      if (msg && msg.action === 'XP_BRIGHTNESS_CHANGED') {
-        try {
-          window.postMessage({ type: 'XP_BRIGHTNESS_CHANGED', brightness: msg.brightness }, '*');
-          localStorage.setItem('xp_site_brightness', String(msg.brightness));
-        } catch (_) {}
-      }
       if (msg && msg.action === 'XP_FS_CREATE_APP') {
         const reqId = 'req_' + Date.now();
         const handler = (e) => {
@@ -454,6 +448,7 @@
         origin.includes('127.0.0.1') ||
         origin.startsWith('chrome-extension://') ||
         origin.includes('vercel.app') ||
+        origin.includes('xpsimulator.com') ||
         origin.includes('elmehdikhalda')
       );
       if (!isSim) return;

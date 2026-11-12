@@ -1,4 +1,4 @@
-const DEFAULT_SIMULATOR_URL = 'https://xpsimulator.vercel.app';
+const DEFAULT_SIMULATOR_URL = 'https://xpsimulator.com';
 
 const switchOpenIe = document.getElementById('switch-open-ie');
 const checkExcludeGoogleUI = document.getElementById('check-exclude-google-ui');
@@ -140,7 +140,7 @@ if (checkExcludeGoogleUI) {
 
 function broadcastOverlaySettings() {
   const settings = {
-    masterEnabled: checkOverlayMaster ? checkOverlayMaster.checked : false
+    masterEnabled: checkOverlayMaster ? checkOverlayMaster.checked : true
   };
 
   chrome.storage.local.set({ xpOverlaySettings: settings }, () => {

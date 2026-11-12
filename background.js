@@ -939,7 +939,7 @@ chrome.runtime.onStartup.addListener(() => {
 async function preloadSimulator() {
   try {
     const data = await chrome.storage.local.get(['simulatorUrl', 'cachedDesktop']);
-    const targetUrl = data.simulatorUrl || 'https://xpsimulator.vercel.app';
+    const targetUrl = data.simulatorUrl || 'https://xpsimulator.com';
     const base = new URL(targetUrl);
 
     // Pre-cache vital shell assets: bliss wallpaper, icons, cursors
@@ -1035,7 +1035,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
   if (message.action === 'openAppWindow') {
-    const url = message.url || 'https://xpsimulator.vercel.app';
+    const url = message.url || 'https://xpsimulator.com';
     chrome.windows.create({
       url: url,
       type: 'popup',
