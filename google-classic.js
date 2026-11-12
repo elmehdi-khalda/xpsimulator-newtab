@@ -24,6 +24,7 @@
             origin.includes('127.0.0.1') || 
             origin.startsWith('chrome-extension://') ||
             origin.includes('vercel.app') ||
+      origin.includes('xpsimulator.com') ||
             origin.includes('elmehdikhalda')
           );
         }

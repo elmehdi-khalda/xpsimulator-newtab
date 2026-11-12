@@ -33,8 +33,8 @@
 
   const isSimContext = isSimulatorOrSimulatedFrame();
 
-  // If running in a regular top window (external site), do not touch theme or interfere with normal browser tabs
-  if (window.self === window.top && !isSimContext) {
+  // If running outside the simulator context (external site / new tab), do not touch theme or interfere with normal browser tabs
+  if (!isSimContext) {
     return;
   }
 
@@ -1780,6 +1780,7 @@
         origin.includes('127.0.0.1') || 
         origin.startsWith('chrome-extension://') ||
         origin.includes('vercel.app') ||
+        origin.includes('xpsimulator.com') ||
         origin.includes('elmehdikhalda') ||
         origin.includes('192.168.') ||
         origin.includes('10.') ||
@@ -1794,6 +1795,7 @@
   const isInternalFrame = window.location.hostname.includes('localhost') ||
                           window.location.hostname.includes('127.0.0.1') ||
                           window.location.hostname.includes('vercel.app') ||
+        window.location.hostname.includes('xpsimulator.com') ||
                           window.location.hostname.includes('elmehdikhalda') ||
                           window.location.pathname.includes('/live_background_dist/') ||
                           window.location.pathname.includes('/html/');

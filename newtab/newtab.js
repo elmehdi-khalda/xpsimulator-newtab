@@ -3,7 +3,7 @@
  * Clean simulator landing page with optional Full Simulation mode.
  */
 
-const DEFAULT_SIMULATOR_URL = 'https://xpsimulator.vercel.app';
+const DEFAULT_SIMULATOR_URL = 'https://xpsimulator.com';
 
 const iframe = document.getElementById('simulator-iframe');
 const offlineScreen = document.getElementById('offline-screen');
@@ -20,7 +20,7 @@ async function init() {
     let url = data.simulatorUrl;
     
     // Auto-heal corrupted URL
-    if (!url || (!url.startsWith('http://') && !url.startsWith('https://'))) {
+    if (!url || url.includes('vercel.app') || (!url.startsWith('http://') && !url.startsWith('https://'))) {
       url = DEFAULT_SIMULATOR_URL;
       chrome.storage.local.set({ simulatorUrl: DEFAULT_SIMULATOR_URL });
     }
