@@ -18,7 +18,7 @@
   },
   "action": {
     "default_popup": "popup/popup.html",
-    "default_title": "Windows XP Simulator Settings",
+    "default_title": "XPSimulator new tab",
     "default_icon": {
       "16": "icons/icon16.png",
       "19": "icons/icon19.png",
