@@ -18,7 +18,7 @@
         document.documentElement.setAttribute('data-xp-meme-pack', memePackStr);
         document.documentElement.setAttribute('data-xp-keep-windows', keepWindowsStr);
         document.documentElement.setAttribute('data-xp-single-click', String(singleClickOpen === true));
-        }
+      }
 
       try {
         localStorage.setItem('xp_extension_installed', 'true');
@@ -27,7 +27,7 @@
         localStorage.setItem('xp_meme_pack', enableMemePack ? '1' : '0');
         localStorage.setItem('xp_keep_windows_open', keepWindowsOpen ? '1' : '0');
         localStorage.setItem('xp_single_click_open', singleClickOpen ? '1' : '0');
-        } catch (_) {}
+      } catch (_) {}
 
       try {
         window.postMessage({

@@ -411,7 +411,7 @@
       }
     } catch (_) {}
 
-    // Style viewport-filling canvas & isolate app iframe for embedded apps (e.g. wasmarcade.com, fifastreet.online, pes12.online, emulators)
+    // Style viewport-filling canvas & isolate iframe for embedded apps (e.g. wasmarcade.com, fifastreet.online, pes12.online, emulators)
     try {
       if (window.self !== window.top) {
         const applyGameViewportFix = () => {

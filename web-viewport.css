@@ -1,4 +1,4 @@
-/* Windows XP Simulator - Web Apps Viewport & Frame Isolation */
+/* Windows XP Simulator - Web Viewport & Frame Isolation */
 html, body {
   margin: 0 !important;
   padding: 0 !important;
@@ -51,7 +51,7 @@ section.promo-card-catalog,
   pointer-events: none !important;
 }
 
-/* Stretch the main layout, player column, screen and app frame/canvas to fill viewport */
+/* Stretch the main layout, player column, screen and frame/canvas to fill viewport */
 main.layout,
 main,
 body > main,
