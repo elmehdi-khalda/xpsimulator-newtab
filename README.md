@@ -20,13 +20,7 @@ Architecture & source code updates: **[elmehdi-khalda/xpsimulator-sc](https://gi
 
 Experience autonomous desktop applications built on the Windows XP Simulator SDK.
 
-<div align="center">
-  <video src="https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/videos/stickman.mp4" controls="controls" width="100%" style="max-width: 850px; border-radius: 6px; box-shadow: 0 6px 20px rgba(0,0,0,0.3);"></video>
-</div>
-
-<p align="center">
-  <a href="https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/videos/stickman.mp4">Direct Link: Watch / Download stickman.mp4 (Full HD)</a>
-</p>
+[![Watch Stickman Interactive Demo](assets/thumbnails/stickman.png)](https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/videos/stickman.mp4)
 
 <div align="center">
   <a href="https://docs.xpsimulator.com/#app-examples">
