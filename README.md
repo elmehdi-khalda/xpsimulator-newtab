@@ -91,7 +91,7 @@ Experience autonomous desktop applications built on the Windows XP Simulator SDK
 ### Meme Pack 1 Desktop Suite
 ![Meme Pack 1 Desktop Suite](assets/meem-pack-1.png)
 
-*Optional vintage meme packs: classic internet humor, custom wallpapers, retro sound notifications, and widgets.*
+*Optional vintage meme packs: ishowmusic, meme wallpapers and creative wallpapers*
 
 ---
 
