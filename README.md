@@ -3,6 +3,7 @@
 [![Website](https://img.shields.io/badge/Website-xpsimulator.com-0055EA?style=for-the-badge&logoColor=white)](https://xpsimulator.com)
 [![Extension Site](https://img.shields.io/badge/Extension%20Site-extension.xpsimulator.com-8B5CF6?style=for-the-badge&logoColor=white)](https://extension.xpsimulator.com)
 [![Docs](https://img.shields.io/badge/Docs-docs.xpsimulator.com-38BDF8?style=for-the-badge&logoColor=white)](https://docs.xpsimulator.com)
+[![Source Code](https://img.shields.io/badge/Source%20Code-xpsimulator--sc-0ea5e9?style=for-the-badge&logoColor=white)](https://github.com/elmehdi-khalda/xpsimulator-sc)
 [![Manifest](https://img.shields.io/badge/Manifest-MV3-10B981?style=for-the-badge&logoColor=white)](manifest.json)
 [![License](https://img.shields.io/badge/License-MIT-F59E0B?style=for-the-badge)](LICENSE)
 
@@ -10,7 +11,7 @@ The official Chromium companion extension for **[Windows XP Simulator](https://x
 
 Detailed documentation, developer manual, and app injection guide available at **[extension.xpsimulator.com](https://extension.xpsimulator.com)**.
 
-Repository: **[elmehdi-khalda/xpsimulator-newtab](https://github.com/elmehdi-khalda/xpsimulator-newtab)**
+Architecture & source code updates: **[elmehdi-khalda/xpsimulator-sc](https://github.com/elmehdi-khalda/xpsimulator-sc)**
 
 ---
 
@@ -19,20 +20,12 @@ Repository: **[elmehdi-khalda/xpsimulator-newtab](https://github.com/elmehdi-kha
 Experience autonomous desktop applications built on the Windows XP Simulator SDK.
 
 <div align="center">
-  <a href="https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/videos/stickman.mp4" target="_blank" title="Click to watch full video">
-    <img src="https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/videos/stickman.gif" alt="Stickman Interactive Application Demo" width="850" style="border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.3);" />
-  </a>
+  <img src="assets/stickman.gif" alt="Stickman Interactive Application Demo" width="850" style="border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.3); max-width: 100%; height: auto;" />
 </div>
 
 <p align="center">
-  <a href="https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/videos/stickman.mp4">▶ Play / Download Full HD Video (stickman.mp4)</a>
+  <a href="https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/videos/stickman.mp4">Play / Download Full HD Video (stickman.mp4)</a>
 </p>
-
-<div align="center">
-  <video src="https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/videos/stickman.mp4" width="100%" controls loop muted></video>
-</div>
-
-<br/>
 
 <div align="center">
   <a href="https://docs.xpsimulator.com/#app-examples">
@@ -44,64 +37,64 @@ Experience autonomous desktop applications built on the Windows XP Simulator SDK
 
 ## Visual Showcase Gallery
 
-### 1. Windows XP Bliss Desktop and Classic System Icons
-![Windows XP Bliss Desktop and Classic System Icons](https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/showcase/bliss-and-icons.png)
+### 1. Windows Media Player & Desktop Workspace & Windows Media Player
+![1. Windows Media Player & Desktop Workspace & Windows Media Player](https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/showcase/bliss-and-icons.png)
 
-*Authentic Luna blue taskbar, iconic Bliss rolling hills wallpaper, and pixel-perfect Windows XP desktop icons.*
-
----
-
-### 2. Live Nostalgic Animated Wallpapers
-![Live Nostalgic Animated Wallpapers](https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/showcase/nostalgic-wallpaper.png)
-
-*Interactive dynamic wallpapers with live animated sky, flowing clouds, and real-time shadow projection.*
+*Authentic 3D Retro App Retro App with classic audio synthesis and Windows Media Player with dynamic Headspace skin.*
 
 ---
 
-### 3. Internet Explorer 6 with Google Search
-![Internet Explorer 6 with Google Search](https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/showcase/ie6-google-web.png)
+### 2. Wallpapers & Headspace Skins
+![2. Wallpapers & Headspace Skins](https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/showcase/nostalgic-wallpaper.png)
 
-*Retro IE6 browser with authentic toolbar buttons, address bar navigation, and live web rendering.*
-
----
-
-### 4. Internet Explorer Multi-Tab Navigation
-![Internet Explorer Multi-Tab Navigation](https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/showcase/ie6-multitab-browsing.png)
-
-*Enhanced tabbed browsing inside the retro Internet Explorer frame.*
+*Dynamic bliss wallpapers, customized system themes, and real-time Headspace skin transformations.*
 
 ---
 
-### 5. Internet Explorer Retro YouTube Video Playback
-![Internet Explorer Retro YouTube Video Playback](https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/showcase/wmp-classic-skin.png)
+### 3. Classic Google Search
+![3. Classic Google Search](https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/showcase/ie6-google-web.png)
 
-*Authentic Internet Explorer 6 window running YouTube retro video playback with native controls and audio.*
-
----
-
-### 6. Windows Media Player Audio Canvas Visualizer
-![Windows Media Player Audio Canvas Visualizer](https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/showcase/wmp-canvas-skin.png)
-
-*Real-time audio frequency visualizers and animated skin modes.*
+*Vintage Google Search interface running inside Internet Explorer with authentic period styling.*
 
 ---
 
-### 7. Windows XP Application Installer Suite
-![Windows XP Application Installer Suite](https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/showcase/app-installer-suite.png)
+### 4. The Classic Google Search Index
+![4. The Classic Google Search Index](https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/showcase/ie6-multitab-browsing.png)
 
-*Install standalone HTML5 applications, widgets, and embed web tools with automated desktop shortcut generation.*
-
----
-
-### 8. Control Panel and System Customization
-![Control Panel and System Customization](https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/showcase/customization-control-panel.png)
-
-*Comprehensive personalization suite: themes, screen resolutions, display properties, sounds, and user management.*
+*Full-fidelity retro Google search index and live web directory navigation.*
 
 ---
 
-### 9. Meme Pack 1 Desktop Suite
-![Meme Pack 1 Desktop Suite](https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/showcase/meem-pack-1.png?v=20261115_v5)
+### 5. Classic YouTube Experience
+![5. Classic YouTube Experience](https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/showcase/wmp-classic-skin.png)
+
+*Authentic Internet Explorer 6 window running YouTube retro video playback with native controls and sound.*
+
+---
+
+### 6. Multiple Apps in the Start Menu
+![6. Multiple Apps in the Start Menu](https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/showcase/wmp-canvas-skin.png)
+
+*Multi-application productivity suite accessible from the authentic two-column Windows XP Start Menu.*
+
+---
+
+### 7. Lock Screen & Password Protection
+![7. Lock Screen & Password Protection](https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/showcase/app-installer-suite.png)
+
+*Authentic Windows XP welcome and lock screen with multi-user profiles and password validation.*
+
+---
+
+### 8. Sticky Notes
+![8. Sticky Notes](https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/showcase/customization-control-panel.png)
+
+*Desktop sticky notes and workspace productivity tools with automatic state persistence.*
+
+---
+
+### Meme Pack 1 Desktop Suite
+![Meme Pack 1 Desktop Suite](assets/meem-pack-1.png)
 
 *Optional vintage meme packs: classic internet humor, custom wallpapers, retro sound notifications, and widgets.*
 
@@ -174,6 +167,14 @@ The extension options popup features a dedicated Meme Pack section:
 | `bookmarks` | Imports browser bookmarks onto the Windows XP desktop as shortcuts |
 | `topSites` | Imports top visited websites onto the Windows XP desktop |
 | `storage` | Persists user settings, brightness levels, and customisation toggles |
+
+---
+
+## Source Code & Community
+
+- **Windows XP Simulator Core Repository**: [https://github.com/elmehdi-khalda/xpsimulator-sc](https://github.com/elmehdi-khalda/xpsimulator-sc)
+- **Official Documentation**: [https://docs.xpsimulator.com](https://docs.xpsimulator.com)
+- **Extension Manual**: [https://extension.xpsimulator.com](https://extension.xpsimulator.com)
 
 ---
 
