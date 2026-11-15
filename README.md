@@ -32,10 +32,10 @@ Experience autonomous desktop applications built on the Windows XP Simulator SDK
 
 ## Visual Showcase Gallery
 
-### 1. Windows Media Player & Desktop Workspace & Windows Media Player
-![1. Windows Media Player & Desktop Workspace & Windows Media Player](https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/showcase/bliss-and-icons.png)
+### 1. Windows Media Player & Desktop Workspace
+![1. Windows Media Player & Desktop Workspace](https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/showcase/bliss-and-icons.png)
 
-*Authentic 3D Retro App Retro App with classic audio synthesis and Windows Media Player with dynamic Headspace skin.*
+*Windows Media Player with dynamic Headspace skin, authentic audio synthesis, and full retro workspace environment.*
 
 ---
 

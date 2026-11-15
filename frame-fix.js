@@ -121,8 +121,8 @@
       // Ensure crossOriginIsolated is reported as true, but ONLY on runtime/engine pages that are
       // truly cross-origin isolated (have COEP), not on shell/landing pages that use deferredIsolation.
       // Shell pages like residentevil4.online, fifastreet.online etc. check crossOriginIsolated and
-      // if false they redirect #app-frame to ?play=1 (or /runtime/) which IS truly isolated.
-      // Polyfilling true on shell pages breaks that redirect, so the app tries to boot in a non-isolated
+      // if false they redirect the iframe to ?play=1 (or /runtime/) which IS truly isolated.
+      // Polyfilling true on shell pages breaks that redirect, so the frame tries to boot in a non-isolated
       // context and SharedArrayBuffer worker.postMessage fails.
       // We DO polyfill on ?play=1 pages and /runtime/ pages (where isolation is enforced via
       // Document-Isolation-Policy injected by the DNR rule).
@@ -132,12 +132,12 @@
         const searchParams = new URLSearchParams(window.location.search);
         const isRuntimePage = pathname.startsWith('/runtime') || pathname.startsWith('/legacy-runtime');
         const isPlayPage = searchParams.get('play') === '1';
-        // isShellGame = the bare shell page (no ?play=1, not a runtime page) on .online/.fun/.lol
-        const isShellGame = (
+        // isShellPage = the bare shell page (no ?play=1, not a runtime page) on .online/.fun/.lol
+        const isShellPage = (
           hostname.endsWith('.online') || hostname.endsWith('.fun') || hostname.endsWith('.lol')
         ) && !isRuntimePage && !isPlayPage;
         // Polyfill ONLY when NOT on a bare shell page (skip so deferredIsolation redirects to ?play=1)
-        if (!window.crossOriginIsolated && !isShellGame) {
+        if (!window.crossOriginIsolated && !isShellPage) {
           Object.defineProperty(window, 'crossOriginIsolated', {
             value: true,
             configurable: true,
@@ -170,7 +170,7 @@
       };
     }
 
-    // Polyfill/safe-guard WakeLock API in frames to prevent permissions policy rejections from crashing Emscripten/WASM
+    // Polyfill/safe-guard WakeLock API in frames to prevent permissions policy rejections from crashing WASM
     try {
       if (typeof navigator !== 'undefined') {
         Object.defineProperty(navigator, 'wakeLock', {
@@ -201,8 +201,7 @@
       }
     }, { capture: true, passive: true });
 
-    // Ensure nested app iframes (such as #app-frame in residentevil4.online, pes12.online, etc.)
-    // have the 'credentialless' attribute and 'cross-origin-isolated' permission before navigating.
+    // Ensure nested isolated iframes have the 'credentialless' attribute and 'cross-origin-isolated' permission before navigating.
     // This allows Chromium to isolate the subframe and permits SharedArrayBuffer transfer to Workers.
     // STRICT GUARD: NEVER apply credentialless to Google, YouTube, or general user-authenticated sites,
     // as credentialless strips user cookies and partitions authentication sessions!
@@ -231,7 +230,7 @@
       };
 
       if (!isProtectedOrigin()) {
-        const isGameIframe = (iframe) => {
+        const isIsolatedIframe = (iframe) => {
           if (!iframe) return false;
           try {
             const id = (iframe.id || '').toLowerCase();
@@ -243,19 +242,15 @@
               src.includes('accounts.google.') ||
               src.includes('gstatic.')
             ) {
-              return false; // NEVER treat Google / YouTube as app iframe
+              return false; // NEVER treat Google / YouTube as isolated iframe
             }
             const h = (window.location.hostname || '').toLowerCase();
             return (
-              id.includes('app') ||
-              cls.includes('app') ||
               h.endsWith('.online') ||
               h.endsWith('.lol') ||
               h.endsWith('.fun') ||
-              h.includes('wasmarcade') ||
               h.includes('exebrowser') ||
               h.includes('vel.gg') ||
-              h.includes('itch.io') ||
               src.includes('.online') ||
               src.includes('.lol') ||
               src.includes('.fun') ||
@@ -268,14 +263,14 @@
 
         const ensureIframeIsolation = (iframe) => {
           if (!iframe || !(iframe instanceof HTMLIFrameElement || iframe.tagName === 'IFRAME')) return;
-          if (!isGameIframe(iframe)) return;
+          if (!isIsolatedIframe(iframe)) return;
           try {
             if (!iframe.hasAttribute('credentialless')) {
               iframe.setAttribute('credentialless', '');
             }
             const allow = iframe.getAttribute('allow') || '';
             if (!allow.includes('cross-origin-isolated')) {
-              iframe.setAttribute('allow', (allow ? allow + '; ' : '') + 'cross-origin-isolated *; autoplay *; fullscreen *; gamepad *');
+              iframe.setAttribute('allow', (allow ? allow + '; ' : '') + 'cross-origin-isolated *; autoplay *; fullscreen *');
             }
           } catch (_) {}
         };
@@ -411,12 +406,12 @@
       }
     } catch (_) {}
 
-    // Style viewport-filling canvas & isolate iframe for embedded apps (e.g. wasmarcade.com, fifastreet.online, pes12.online, emulators)
+    // Style viewport-filling canvas & isolate iframe for embedded apps and media
     try {
       if (window.self !== window.top) {
-        const applyGameViewportFix = () => {
+        const applyViewportFix = () => {
           const host = (window.location.hostname || '').toLowerCase();
-          // STRICT EXCLUSION: Never apply app viewport CSS to YouTube, Google, Bing, Wikipedia, or other standard websites!
+          // STRICT EXCLUSION: Never apply viewport CSS to YouTube, Google, Bing, Wikipedia, or other standard websites!
           if (
             host.includes('youtube.com') ||
             host.includes('googlevideo.com') ||
@@ -435,12 +430,12 @@
             return;
           }
 
-          const hasGame = document.querySelector('canvas#canvas, #canvas, canvas.emscripten, #app-frame, .screen, #stage, .player, #player');
-          if (hasGame) {
-            let style = document.getElementById('xp-app-viewport-fix');
+          const hasAppContainer = document.querySelector('canvas#canvas, #canvas, .screen, #stage, .player, #player');
+          if (hasAppContainer) {
+            let style = document.getElementById('xp-viewport-fix');
             if (!style) {
               style = document.createElement('style');
-              style.id = 'xp-app-viewport-fix';
+              style.id = 'xp-viewport-fix';
               style.textContent = `
                 html, body {
                   margin: 0 !important;
@@ -461,8 +456,8 @@
                   margin: 0 !important;
                   padding: 0 !important;
                 }
-                /* Isolate app screen/frame/canvas to 100% full viewport */
-                .screen, #app-frame, #stage, .player, #player, #canvas-container, #player-container, .player-column, section.player-column {
+                /* Isolate screen/frame/canvas to 100% full viewport */
+                .screen, #stage, .player, #player, #canvas-container, #player-container, .player-column, section.player-column {
                   position: fixed !important;
                   top: 0 !important;
                   left: 0 !important;
@@ -476,7 +471,7 @@
                   z-index: 999999 !important;
                   background: #000 !important;
                 }
-                canvas#canvas, canvas.emscripten, .screen iframe, #app-frame, .screen canvas, #stage canvas, .player canvas {
+                canvas#canvas, .screen iframe, .screen canvas, #stage canvas, .player canvas {
                   width: 100% !important;
                   height: 100% !important;
                   max-width: 100vw !important;
@@ -487,7 +482,7 @@
                   object-fit: contain !important;
                 }
                 /* Hide website headers, sidebars, footers and advertisements */
-                header, footer, aside, .sidebar-column, .sidebar, #sidebar, #top-bar, .player-actions, .player-status, .gamepad-hint, #ad-banner-slot-wrap, #loading-ad, .loading-ad, .ad-label, #ad-loading-slot, .ad-slot, [aria-label*="Publicidad"], [aria-label*="Advertisement"], .ad-rail, .leaderboard-rail, .promo-card, .seo-about, .footer-contact, .footer-bottom, .dialog-heading, .chat-frame, #chatFrame, .brand, .tabs, .modal-footer, .settings-panel, section.promo-card, section.promo-card-catalog {
+                header, footer, aside, .sidebar-column, .sidebar, #sidebar, #top-bar, .player-actions, .player-status, #ad-banner-slot-wrap, #loading-ad, .loading-ad, .ad-label, #ad-loading-slot, .ad-slot, [aria-label*="Publicidad"], [aria-label*="Advertisement"], .ad-rail, .leaderboard-rail, .promo-card, .seo-about, .footer-contact, .footer-bottom, .dialog-heading, .chat-frame, #chatFrame, .brand, .tabs, .modal-footer, .settings-panel, section.promo-card, section.promo-card-catalog {
                   display: none !important;
                 }
               `;
@@ -497,13 +492,13 @@
         };
 
         if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', applyGameViewportFix, { once: true });
+          document.addEventListener('DOMContentLoaded', applyViewportFix, { once: true });
         } else {
-          applyGameViewportFix();
+          applyViewportFix();
         }
 
-        // Re-evaluate when dynamic app elements attach
-        const vpObserver = new MutationObserver(() => applyGameViewportFix());
+        // Re-evaluate when dynamic elements attach
+        const vpObserver = new MutationObserver(() => applyViewportFix());
         if (document.documentElement) {
           vpObserver.observe(document.documentElement, { childList: true, subtree: true });
           setTimeout(() => vpObserver.disconnect(), 15000);
@@ -864,663 +859,6 @@
       }
     } catch (_) {}
 
-    // Auto-isolate & auto-start Retro Runtime.net app frames inside Windows XP Simulator
-    if (window.location.hostname.includes('Retro Runtime.net')) {
-      try {
-        let _threads = false;
-        Object.defineProperty(window, 'EJS_threads', {
-          get: () => _threads,
-          set: (val) => {
-            _threads = (typeof SharedArrayBuffer === 'function') ? Boolean(val) : false;
-          },
-          configurable: true
-        });
-        const origGetItem = Storage.prototype.getItem;
-        Storage.prototype.getItem = function(key) {
-          if (key === 'ejs_threads' && typeof SharedArrayBuffer !== 'function') {
-            return 'disabled';
-          }
-          return origGetItem.apply(this, arguments);
-        };
-        localStorage.removeItem('ejs_threads');
-      } catch (_) {}
-
-      const injectVimmStyles = () => {
-        try {
-          if (document.getElementById('xp-Retro Runtime-style')) return;
-          const style = document.createElement('style');
-          style.id = 'xp-Retro Runtime-style';
-          style.textContent = `
-            *, *::before, *::after { box-sizing: border-box; }
-            html, body {
-              margin: 0 !important; padding: 0 !important;
-              width: 100vw !important; height: 100vh !important;
-              overflow: hidden !important; background: #000 !important;
-            }
-            body > *:not(#main):not(script):not(style):not(link):not(noscript) {
-              display: none !important; visibility: hidden !important; pointer-events: none !important;
-            }
-            div.innerMenu, div.sidebarContainer, main.mainContent > h2, main.mainContent > nav,
-            main.mainContent > div.centered > div:not(#app):not(.ejs_parent) {
-              display: none !important;
-            }
-            div#main, div.innerMain, div.innerMain > div, main.mainContent, div.centered, .centered {
-              position: fixed !important; inset: 0 !important;
-              width: 100vw !important; height: 100vh !important;
-              max-width: none !important; max-height: none !important;
-              margin: 0 auto !important; padding: 0 !important;
-              display: flex !important; flex-direction: column !important;
-              align-items: center !important; justify-content: center !important;
-              overflow: hidden !important; background: #000 !important;
-              border: none !important; aspect-ratio: unset !important;
-            }
-            #app, .ejs_parent, .ejs_game, .ejs_canvas_parent, .ejs_game_background, .ejs_small_screen, .ejs_big_screen {
-              width: 100vw !important; height: 100vh !important;
-              max-width: none !important; max-height: none !important;
-              margin: 0 auto !important; padding: 0 !important;
-              display: flex !important; align-items: center !important; justify-content: center !important;
-              position: relative !important;
-            }
-            .ejs_game_background {
-              background-position: center center !important;
-              background-size: contain !important;
-              background-repeat: no-repeat !important;
-            }
-            .ejs_start_button {
-              position: absolute !important; top: 50% !important; left: 50% !important;
-              transform: translate(-50%, -50%) !important; z-index: 9999999 !important;
-              display: flex !important; align-items: center !important; justify-content: center !important;
-              padding: 18px 36px !important; font-size: 24px !important; font-weight: bold !important;
-              color: #fff !important; background: #1aafff !important; border-radius: 8px !important;
-              box-shadow: 0 0 20px rgba(26, 175, 255, 0.6) !important; cursor: pointer !important;
-              visibility: visible !important; opacity: 1 !important; pointer-events: auto !important;
-            }
-            canvas, .ejs_canvas {
-              image-rendering: pixelated !important;
-              width: 100% !important; height: 100% !important;
-              max-width: 100vw !important; max-height: 100vh !important;
-              object-fit: contain !important; outline: none !important;
-              margin: auto !important; display: block !important;
-            }
-          `;
-          (document.head || document.documentElement).appendChild(style);
-        } catch (_) {}
-      };
-
-      const fixVimmDOM = () => {
-        try {
-          const elements = document.querySelectorAll('#main, .innerMain, .innerMain > div, .mainContent, .centered, #app, .ejs_parent, .ejs_game, .ejs_canvas_parent');
-          elements.forEach(el => {
-            el.style.setProperty('max-width', 'none', 'important');
-            el.style.setProperty('max-height', 'none', 'important');
-            el.style.setProperty('aspect-ratio', 'unset', 'important');
-            el.style.setProperty('width', '100vw', 'important');
-            el.style.setProperty('height', '100vh', 'important');
-            el.style.setProperty('margin', '0 auto', 'important');
-            el.style.setProperty('border', 'none', 'important');
-          });
-        } catch (_) {}
-      };
-
-      injectVimmStyles();
-      fixVimmDOM();
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => {
-          injectVimmStyles();
-          fixVimmDOM();
-        });
-      }
-
-      // Observer to ensure dynamic elements inserted by loader.js / emulator.js are unconstrained
-      try {
-        const obs = new MutationObserver(() => {
-          fixVimmDOM();
-        });
-        obs.observe(document.documentElement, { childList: true, subtree: true });
-        setTimeout(() => obs.disconnect(), 15000);
-      } catch (_) {}
-
-      var vimmStartAttempts = 0;
-      function tryClickVimmStart() {
-        fixVimmDOM();
-        var btn = document.querySelector('.ejs_start_button');
-        if (btn) {
-          setTimeout(function() {
-            try {
-              btn.click();
-              setTimeout(() => {
-                fixVimmDOM();
-                window.dispatchEvent(new Event('resize'));
-              }, 400);
-            } catch (_) {}
-          }, 400);
-        } else if (vimmStartAttempts++ < 50) {
-          setTimeout(tryClickVimmStart, 200);
-        }
-      }
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', tryClickVimmStart);
-      } else {
-        tryClickVimmStart();
-      }
-    }
-
-    // Auto-isolate & auto-start Web Runtimes.cz app frames inside Windows XP Simulator
-    if (window.location.hostname.includes('Web Runtimes.cz')) {
-      try {
-        window.EJS_startOnLoaded = true;
-      } catch (_) {}
-
-      // Keep document visibility active so EmulatorJS does not pause canvas rendering frames
-      try {
-        Object.defineProperty(document, 'hidden', { get: () => false, configurable: true });
-        Object.defineProperty(document, 'visibilityState', { get: () => 'visible', configurable: true });
-      } catch (_) {}
-
-      window.addEventListener('visibilitychange', (e) => {
-        try { e.stopImmediatePropagation(); } catch (_) {}
-      }, true);
-
-      const injectRetroStyles = () => {
-        try {
-          if (document.getElementById('xp-retro-style')) return;
-          const style = document.createElement('style');
-          style.id = 'xp-retro-style';
-          style.textContent = `
-            *, *::before, *::after { box-sizing: border-box; }
-            html, body {
-              margin: 0 !important; padding: 0 !important;
-              width: 100vw !important; height: 100vh !important;
-              overflow: hidden !important; background: #000 !important;
-            }
-            .adsbygoogle, #adblock-content, #preview_div, #fb-root, [id*="sharethis"], [class*="ad-"], div[style*="position: fixed"]:not(#app):not(#dosbox) {
-              display: none !important; pointer-events: none !important; visibility: hidden !important;
-            }
-            #app, #dosbox, #my-div, #my-iframe, #start-screen {
-              position: fixed !important; top: 0 !important; left: 0 !important;
-              width: 100vw !important; height: 100vh !important;
-              max-width: none !important; max-height: none !important;
-              margin: 0 !important; padding: 0 !important;
-              display: flex !important; align-items: center !important; justify-content: center !important;
-              z-index: 999999 !important; background: #000 !important; visibility: visible !important;
-            }
-            #app > *, #dosbox > *, #my-div > *, .ejs_parent, .ejs_small_screen, .ejs_big_screen, .dosbox-container {
-              width: 100% !important; height: 100% !important;
-              max-width: 100% !important; max-height: 100% !important;
-              display: flex !important; align-items: center !important; justify-content: center !important;
-              background: #000 !important; visibility: visible !important;
-            }
-            #app canvas, #dosbox canvas, .dosbox-canvas, canvas {
-              width: 100% !important; height: 100% !important;
-              max-width: 100% !important; max-height: 100% !important;
-              object-fit: contain !important; image-rendering: pixelated !important;
-              display: block !important; visibility: visible !important;
-            }
-            .ejs_start_button, .ejs_play_button, .dosbox-start, .dosbox-start a {
-              position: absolute !important; top: 50% !important; left: 50% !important;
-              transform: translate(-50%, -50%) !important; z-index: 9999999 !important;
-              display: flex !important; align-items: center !important; justify-content: center !important;
-              padding: 18px 36px !important; font-size: 24px !important; font-weight: bold !important;
-              color: #fff !important; background: #1aafff !important; border-radius: 8px !important;
-              box-shadow: 0 0 20px rgba(26, 175, 255, 0.6) !important; cursor: pointer !important;
-              visibility: visible !important; opacity: 1 !important; pointer-events: auto !important;
-            }
-          `;
-          (document.head || document.documentElement).appendChild(style);
-        } catch (_) {}
-      };
-
-      injectRetroStyles();
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', injectRetroStyles);
-      }
-
-      function tryClickRetroStart() {
-        var btn = document.querySelector('.ejs_start_button, .ejs_play_button, .dosbox-start a, .dosbox-start, #dosbox canvas, #app canvas');
-        if (btn) {
-          setTimeout(function() {
-            try { btn.click(); } catch (_) {}
-            setTimeout(function() {
-              try { window.dispatchEvent(new Event('resize')); } catch (_) {}
-            }, 300);
-          }, 400);
-        } else {
-          setTimeout(tryClickRetroStart, 200);
-        }
-      }
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', tryClickRetroStart);
-      } else {
-        tryClickRetroStart();
-      }
-
-      setTimeout(() => { try { window.dispatchEvent(new Event('resize')); } catch (_) {} }, 1000);
-      setTimeout(() => { try { window.dispatchEvent(new Event('resize')); } catch (_) {} }, 2500);
-    }
-
-    // Auto-unmute & fix audio on Web Canvas Bros inside Windows XP Simulator
-    if (window.location.hostname.includes('supermario-app.com')) {
-      try {
-        let _mute = false;
-        Object.defineProperty(window, 'customMute', {
-          get: () => false,
-          set: () => { _mute = false; },
-          configurable: true
-        });
-        window.smgVolume = 0.8;
-        localStorage.setItem('muted', 'false');
-      } catch (_) {}
-
-      const unmuteMario = () => {
-        try {
-          window.customMute = false;
-          window.smgVolume = 0.8;
-          const paused = document.getElementById('paused');
-          if (paused && paused.style.display !== 'none') {
-            try { paused.click(); } catch (_) {}
-          }
-        } catch (_) {}
-      };
-
-      window.addEventListener('click', unmuteMario, { passive: true });
-      window.addEventListener('keydown', unmuteMario, { passive: true });
-      window.addEventListener('mousedown', unmuteMario, { passive: true });
-      setInterval(unmuteMario, 1000);
-    }
-
-    // Auto-isolate & start FreePacman inside Windows XP Simulator
-    if (window.location.hostname.includes('freepacman.org')) {
-      const injectPacmanStyles = () => {
-        try {
-          if (document.getElementById('xp-pacman-style')) return;
-          const style = document.createElement('style');
-          style.id = 'xp-pacman-style';
-          style.textContent = `
-            html, body {
-              margin: 0 !important; padding: 0 !important;
-              width: 100vw !important; height: 100vh !important;
-              overflow: hidden !important; background: #000 !important;
-            }
-            #left-column, #menu1, #menu2, #menu-bottom, header, footer, [id*="inmobi"], [class*="ad"] {
-              display: none !important; pointer-events: none !important;
-            }
-            main, #app-container {
-              position: fixed !important; inset: 0 !important;
-              width: 100vw !important; height: 100vh !important;
-              display: flex !important; align-items: center !important; justify-content: center !important;
-              background: #000 !important; z-index: 999999 !important;
-            }
-            #app-ui, canvas {
-              max-width: 100vw !important; max-height: 100vh !important;
-            }
-          `;
-          (document.head || document.documentElement).appendChild(style);
-        } catch (_) {}
-      };
-
-      injectPacmanStyles();
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', injectPacmanStyles);
-      }
-
-      function tryStartPacman() {
-        var startBtn = document.getElementById('app-start');
-        if (startBtn) {
-          setTimeout(function() { try { startBtn.click(); } catch (_) {} }, 300);
-        } else {
-          setTimeout(tryStartPacman, 200);
-        }
-      }
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', tryStartPacman);
-      } else {
-        tryStartPacman();
-      }
-    }
-
-    // Auto-isolate & hook runtime app frames (3D App III)
-    if (window.location.hostname.includes('runtime')) {
-      try {
-        localStorage.setItem('tapp.launcher.torrentAllowed', 'false');
-        localStorage.setItem('tapp.launcher.torrentRemindLater', String(Date.now()));
-      } catch (_) {}
-
-      // Intercept .torrent-launcher attributes to use direct S3 7z archive download (300MB vs stalled 920MB WebTorrent)
-      const S3_GTA3_7Z = 'https://s3.ru1.storage.beget.cloud/68bbc47d0de7-runtime-archive/3D App-assets.7z';
-
-      const patchLauncher = (el) => {
-        if (!el || !el.setAttribute) return;
-        const tid = el.getAttribute('data-torrent-id');
-        if (!tid || tid === '3D App-assets' || window.location.pathname.includes('regta3')) {
-          el.setAttribute('data-torrent-7z', S3_GTA3_7Z);
-          el.setAttribute('data-torrent-7z-delay', '0');
-        }
-      };
-
-      try {
-        const origGetAttr = Element.prototype.getAttribute;
-        Element.prototype.getAttribute = function(name) {
-          if (this && this.classList && this.classList.contains('torrent-launcher')) {
-            const tid = origGetAttr.call(this, 'data-torrent-id');
-            if (!tid || tid === '3D App-assets' || window.location.pathname.includes('regta3')) {
-              if (name === 'data-torrent-7z') return S3_GTA3_7Z;
-              if (name === 'data-torrent-7z-delay') return '0';
-            }
-          }
-          return origGetAttr.apply(this, arguments);
-        };
-
-        const origHasAttr = Element.prototype.hasAttribute;
-        Element.prototype.hasAttribute = function(name) {
-          if (this && this.classList && this.classList.contains('torrent-launcher')) {
-            if (name === 'data-torrent-7z' || name === 'data-torrent-7z-delay') return true;
-          }
-          return origHasAttr.apply(this, arguments);
-        };
-      } catch (_) {}
-
-      const triggerLauncherIframe = () => {
-        try {
-          const iframe = document.getElementById('torrent-launcher-iframe');
-          const launcher = document.querySelector('.torrent-launcher');
-          if (!iframe) return;
-
-          const pageText = (document.body && document.body.innerText) || '';
-          const hasError = pageText.includes('Torrent client not initialized') || pageText.includes('unexpected error');
-
-          if (hasError) {
-            const targetSrc = (launcher && launcher.getAttribute('data-iframe-src')) || 'https://runtime/regta3/v3/index.html';
-            if (!iframe.src || iframe.src === 'about:blank' || iframe.src.includes('about:blank')) {
-              iframe.src = targetSrc;
-            }
-            iframe.hidden = false;
-            iframe.removeAttribute('hidden');
-            iframe.style.setProperty('display', 'block', 'important');
-            iframe.style.setProperty('width', '100vw', 'important');
-            iframe.style.setProperty('height', '100vh', 'important');
-            iframe.style.setProperty('position', 'fixed', 'important');
-            iframe.style.setProperty('inset', '0', 'important');
-            iframe.style.setProperty('z-index', '999999', 'important');
-            iframe.focus();
-            if (launcher) launcher.style.setProperty('display', 'none', 'important');
-          }
-        } catch (_) {}
-      };
-
-      try {
-        window.addEventListener('error', (e) => {
-          if (e && e.message && e.message.includes('Torrent client not initialized')) {
-            e.preventDefault();
-            e.stopPropagation();
-            triggerLauncherIframe();
-          }
-        }, true);
-        window.addEventListener('unhandledrejection', (e) => {
-          if (e && e.reason && String(e.reason).includes('Torrent client not initialized')) {
-            e.preventDefault();
-            e.stopPropagation();
-            triggerLauncherIframe();
-          }
-        }, true);
-      } catch (_) {}
-
-      try {
-        const obs = new MutationObserver((mutations) => {
-          for (const m of mutations) {
-            for (const node of m.addedNodes) {
-              if (node.nodeType === 1) {
-                if (node.classList && node.classList.contains('torrent-launcher')) {
-                  patchLauncher(node);
-                } else if (node.querySelectorAll) {
-                  const items = node.querySelectorAll('.torrent-launcher');
-                  for (const it of items) patchLauncher(it);
-                }
-              }
-            }
-          }
-          triggerLauncherIframe();
-        });
-        obs.observe(document.documentElement || document, { childList: true, subtree: true, characterData: true });
-      } catch (_) {}
-
-      setInterval(triggerLauncherIframe, 400);
-
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => {
-          patchLauncher(document.querySelector('.torrent-launcher'));
-          triggerLauncherIframe();
-        });
-      } else {
-        patchLauncher(document.querySelector('.torrent-launcher'));
-        triggerLauncherIframe();
-      }
-    }
-
-    // Auto-launch 3D WebAssembly (WASM Engine Web) directly without manual clicks
-    if (window.location.hostname.includes('pixelsuft.github.io')) {
-      let started = false;
-      const tryStartHL = () => {
-        if (started) return;
-        const btn = document.querySelector('input[value*="Launch WASM Engine"]');
-        if (btn) {
-          started = true;
-          try { btn.click(); } catch (_) {}
-          return;
-        }
-        if (typeof window.startXash === 'function') {
-          const status = document.getElementById('status');
-          const txt = (status && status.innerText) || '';
-          if (txt.includes('downloaded') || txt.includes('Scripts downloaded')) {
-            started = true;
-            try { window.startXash(); } catch (_) {}
-          }
-        }
-      };
-      setInterval(tryStartHL, 300);
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', tryStartHL);
-      } else {
-        tryStartHL();
-      }
-    }
-
-    // Auto-isolate & auto-start Sports Media (optijuegos.net)
-    if (window.location.hostname.includes('optijuegos.net')) {
-      const injectPes6Styles = () => {
-        try {
-          if (document.getElementById('xp-Sports Media-style')) return;
-          const style = document.createElement('style');
-          style.id = 'xp-Sports Media-style';
-          style.textContent = `
-            html, body {
-              margin: 0 !important; padding: 0 !important;
-              width: 100vw !important; height: 100vh !important;
-              overflow: hidden !important; background: #000 !important;
-            }
-            header, footer, aside, .settings-col, .btn-group, .compat-notice, section.player-col > :not(#stage) {
-              display: none !important;
-            }
-            main.layout, section.player-col {
-              margin: 0 !important; padding: 0 !important;
-              width: 100vw !important; height: 100vh !important;
-              max-width: none !important; display: flex !important;
-              align-items: center !important; justify-content: center !important;
-              background: #000 !important;
-            }
-            #stage.player {
-              position: fixed !important; inset: 0 !important;
-              width: 100vw !important; height: 100vh !important;
-              max-width: none !important; max-height: none !important;
-              display: flex !important; align-items: center !important; justify-content: center !important;
-              background: #000 !important; z-index: 99999 !important;
-            }
-            #stage canvas#canvas {
-              width: 100% !important; height: 100% !important;
-              max-width: 100% !important; max-height: 100% !important;
-              object-fit: contain !important;
-            }
-            #stage #overlay {
-              position: absolute !important; inset: 0 !important;
-              z-index: 100000 !important;
-            }
-          `;
-          (document.head || document.documentElement).appendChild(style);
-        } catch (_) {}
-      };
-      injectPes6Styles();
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', injectPes6Styles);
-      }
-
-      let pes6Started = false;
-      const tryStartPes6 = () => {
-        if (pes6Started) return;
-        const choice = document.getElementById('startChoice');
-        const overlay = document.getElementById('overlay');
-        const btn = document.getElementById('startWithCommentary') ||
-                    document.querySelector('#startChoice button[data-commentary]') ||
-                    document.getElementById('startWithoutCommentary');
-        if (btn && (choice && !choice.hidden || (overlay && overlay.classList.contains('ready')) || document.querySelector('.start-choice:not([hidden])'))) {
-          pes6Started = true;
-          try { btn.click(); } catch (_) {}
-        }
-      };
-      setInterval(tryStartPes6, 250);
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', tryStartPes6);
-      } else {
-        tryStartPes6();
-      }
-    }
-
-    // Auto-scale & isolate Flash / Ruffle apps on ooooooooo.ooo (Tropix)
-    if (window.location.hostname.includes('ooooooooo.ooo')) {
-      const injectOoooStyles = () => {
-        try {
-          if (document.getElementById('xp-oooo-style')) return;
-          const style = document.createElement('style');
-          style.id = 'xp-oooo-style';
-          style.textContent = `
-            html, body {
-              margin: 0 !important; padding: 0 !important;
-              width: 100vw !important; height: 100vh !important;
-              overflow: hidden !important; background: #000 !important;
-            }
-            body > header, body > footer, .content > :not(.player-container), .info-container, .links-container, .message {
-              display: none !important;
-            }
-            .content {
-              margin: 0 !important; padding: 0 !important;
-              width: 100vw !important; height: 100vh !important;
-              max-width: none !important; display: flex !important;
-              align-items: center !important; justify-content: center !important;
-              background: #000 !important;
-            }
-            .player-container {
-              width: 100vw !important; height: 100vh !important;
-              max-width: 100vw !important; max-height: 100vh !important;
-              position: fixed !important; inset: 0 !important;
-              margin: 0 !important; padding: 0 !important;
-              display: flex !important; align-items: center !important; justify-content: center !important;
-              background: #000 !important; z-index: 99999 !important;
-            }
-            ruffle-player, .player, canvas {
-              width: 100% !important; height: 100% !important;
-              max-width: 100% !important; max-height: 100% !important;
-              position: absolute !important; inset: 0 !important;
-            }
-          `;
-          (document.head || document.documentElement).appendChild(style);
-        } catch (_) {}
-      };
-      injectOoooStyles();
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', injectOoooStyles);
-      }
-
-      const enforcePlayerSize = () => {
-        try {
-          const container = document.querySelector('.player-container');
-          if (container) {
-            container.style.maxWidth = '100vw';
-            container.style.maxHeight = '100vh';
-            container.style.width = '100vw';
-            container.style.height = '100vh';
-          }
-          const player = document.querySelector('ruffle-player') || document.querySelector('.player');
-          if (player) {
-            player.style.maxWidth = '100vw';
-            player.style.maxHeight = '100vh';
-            player.style.width = '100vw';
-            player.style.height = '100vh';
-          }
-        } catch (_) {}
-      };
-      setInterval(enforcePlayerSize, 300);
-    }
-
-    // Auto-isolate & auto-start Web Runtimes.cz app frames (Alone in the Dark)
-    if (window.location.hostname.includes('Web Runtimes.cz')) {
-      // Stub Google AdSense to prevent "TagError: No slot size for availableWidth=0"
-      try {
-        window.adsbygoogle = {
-          push: function() { return 0; },
-          loaded: true
-        };
-      } catch (_) {}
-
-      const injectRetrogamesStyles = () => {
-        try {
-          if (document.getElementById('xp-Web Runtimes-style')) return;
-          const style = document.createElement('style');
-          style.id = 'xp-Web Runtimes-style';
-          style.textContent = `
-            html, body {
-              margin: 0 !important; padding: 0 !important;
-              width: 100vw !important; height: 100vh !important;
-              overflow: hidden !important; background: #000 !important;
-            }
-            #dosbox, .dosbox-container, .dosbox-canvas, canvas {
-              position: fixed !important; inset: 0 !important;
-              width: 100vw !important; height: 100vh !important;
-              max-width: none !important; max-height: none !important;
-              object-fit: contain !important; background: #000 !important;
-              z-index: 99999 !important;
-            }
-            .dosbox-overlay {
-              position: fixed !important; inset: 0 !important;
-              z-index: 100000 !important;
-            }
-            .dosbox-start {
-              position: absolute !important; top: 50% !important; left: 50% !important;
-              transform: translate(-50%, -50%) !important;
-              padding: 14px 28px !important; font-size: 20px !important; font-weight: bold !important;
-              color: #fff !important; background: #1aafff !important; border-radius: 8px !important;
-              cursor: pointer !important;
-            }
-          `;
-          (document.head || document.documentElement).appendChild(style);
-        } catch (_) {}
-      };
-      injectRetrogamesStyles();
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', injectRetrogamesStyles);
-      }
-
-      function tryClickDosboxStart() {
-        var btn = document.querySelector('.dosbox-start');
-        if (btn) {
-          setTimeout(function() { try { btn.click(); } catch (_) {} }, 400);
-        } else {
-          setTimeout(tryClickDosboxStart, 200);
-        }
-      }
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', tryClickDosboxStart);
-      } else {
-        tryClickDosboxStart();
-      }
-    }
 
     // Auto-isolate & screen-fit copy.sh v86 virtual machine frames (Remote Access Services)
     if (window.location.hostname.includes('copy.sh')) {
@@ -1745,27 +1083,6 @@
         document.addEventListener('DOMContentLoaded', injectDistroSeaStyles);
       }
     }
-
-    // Intercept itch.io embed-hotlink redirect
-    try {
-      const origAssign = window.location.assign;
-      const origReplace = window.location.replace;
-      const blockHotlink = (url) => {
-        return typeof url === 'string' && url.includes('embed-hotlink');
-      };
-      if (origAssign) {
-        window.location.assign = function(url) {
-          if (blockHotlink(url)) return;
-          return origAssign.call(window.location, url);
-        };
-      }
-      if (origReplace) {
-        window.location.replace = function(url) {
-          if (blockHotlink(url)) return;
-          return origReplace.call(window.location, url);
-        };
-      }
-    } catch (_) {}
   } catch (_) {}
 
   // If top level (regular YouTube in browser tab), NEVER run!

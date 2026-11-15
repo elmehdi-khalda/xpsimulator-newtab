@@ -18,7 +18,6 @@ aside,
 #top-bar,
 .player-actions,
 .player-status,
-.gamepad-hint,
 #ad-banner-slot-wrap,
 #loading-ad,
 .loading-ad,
@@ -74,7 +73,6 @@ section.player-column,
 }
 
 .screen,
-#app-frame,
 #stage,
 .player,
 #player,
@@ -93,10 +91,7 @@ section.player-column,
   z-index: 999999 !important;
 }
 
-#app-frame,
-iframe#app-frame,
 canvas#canvas,
-canvas.emscripten,
 .screen iframe,
 .screen canvas,
 #stage canvas,
@@ -114,7 +109,7 @@ canvas.emscripten,
   z-index: 999999 !important;
 }
 
-/* exebrowser Retro App canvas scaling */
+/* exebrowser viewport canvas scaling */
 .wrap, .wrap iframe, .window {
   width: 100% !important;
   height: 100% !important;
@@ -123,14 +118,6 @@ canvas.emscripten,
   border: none !important;
   box-shadow: none !important;
   overflow: hidden !important;
-}
-
-canvas.emscripten {
-  width: 100% !important;
-  height: 100% !important;
-  max-width: 100vw !important;
-  max-height: 100vh !important;
-  object-fit: contain !important;
 }
 
 .by, .titlebar, a.by, div.titlebar {

@@ -71,17 +71,6 @@
     },
     {
       "matches": [
-        "*://runtime/*",
-        "*://*.runtime/*"
-      ],
-      "all_frames": true,
-      "run_at": "document_start",
-      "css": [
-        "web-viewport.css"
-      ]
-    },
-    {
-      "matches": [
         "*://copy.sh/*",
         "*://*.copy.sh/*"
       ],
@@ -118,8 +107,6 @@
         "*://*.online/*",
         "*://*.fun/*",
         "*://*.lol/*",
-        "*://*.optijuegos.net/*",
-        "*://all22pokemon.com/*",
         "*://*.exebrowser.com/*",
         "*://exebrowser.com/*"
       ],
