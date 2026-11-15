@@ -357,6 +357,13 @@ btnResetUrl.addEventListener('click', () => {
   });
 });
 
+const btnGithubRepo = document.getElementById('btn-github-repo');
+if (btnGithubRepo) {
+  btnGithubRepo.addEventListener('click', () => {
+    chrome.tabs.create({ url: 'https://github.com/elmehdi-khalda/xpsimulator-newtab' });
+  });
+}
+
 function showStatus(text) {
   statusMsg.textContent = text;
   setTimeout(() => {

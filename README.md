@@ -5,53 +5,9 @@
 [![Manifest](https://img.shields.io/badge/Manifest-MV3-10B981?style=for-the-badge&logoColor=white)](manifest.json)
 [![License](https://img.shields.io/badge/License-MIT-F59E0B?style=for-the-badge)](LICENSE)
 
-The official Chromium companion extension for **[Windows XP Simulator](https://xpsimulator.com)**. It transforms browser new tabs into a fully interactive Windows XP desktop environment and provides net-request rule filtering to unblock live browsing inside Internet Explorer 6.
+The official Chromium companion extension for **[Windows XP Simulator](https://xpsimulator.com)**. It transforms browser new tabs into a fully interactive Windows XP desktop environment, unblocks live web browsing inside Internet Explorer 6 via declarative net rules, and imports your bookmarks and shortcuts directly to the retro desktop.
 
 Repository: **[elmehdi-khalda/xpsimulator-newtab](https://github.com/elmehdi-khalda/xpsimulator-newtab)**
-
----
-
-## Visual Showcase
-
-<div align="center">
-  <img src="https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/showcase/bliss-and-icons.png" alt="Windows XP Desktop Simulation" width="850" style="border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.3);" />
-</div>
-
-<br/>
-
-<div align="center">
-  <img src="https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/showcase/ie6-google-web.png" alt="Internet Explorer 6 Live Browsing" width="850" style="border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.3);" />
-</div>
-
-<br/>
-
-<div align="center">
-  <img src="https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/showcase/app-installer-suite.png" alt="Custom Application Installer" width="850" style="border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.3);" />
-</div>
-
-<br/>
-
-<div align="center">
-  <img src="https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/showcase/customization-control-panel.png" alt="Customization and Control Panel" width="850" style="border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.3);" />
-</div>
-
-<br/>
-
-<div align="center">
-  <img src="https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/showcase/ie6-multitab-browsing.png" alt="Multi-Tab Browsing" width="850" style="border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.3);" />
-</div>
-
-<br/>
-
-<div align="center">
-  <img src="https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/showcase/wmp-canvas-skin.png" alt="Media Player Skin" width="850" style="border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.3);" />
-</div>
-
-<br/>
-
-<div align="center">
-  <img src="https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/showcase/meem-pack-1.png" alt="Meme Pack Desktop Integration" width="850" style="border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.3);" />
-</div>
 
 ---
 
@@ -60,16 +16,81 @@ Repository: **[elmehdi-khalda/xpsimulator-newtab](https://github.com/elmehdi-kha
 Experience autonomous desktop applications built on the Windows XP Simulator SDK.
 
 <div align="center">
-  <video src="https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/videos/stickman.mp4" width="850" controls autoplay loop muted style="border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.3);"></video>
+  <video src="https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/videos/stickman.mp4" width="100%" controls autoplay loop muted></video>
 </div>
 
 <br/>
 
 <div align="center">
   <a href="https://docs.xpsimulator.com/#app-examples">
-    <img src="https://img.shields.io/badge/Explore%20More%20App%20Videos-docs.xpsimulator.com-0055EA?style=for-the-badge&logoColor=white" alt="More App Videos" />
+    <img src="https://img.shields.io/badge/Explore%20More%20App%20Videos-docs.xpsimulator.com-0055EA?style=for-the-badge&logoColor=white" alt="Explore More App Videos" />
   </a>
 </div>
+
+---
+
+## Visual Showcase Gallery
+
+### 1. Windows XP Bliss Desktop and Classic System Icons
+![Windows XP Bliss Desktop and Classic System Icons](https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/showcase/bliss-and-icons.png)
+
+*Authentic Luna blue taskbar, iconic Bliss rolling hills wallpaper, and pixel-perfect Windows XP desktop icons.*
+
+---
+
+### 2. Live Nostalgic Animated Wallpapers
+![Live Nostalgic Animated Wallpapers](https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/showcase/nostalgic-wallpaper.png)
+
+*Interactive dynamic wallpapers with live animated sky, flowing clouds, and real-time shadow projection.*
+
+---
+
+### 3. Internet Explorer 6 with Google Search
+![Internet Explorer 6 with Google Search](https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/showcase/ie6-google-web.png)
+
+*Retro IE6 browser with authentic toolbar buttons, address bar navigation, and live web rendering.*
+
+---
+
+### 4. Internet Explorer Multi-Tab Navigation
+![Internet Explorer Multi-Tab Navigation](https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/showcase/ie6-multitab-browsing.png)
+
+*Enhanced tabbed browsing inside the retro Internet Explorer frame.*
+
+---
+
+### 5. Internet Explorer Retro YouTube Video Playback
+![Internet Explorer Retro YouTube Video Playback](https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/showcase/wmp-classic-skin.png)
+
+*Authentic Internet Explorer 6 window running YouTube retro video playback with native controls and audio.*
+
+---
+
+### 6. Windows Media Player Audio Canvas Visualizer
+![Windows Media Player Audio Canvas Visualizer](https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/showcase/wmp-canvas-skin.png)
+
+*Real-time audio frequency visualizers and animated skin modes.*
+
+---
+
+### 7. Windows XP Application Installer Suite
+![Windows XP Application Installer Suite](https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/showcase/app-installer-suite.png)
+
+*Install standalone HTML5 applications, widgets, and embed web tools with automated desktop shortcut generation.*
+
+---
+
+### 8. Control Panel and System Customization
+![Control Panel and System Customization](https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/showcase/customization-control-panel.png)
+
+*Comprehensive personalization suite: themes, screen resolutions, display properties, sounds, and user management.*
+
+---
+
+### 9. Meme Pack 1 Desktop Suite
+![Meme Pack 1 Desktop Suite](https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/showcase/meem-pack-1.png)
+
+*Optional vintage meme packs: classic internet humor, custom wallpapers, retro sound notifications, and widgets.*
 
 ---
 
@@ -81,32 +102,38 @@ Every new tab session initialises the desktop environment with persistent local 
 - Virtual file system backed by IndexedDB storage with drag-and-drop operations.
 - Offline resilience with automatic fallback mechanisms.
 
-### 2. Declarative Net Request Header Unblocking
+### 2. Chrome Bookmarks and Shortcuts Import
+The extension bridges the host browser with the simulated desktop:
+- **Import Bookmarks**: Read your browser bookmarks hierarchy and generate authentic `.url` desktop shortcuts with favicons on the XP desktop.
+- **Import Shortcuts**: Seamlessly import your top visited websites and new-tab speed dial shortcuts into the virtual system.
+- Completely local processing stored in client-side IndexedDB with zero cloud telemetry.
+
+### 3. Declarative Net Request Header Unblocking
 Modern web applications enforce restrictions that limit iframe embedding (`X-Frame-Options` and `Content-Security-Policy: frame-ancestors`). This extension leverages Chrome Manifest V3 declarative rules (`rules/rules.json`) to strip restriction headers exclusively for simulator sessions:
 - Strips `x-frame-options`, `content-security-policy`, `frame-ancestors`, and `cross-origin-embedder-policy`.
 - Scope is strictly constrained to traffic initiated by the simulator frame origin (`https://xpsimulator.com` and local development hosts).
 
-### 3. Desktop Display and Brightness Control
+### 4. Desktop Display and Brightness Control
 The extension options panel includes real-time display controls:
 - Hardware-accelerated CSS filter adjustments for screen brightness from 20% to 150%.
 - Dynamic contrast and saturation calibration for vintage CRT simulation.
 - Preserves display preferences across browsing sessions via browser storage.
 
-### 4. Context Menu Integration: Open Link with Internet Explorer
+### 5. Context Menu Integration: Open Link with Internet Explorer
 The extension injects a context menu action accessible across all web pages:
 - Right-click any URL or link and select **Open with Internet Explorer**.
 - Opens a new tab directly into the simulator with Internet Explorer 6 navigating to the selected URL.
 
-### 5. One-Click Configuration Profiles
+### 6. One-Click Configuration Profiles
 Preconfigured profiles allow switching operational modes instantly:
 - **Default Profile**: Standard authentic Luna visual layout and preinstalled suite.
 - **Minimalist Profile**: Lightweight productivity view without background media layers.
 - **Developer Profile**: Enables console bridge debug output and SDK inspect tools.
 
-### 6. Meme Pack Desktop Customisation
-The extension includes optional meme assets that introduce classic internet humor directly into the desktop:
-- Custom Luna themes, meme desktop wallpapers, sound schemes, and custom desktop widget shortcuts.
-- Toggled on demand via the extension popup options without altering virtual hard drive data.
+### 7. Dedicated Meme Pack Section
+The extension options popup features a dedicated Meme Pack section:
+- Easily toggle Meme Pack 1 on and off.
+- Enables retro internet humor, meme audio cues, and custom assets without modifying core virtual files.
 
 ---
 
@@ -131,6 +158,8 @@ The extension includes optional meme assets that introduce classic internet humo
 | `declarativeNetRequest` | Modifies HTTP response headers to unblock embedding in Internet Explorer 6 |
 | `declarativeNetRequestFeedback` | Diagnostics for rule matching in development environments |
 | `contextMenus` | Registers the "Open with Internet Explorer" context menu entry |
+| `bookmarks` | Imports browser bookmarks onto the Windows XP desktop as shortcuts |
+| `topSites` | Imports top visited websites onto the Windows XP desktop |
 | `storage` | Persists user settings, brightness levels, and customisation toggles |
 
 ---
