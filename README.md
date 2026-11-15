@@ -1,11 +1,14 @@
 # Windows XP Simulator - New Tab Companion Extension (Chromium MV3)
 
 [![Website](https://img.shields.io/badge/Website-xpsimulator.com-0055EA?style=for-the-badge&logoColor=white)](https://xpsimulator.com)
+[![Extension Site](https://img.shields.io/badge/Extension%20Site-extension.xpsimulator.com-8B5CF6?style=for-the-badge&logoColor=white)](https://extension.xpsimulator.com)
 [![Docs](https://img.shields.io/badge/Docs-docs.xpsimulator.com-38BDF8?style=for-the-badge&logoColor=white)](https://docs.xpsimulator.com)
 [![Manifest](https://img.shields.io/badge/Manifest-MV3-10B981?style=for-the-badge&logoColor=white)](manifest.json)
 [![License](https://img.shields.io/badge/License-MIT-F59E0B?style=for-the-badge)](LICENSE)
 
 The official Chromium companion extension for **[Windows XP Simulator](https://xpsimulator.com)**. It transforms browser new tabs into a fully interactive Windows XP desktop environment, unblocks live web browsing inside Internet Explorer 6 via declarative net rules, and imports your bookmarks and shortcuts directly to the retro desktop.
+
+Detailed documentation, developer manual, and app injection guide available at **[extension.xpsimulator.com](https://extension.xpsimulator.com)**.
 
 Repository: **[elmehdi-khalda/xpsimulator-newtab](https://github.com/elmehdi-khalda/xpsimulator-newtab)**
 
@@ -16,7 +19,17 @@ Repository: **[elmehdi-khalda/xpsimulator-newtab](https://github.com/elmehdi-kha
 Experience autonomous desktop applications built on the Windows XP Simulator SDK.
 
 <div align="center">
-  <video src="https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/videos/stickman.mp4" width="100%" controls autoplay loop muted></video>
+  <a href="https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/videos/stickman.mp4" target="_blank" title="Click to watch full video">
+    <img src="https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/videos/stickman.gif" alt="Stickman Interactive Application Demo" width="850" style="border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.3);" />
+  </a>
+</div>
+
+<p align="center">
+  <a href="https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/videos/stickman.mp4">▶ Play / Download Full HD Video (stickman.mp4)</a>
+</p>
+
+<div align="center">
+  <video src="https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/videos/stickman.mp4" width="100%" controls loop muted></video>
 </div>
 
 <br/>
@@ -88,7 +101,7 @@ Experience autonomous desktop applications built on the Windows XP Simulator SDK
 ---
 
 ### 9. Meme Pack 1 Desktop Suite
-![Meme Pack 1 Desktop Suite](https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/showcase/meem-pack-1.png)
+![Meme Pack 1 Desktop Suite](https://r2-cors-proxy.elmehdikhalda.workers.dev/elmehdikhalda/showcase/meem-pack-1.png?v=20261115_v5)
 
 *Optional vintage meme packs: classic internet humor, custom wallpapers, retro sound notifications, and widgets.*
 
