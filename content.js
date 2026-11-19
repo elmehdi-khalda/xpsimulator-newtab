@@ -167,7 +167,8 @@
           window.postMessage({
             type: 'XP_CREATE_BOOKMARKS_FOLDER',
             bookmarks: msg.bookmarks,
-            playSound: false
+            playSound: false,
+            isManual: true
           }, '*');
         } catch (_) {}
       }
@@ -176,7 +177,8 @@
           window.postMessage({
             type: 'XP_CREATE_SHORTCUTS_FOLDER',
             shortcuts: msg.shortcuts,
-            playSound: false
+            playSound: false,
+            isManual: true
           }, '*');
         } catch (_) {}
       }
