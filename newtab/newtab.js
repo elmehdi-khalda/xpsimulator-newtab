@@ -14,6 +14,29 @@ const btnResetUrl = document.getElementById('btn-reset-url');
 let currentSimulatorUrl = DEFAULT_SIMULATOR_URL;
 let isFullSimulationEnabled = false;
 
+function updateFavicon() {
+  try {
+    const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const color = isDark ? '#C2C3CC' : '#3C4043';
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="2 2 28 28" fill="${color}"><path d="M5.91 8.62A12.5 12.5 0 0 1 26.52 9.25L16 9.25A6.75 6.75 0 0 0 9.39 14.65ZM27.43 10.95A12.5 12.5 0 0 1 16.59 28.49L21.85 19.38A6.75 6.75 0 0 0 20.48 10.95ZM14.66 28.43A12.5 12.5 0 0 1 4.89 10.26L10.15 19.38A6.75 6.75 0 0 0 18.13 22.4Z"/><path d="M16 11.5A4.5 4.5 0 1 0 16 20.5A4.5 4.5 0 1 0 16 11.5Z"/></svg>`;
+    let link = document.querySelector("link[rel~='icon']");
+    if (!link) {
+      link = document.createElement('link');
+      link.rel = 'icon';
+      document.head.appendChild(link);
+    }
+    link.type = 'image/svg+xml';
+    link.href = 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+  } catch (_) {}
+}
+
+if (window.matchMedia) {
+  try {
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateFavicon);
+  } catch (_) {}
+}
+updateFavicon();
+
 async function init() {
   try {
     const data = await chrome.storage.local.get(['simulatorUrl', 'fullSimulation']);
